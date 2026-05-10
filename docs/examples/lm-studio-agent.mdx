@@ -1,0 +1,30 @@
+---
+sidebar_position: 4
+title: LM Studio Agent
+description: Local model example using TraceAgent SDK with LM Studio or any OpenAI-compatible endpoint.
+keywords: [example, lm studio, local model, openai compatible]
+---
+
+# LM Studio Agent
+
+**File:** `examples/lm_studio_agent.py`
+
+Uses `TraceAgentClient` with LM Studio or any OpenAI-compatible local model, registers a tool, and records a single traced turn.
+
+## Run
+
+```bash
+uv run examples/lm_studio_agent.py
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `TRACE_AGENT_PROXY_URL` | URL for the local model proxy |
+| `TRACE_AGENT_TEST_MODEL` | Model name to use |
+| `TRACE_AGENT_PROXY_TIMEOUT` | Connection timeout |
+
+## When to Use
+
+This is a good fit when you want to validate local model connectivity and ensure that TraceAgent can capture tool calls from a locally-hosted LLM.

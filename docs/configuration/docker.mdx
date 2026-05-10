@@ -1,0 +1,112 @@
+---
+sidebar_position: 2
+title: Docker Deployment
+description: Deploy TraceAgent with Docker and Docker Compose.
+keywords: [docker, deployment, containers, docker-compose]
+---
+
+# Docker Deployment
+
+TraceAgent provides pre-built Docker images for the server and UI.
+
+## Images
+
+| Component | Image |
+|-----------|-------|
+| Server | `ghcr.io/lixussoftware/trace-agent-server:latest` |
+| UI | `ghcr.io/lixussoftware/trace-agent-ui:latest` |
+
+## Docker Compose
+
+Create a `docker-compose.yml` to run both services:
+
+```yaml title="docker-compose.yml"
+version: "3.8"
+
+services:
+  server:
+    image: ghcr.io/lixussoftware/trace-agent-server:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
+      - TRACE_AGENT_AUDIT_METRICS_ENABLED=true
+    volumes:
+      - trace-data:/app/data
+
+  ui:
+    image: ghcr.io/lixussoftware/trace-agent-ui:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - TRACE_AGENT_SERVER_URL=http://server:8000
+    depends_on:
+      - server
+
+volumes:
+  trace-data:
+```
+
+```bash
+docker compose up -d
+```
+
+The UI will be available at `http://localhost:8080` and the server API at `http://localhost:8000`.
+
+## With PostgreSQL
+
+For production deployments, use PostgreSQL instead of SQLite:
+
+```yaml title="docker-compose.prod.yml"
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: traceagent
+      POSTGRES_USER: traceagent
+      POSTGRES_PASSWORD: changeme
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  server:
+    image: ghcr.io/lixussoftware/trace-agent-server:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - TRACE_AGENT_DATABASE_URL=postgresql://traceagent:changeme@db:5432/traceagent
+    depends_on:
+      - db
+
+  ui:
+    image: ghcr.io/lixussoftware/trace-agent-ui:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - TRACE_AGENT_SERVER_URL=http://server:8000
+    depends_on:
+      - server
+
+volumes:
+  pg-data:
+```
+
+:::danger
+Change the default `POSTGRES_PASSWORD` before deploying to production.
+:::
+
+## Verify
+
+```bash
+# Check server health
+curl http://localhost:8000/health
+
+# Open UI
+open http://localhost:8080
+```
+
+## What's Next?
+
+- **[Environment Variables](/docs/configuration/environment-variables)** — Full configuration reference
+- **[Quick Start](/docs/getting-started/quick-start)** — Create your first trace

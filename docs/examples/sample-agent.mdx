@@ -1,0 +1,30 @@
+---
+sidebar_position: 2
+title: Sample Agent
+description: Minimal SDK smoke test — start a run, record a tool call, and finish.
+keywords: [example, sample, smoke test, sdk]
+---
+
+# Sample Agent
+
+**File:** `examples/sample_agent.py`
+
+Minimal SDK smoke test. It starts a run, registers a mock `get_weather` tool, performs a single model turn, and closes the run with the assistant response.
+
+## Run
+
+```bash
+uv run examples/sample_agent.py
+```
+
+## What It Does
+
+1. Creates a `TraceAgentClient` connected to the server
+2. Starts a run named `"my-agent"`
+3. Registers a mock `get_weather` tool call
+4. Performs a single model turn
+5. Closes the run with the assistant response
+
+## When to Use
+
+Use this when you want to confirm that the SDK can create runs, record tool calls, and finish cleanly. It's the simplest possible integration test.

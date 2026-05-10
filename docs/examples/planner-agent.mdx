@@ -1,0 +1,35 @@
+---
+sidebar_position: 5
+title: Planner Agent
+description: Multi-tool planning demo with built-in scenarios for weather, budget, venue, and travel.
+keywords: [example, planner, scenarios, multi-tool]
+---
+
+# Planner Agent
+
+**File:** `examples/lm_studio_planner_agent.py`
+
+A richer planning demo that exposes multiple tools for weather, budget policy, venue selection, travel time, and venue cost estimation. The model chooses the minimum set of calls needed.
+
+## Run
+
+```bash
+uv run examples/lm_studio_planner_agent.py --scenario meetup_plan
+```
+
+## Scenarios
+
+| Scenario | Description |
+|----------|-------------|
+| `meetup_plan` | Plans a realistic team meetup in Madrid with weather, budget, venue, and travel constraints |
+| `weather_gate` | Checks whether an outdoor meetup is viable without extra venue/budget work |
+| `budget_only` | Verifies a selected venue against the budget, avoids unrelated tool calls |
+| `barcelona_shortlist` | Builds a short list of Barcelona venues prioritizing logistics and travel from Sants |
+
+## Custom Prompts
+
+You can override the scenario prompt:
+
+```bash
+uv run examples/lm_studio_planner_agent.py --scenario meetup_plan --prompt "Plan an offsite in Berlin"
+```

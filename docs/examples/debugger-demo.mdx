@@ -1,0 +1,31 @@
+---
+sidebar_position: 6
+title: Debugger Demo
+description: Synthetic debugger demo for testing divergence detection and trace visualization.
+keywords: [example, debugger, synthetic, divergence, visualization]
+---
+
+# Debugger Demo
+
+**File:** `examples/coding_agent_debugger_demo.py`
+
+Synthetic debugger and UI demo. Records command executions, file reads/writes, patches, and failure states **without needing a live model** — useful for testing divergence detection and trace visualization.
+
+## Run
+
+```bash
+uv run examples/coding_agent_debugger_demo.py --scenario correct_edit
+```
+
+## Scenarios
+
+| Scenario | Description |
+|----------|-------------|
+| `correct_edit` | A successful agent run with the expected file edits |
+| `wrong_file` | The agent modifies the wrong file and fails to recover |
+| `retry_without_adaptation` | The agent retries the same failing action without changing strategy |
+| `same_tools_different_artifact` | The tool sequence stays the same, but the final artifact changes |
+
+## When to Use
+
+Use this when you want a dense trace to inspect the dashboard, timeline, and artifact views — without needing a live LLM connection.

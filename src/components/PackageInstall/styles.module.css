@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--ta-surface-3);
+  border: 1px solid var(--ta-border);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.command {
+  flex: 1;
+  font-size: 0.875rem;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  color: var(--ifm-font-color-base);
+}
+
+.copyBtn {
+  background: transparent;
+  border: 1px solid var(--ta-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.copyBtn:hover {
+  border-color: var(--ta-accent-amber);
+  background: rgba(201, 148, 62, 0.06);
+}

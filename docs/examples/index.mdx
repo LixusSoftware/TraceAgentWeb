@@ -1,0 +1,48 @@
+---
+sidebar_position: 1
+title: Examples
+description: Runnable examples demonstrating TraceAgent SDK and LangChain integration.
+keywords: [examples, demos, sample code]
+slug: /examples/
+---
+
+# Examples
+
+TraceAgent ships with several runnable examples. Make sure the server is running at `http://127.0.0.1:8000` before running any example.
+
+
+:::info
+
+Most scripts load configuration from a local `.env` file, so that is the easiest place to set the backend URL and model settings.
+
+:::
+
+
+## Overview
+
+| Example | What It Demonstrates |
+|---------|---------------------|
+| **[Sample Agent](/docs/examples/sample-agent)** | Minimal SDK smoke test |
+| **[LangChain Agent](/docs/examples/langchain-agent)** | LangChain callback integration |
+| **[LM Studio Agent](/docs/examples/lm-studio-agent)** | Local model with SDK |
+| **[Planner Agent](/docs/examples/planner-agent)** | Multi-tool planning with scenarios |
+| **[Debugger Demo](/docs/examples/debugger-demo)** | Synthetic debugging scenarios |
+| **[Rich Demo](/docs/examples/rich-demo)** | Full-fidelity trace with all event types |
+
+## Prerequisites
+
+Install from source with dev extras:
+
+```bash
+uv sync --extra dev --extra providers --extra langchain
+```
+
+## Running Examples
+
+All examples follow the same pattern:
+
+```bash
+uv run examples/<script_name>.py
+```
+
+Some examples accept command-line flags like `--scenario` or `--prompt`. Check each example's page for details.

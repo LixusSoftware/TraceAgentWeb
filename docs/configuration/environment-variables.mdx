@@ -1,0 +1,61 @@
+---
+sidebar_position: 1
+title: Environment Variables
+description: All configuration options for TraceAgent via environment variables.
+keywords: [configuration, environment variables, settings]
+---
+
+# Environment Variables
+
+TraceAgent's behavior can be customized via environment variables.
+
+## Server Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TRACE_AGENT_DATABASE_URL` | `sqlite:///./data/trace_agent.db` | Database connection URL (SQLite or PostgreSQL) |
+| `TRACE_AGENT_SERVER_URL` | `http://localhost:8000` | Backend URL used by the UI and SDK |
+| `TRACE_AGENT_AUDIT_METRICS_ENABLED` | `true` | Enables or disables audit metrics collection |
+| `TRACE_AGENT_UI_PORT` | `8080` | Port where the frontend UI is exposed |
+
+## SDK / Agent Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TRACE_AGENT_BASE_URL` | `http://localhost:8000` | Server URL used by the SDK client |
+| `TRACE_AGENT_PROXY_URL` | *(none)* | Proxy URL for local model connectivity |
+| `TRACE_AGENT_PROXY_TIMEOUT` | *(none)* | Timeout for proxy connections |
+| `TRACE_AGENT_TEST_MODEL` | *(none)* | Model name for test/example scripts |
+
+## LLM Configuration (Examples)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENAI_BASE_URL` | *(none)* | OpenAI-compatible endpoint (e.g., LM Studio) |
+| `OPENAI_API_KEY` | *(none)* | API key for the model provider |
+
+## Example `.env` File
+
+```bash title=".env"
+# TraceAgent Server
+TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
+TRACE_AGENT_SERVER_URL=http://localhost:8000
+TRACE_AGENT_AUDIT_METRICS_ENABLED=true
+TRACE_AGENT_UI_PORT=8080
+
+# Local Model (LM Studio)
+OPENAI_BASE_URL=http://localhost:1234/v1
+OPENAI_API_KEY=not-needed
+```
+
+:::warning
+When using PostgreSQL, make sure the database exists and the connection URL includes credentials:
+```bash
+TRACE_AGENT_DATABASE_URL=postgresql://user:password@localhost:5432/traceagent
+```
+:::
+
+## What's Next?
+
+- **[Docker Deployment](/docs/configuration/docker)** — Container-based setup
+- **[Quick Start](/docs/getting-started/quick-start)** — Get tracing in 5 minutes

@@ -1,0 +1,19 @@
+release:
+  label: Release
+  permalink: /release
+  description: Release announcements and changelogs
+
+tutorial:
+  label: Tutorial
+  permalink: /tutorial
+  description: Step-by-step guides and walkthroughs
+
+architecture:
+  label: Architecture
+  permalink: /architecture
+  description: Deep dives into TraceAgent internals
+
+community:
+  label: Community
+  permalink: /community
+  description: Community updates and showcases

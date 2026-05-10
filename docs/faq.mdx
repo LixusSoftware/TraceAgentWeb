@@ -1,0 +1,86 @@
+---
+sidebar_position: 99
+title: FAQ
+description: Frequently asked questions about TraceAgent — troubleshooting, compatibility, and common issues.
+keywords: [faq, troubleshooting, help, common issues]
+---
+
+import CatIllustration from '@site/src/components/CatIllustration';
+
+# Frequently Asked Questions
+
+## General
+
+### What is TraceAgent?
+
+TraceAgent is an observability and tracing platform for AI agents. It captures tool calls, file operations, shell commands, and decision paths — giving you complete visibility into what your agents are doing.
+
+### Is TraceAgent open source?
+
+Yes. TraceAgent is released under the **MIT License**. You can find the source code on [GitHub](https://github.com/LixusSoftware/TraceAgent).
+
+### What Python versions are supported?
+
+TraceAgent requires **Python 3.11+**.
+
+## Installation
+
+### Can I install only the SDK without the server?
+
+Yes. Each package is independent:
+
+```bash
+pip install trace-agent-sdk
+```
+
+The SDK sends events to any running TraceAgent server — you don't need to install the server on the same machine.
+
+### Does it work with virtual environments?
+
+Yes. We recommend using `venv`, `conda`, or `uv` to manage your Python environment.
+
+## Server
+
+### What databases are supported?
+
+- **SQLite** (default) — Zero configuration, great for development
+- **PostgreSQL** — Recommended for production deployments
+
+### How do I change the database?
+
+Set the `TRACE_AGENT_DATABASE_URL` environment variable:
+
+```bash
+# PostgreSQL
+TRACE_AGENT_DATABASE_URL=postgresql://user:password@localhost:5432/traceagent
+
+# SQLite (default)
+TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
+```
+
+## Troubleshooting
+
+<CatIllustration state="error" size="level2" caption="Is the system misbehaving? Let's debug." />
+
+### The UI is not connecting to the server
+
+1. Verify the server is running: `curl http://localhost:8000/health`
+2. Check that `TRACE_AGENT_SERVER_URL` points to the correct host
+3. If using Docker, ensure the services are on the same network
+
+### I see "connection refused" errors
+
+The server is not running or is on a different port. Check:
+- Is the server process running?
+- Is port 8000 available?
+- Are you behind a firewall or proxy?
+
+### Events are not appearing in the UI
+
+1. Verify the SDK is pointing to the correct server URL
+2. Check that `run.finish()` was called
+3. Refresh the UI — some views require a page reload
+
+:::tip[Getting Help]
+Can't find what you're looking for? [Open an issue on GitHub](https://github.com/LixusSoftware/TraceAgent/issues).
+:::

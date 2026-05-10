@@ -1,0 +1,73 @@
+---
+sidebar_position: 2
+title: LangChain Integration
+description: Automatically trace LangChain agents with the TraceAgent callback handler.
+keywords: [langchain, callback, integration, automatic tracing]
+---
+
+# LangChain Integration
+
+import PackageInstall from '@site/src/components/PackageInstall';
+
+TraceAgent provides a native **callback handler** for LangChain that automatically captures chain steps, LLM calls, tool usage, and retriever activity.
+
+## Installation
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain']} />
+
+## Basic Usage
+
+```python
+from trace_agent_sdk import TraceAgentClient
+from trace_agent_langchain import TraceAgentLangChainCallback
+
+client = TraceAgentClient("http://localhost:8000")
+run = client.start_run("langchain-agent", "Answer user question")
+
+callback = TraceAgentLangChainCallback(run)
+agent.invoke({"input": "What's the weather?"}, callbacks=[callback])
+
+run.finish({"status": "success"})
+```
+
+## Captured Events
+
+| Event | Captured Data |
+|-------|---------------|
+| **Chain start/end** | Chain type, input, output, duration |
+| **LLM call/response** | Prompt, response, token counts |
+| **Tool use/result** | Tool name, parameters, output |
+| **Retriever query** | Query, retrieved documents |
+| **Error** | Error type, message, traceback |
+
+## With Local Models (LM Studio)
+
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    base_url="http://localhost:1234/v1",
+    api_key="not-needed",
+    model="local-model"
+)
+
+callback = TraceAgentLangChainCallback(run)
+agent.invoke({"input": "..."}, callbacks=[callback])
+```
+
+:::tip
+Set `OPENAI_BASE_URL` environment variable to avoid hardcoding the endpoint.
+:::
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `TRACE_AGENT_BASE_URL` | Server URL for the callback handler |
+| `OPENAI_BASE_URL` | OpenAI-compatible endpoint for local models |
+| `OPENAI_API_KEY` | API key (use any value for local models) |
+
+## What's Next?
+
+- **[LangChain Example](/docs/examples/langchain-agent)** — Full walkthrough
+- **[SDK Reference](/docs/instrumentation/sdk)** — Manual instrumentation

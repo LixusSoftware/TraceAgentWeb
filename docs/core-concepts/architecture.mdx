@@ -1,0 +1,76 @@
+---
+sidebar_position: 1
+title: Architecture
+description: Understand the TraceAgent system architecture — how the SDK, server, UI, and LangChain integration work together.
+keywords: [architecture, system design, packages, components]
+---
+
+import ArchitectureDiagram from '@site/src/components/ArchitectureDiagram';
+
+# Architecture
+
+TraceAgent follows a **client-server** architecture with a modular package design. Understanding how the pieces fit together helps you make the most of the platform.
+
+## System Overview
+
+<ArchitectureDiagram />
+
+## Package Breakdown
+
+### TraceAgent SDK
+
+The core Python client. Use it to:
+
+- **Start and finish runs** — Create named sessions with descriptions
+- **Record file operations** — Reads, writes, patches, and diffs
+- **Record commands** — Shell executions with exit codes
+- **Record tool calls** — Custom tool invocations with parameters and results
+- **Attach artifacts** — Any derived output from the agent
+
+The SDK communicates with the server via REST API calls.
+
+### TraceAgent LangChain
+
+A **callback handler** that plugs into LangChain's callback system. Once attached, it automatically captures:
+
+- Chain starts and completions
+- LLM calls (prompts and responses)
+- Tool usage and results
+- Retriever activity
+- Error states
+
+No manual instrumentation needed — just pass the callback.
+
+### TraceAgent Server
+
+The **FastAPI backend** that persists and serves trace data:
+
+- Receives events from the SDK and LangChain handler
+- Stores data in **SQLite** (default) or **PostgreSQL**
+- Exposes REST API for the UI to query
+- Supports audit metrics collection
+
+### TraceAgent UI
+
+The **interactive dashboard** for visualizing traces:
+
+- Execution timelines with event details
+- Run listings with search and filtering
+- File diff viewer for recorded edits
+- Artifact browser
+
+## Data Flow
+
+1. Your agent code calls the **SDK** (or uses the **LangChain callback**)
+2. The SDK sends events over HTTP to the **Server**
+3. The Server persists events in the **database**
+4. The **UI** queries the Server API and renders visualizations
+
+:::info[Self-hosted]
+All data stays on your infrastructure. There's no external telemetry, no cloud dependency. You own everything.
+:::
+
+## What's Next?
+
+- **[SDK Reference](/docs/instrumentation/sdk)** — Instrument your agent
+- **[Configuration](/docs/configuration/environment-variables)** — Customize the setup

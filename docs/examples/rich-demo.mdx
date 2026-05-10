@@ -1,0 +1,32 @@
+---
+sidebar_position: 7
+title: Rich Demo
+description: Full-fidelity trace demo combining all event types in a single dense run.
+keywords: [example, rich demo, full trace, all events]
+---
+
+# Rich Demo
+
+**File:** `examples/rich_demo_agent.py`
+
+Full-fidelity trace demo. Combines a model turn, tool retries, shell commands, file reads/writes, patches, artifacts, and derived decisions in a single run.
+
+## Run
+
+```bash
+uv run examples/rich_demo_agent.py
+```
+
+## What It Demonstrates
+
+- Model turns with tool selection
+- Tool retries and error handling
+- Shell command execution with exit codes
+- File read and write operations
+- Patch application
+- Artifact generation
+- Derived decisions from tool results
+
+## When to Use
+
+Use this example when you want the **densest possible run** for inspecting the dashboard, timeline, and artifact views. It exercises every event type TraceAgent supports.

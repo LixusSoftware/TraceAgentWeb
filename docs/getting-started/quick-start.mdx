@@ -1,0 +1,130 @@
+---
+sidebar_position: 3
+title: Quick Start
+description: Get your first TraceAgent trace running in under 5 minutes. Start a run, record actions, and see results.
+keywords: [quickstart, first trace, getting started, tutorial]
+---
+
+# Quick Start
+
+Get your first trace running in **under 5 minutes**.
+
+## Prerequisites
+
+- Python 3.11+
+- TraceAgent SDK installed (`pip install trace-agent-sdk`)
+- TraceAgent Server running at `http://localhost:8000`
+
+:::tip[Starting the server]
+
+If you're using Docker:
+```bash
+docker run -p 8000:8000 ghcr.io/lixussoftware/trace-agent-server:latest
+```
+:::
+
+## Step 1 — Create a Client
+
+```python title="my_first_trace.py"
+from trace_agent_sdk import TraceAgentClient
+
+# Connect to your TraceAgent server
+client = TraceAgentClient("http://localhost:8000")
+```
+
+## Step 2 — Start a Run
+
+A **run** represents a single agent execution session. Everything your agent does gets recorded inside a run.
+
+```python title="my_first_trace.py"
+# Start a tracked run
+run = client.start_run("my-agent", "Perform a system task")
+print("Run started:", run)
+```
+
+## Step 3 — Record Actions
+
+Now record the side-effects your agent performs:
+
+```python title="my_first_trace.py"
+# Record a file write
+file_result = run.record_file_write(
+    "app.py",
+    before_content="",
+    after_content="print('Hello World')"
+)
+print("File recorded:", file_result)
+
+# Record a command execution
+command_result = run.record_command(
+    ["python", "app.py"],
+    exit_code=0
+)
+print("Command recorded:", command_result)
+```
+
+## Step 4 — Finish the Run
+
+```python title="my_first_trace.py"
+# Close the session with final metadata
+finish_result = run.finish({"status": "success"})
+print("Run finished:", finish_result)
+```
+
+## Complete Script
+
+Here's the full script in one piece:
+
+```python title="my_first_trace.py"
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://localhost:8000")
+
+# Start a tracked run
+run = client.start_run("my-agent", "Perform a system task")
+
+# Record side-effects
+run.record_file_write(
+    "app.py",
+    before_content="",
+    after_content="print('Hello World')"
+)
+
+run.record_command(
+    ["python", "app.py"],
+    exit_code=0
+)
+
+# Close the session
+run.finish({"status": "success"})
+
+print("✓ First trace complete!")
+```
+
+Run it:
+
+```bash
+python my_first_trace.py
+```
+
+## What Just Happened?
+
+You just:
+
+1. **Connected** to the TraceAgent server
+2. **Started** a named run with a description
+3. **Recorded** a file write operation and a command execution
+4. **Finished** the run with success metadata
+
+All of this is now visible in the **TraceAgent UI** at `http://localhost:8080`.
+
+:::info
+Open the TraceAgent UI to see your trace in the interactive timeline. You'll see the file write and command execution as events on the timeline.
+:::
+
+## What's Next?
+
+- **[Architecture](/docs/core-concepts/architecture)** — Understand the system design
+- **[SDK Reference](/docs/instrumentation/sdk)** — Full API documentation
+- **[LangChain Integration](/docs/instrumentation/langchain)** — Auto-trace LangChain agents
+- **[Examples](/docs/examples/)** — Real-world usage patterns

@@ -1,0 +1,91 @@
+---
+sidebar_position: 2
+title: Installation
+description: Install TraceAgent packages via pip, Docker, or from source. Supports Python 3.11+.
+keywords: [install, pip, docker, setup, python]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PackageInstall from '@site/src/components/PackageInstall';
+
+# Installation
+
+TraceAgent requires **Python 3.11+** and can be installed via pip, Docker, or from source.
+
+## Install via pip
+
+Each package can be installed independently:
+
+<Tabs>
+  <TabItem value="all" label="All Packages" default>
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain', 'trace-agent-server', 'trace-agent-ui']} />
+
+  </TabItem>
+  <TabItem value="sdk" label="SDK Only">
+
+<PackageInstall packages={['trace-agent-sdk']} />
+
+  </TabItem>
+  <TabItem value="langchain" label="SDK + LangChain">
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain']} />
+
+  </TabItem>
+</Tabs>
+
+:::tip
+If you only need to **instrument** your agent (and the server runs elsewhere), install just the SDK. The server and UI are only needed for the self-hosted backend.
+:::
+
+## Docker
+
+Pre-built images are available for the backend and frontend:
+
+| Component | Image |
+|-----------|-------|
+| TraceAgent Server | `ghcr.io/lixussoftware/trace-agent-server:latest` |
+| TraceAgent UI | `ghcr.io/lixussoftware/trace-agent-ui:latest` |
+
+```bash
+# Pull the images
+docker pull ghcr.io/lixussoftware/trace-agent-server:latest
+docker pull ghcr.io/lixussoftware/trace-agent-ui:latest
+```
+
+For a full Docker Compose setup, see the **[Docker deployment guide](/docs/configuration/docker)**.
+
+## From Source
+
+```bash
+git clone https://github.com/LixusSoftware/TraceAgent.git
+cd TraceAgent
+```
+
+<Tabs>
+  <TabItem value="uv" label="uv (recommended)" default>
+
+```bash
+uv sync --extra dev --extra providers --extra langchain
+```
+
+  </TabItem>
+  <TabItem value="pip" label="pip">
+
+```bash
+pip install -e ".[dev,providers,langchain]"
+```
+
+  </TabItem>
+</Tabs>
+
+## Verify Installation
+
+```bash
+python -c "from trace_agent_sdk import TraceAgentClient; print('TraceAgent SDK ready ✓')"
+```
+
+## What's Next?
+
+Head to the **[Quick Start](/docs/getting-started/quick-start)** to create your first trace in under 5 minutes.

@@ -1,0 +1,139 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem auto;
+}
+
+.imageWrapper {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 160px;
+  border-radius: 56% 44% 58% 42% / 48% 58% 42% 52%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(201, 148, 62, 0.18) 0%, rgba(201, 148, 62, 0.08) 18%, transparent 42%),
+    radial-gradient(circle at 72% 68%, rgba(148, 163, 184, 0.12) 0%, rgba(148, 163, 184, 0.05) 16%, transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  padding: 1.1rem 1.3rem;
+}
+
+.imageWrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0.65rem;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, transparent 34%),
+    linear-gradient(155deg, transparent 48%, rgba(255, 255, 255, 0.12) 57%, transparent 68%);
+  pointer-events: none;
+}
+
+.imageWrapper::after {
+  content: '';
+  position: absolute;
+  inset: 1rem 1.2rem 1.1rem;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 24% 72%, rgba(201, 148, 62, 0.18) 0%, transparent 26%),
+    radial-gradient(circle at 80% 28%, rgba(255, 255, 255, 0.2) 0%, transparent 22%);
+  filter: blur(2px);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.image {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.18));
+}
+
+.container:hover .image {
+  transform: translateY(-1px) scale(1.03);
+}
+
+.level1 {
+  margin: 0.5rem;
+  display: inline-flex;
+}
+.level1 .imageWrapper {
+  width: 64px;
+  height: 64px;
+  min-height: 64px;
+  padding: 0.4rem;
+  border-radius: 50%;
+}
+
+.level2 .imageWrapper {
+  width: 280px;
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 1.5rem 1.75rem;
+}
+
+.level3 .imageWrapper {
+  width: 520px;
+  max-width: 100%;
+  aspect-ratio: 16 / 10;
+  padding: 2rem 2.5rem;
+}
+
+.caption {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--ta-text-muted);
+  font-weight: 500;
+  text-align: center;
+  max-width: 80%;
+}
+
+:global([data-theme='dark']) .imageWrapper {
+  background:
+    radial-gradient(circle at 28% 24%, rgba(201, 148, 62, 0.12) 0%, rgba(201, 148, 62, 0.05) 18%, transparent 42%),
+    radial-gradient(circle at 72% 68%, rgba(148, 163, 184, 0.08) 0%, rgba(148, 163, 184, 0.03) 16%, transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme='dark']) .imageWrapper::before {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 36%),
+    linear-gradient(155deg, transparent 46%, rgba(255, 255, 255, 0.15) 58%, transparent 72%);
+}
+
+:global([data-theme='dark']) .imageWrapper::after {
+  background:
+    radial-gradient(circle at 24% 72%, rgba(212, 165, 78, 0.2) 0%, transparent 24%),
+    radial-gradient(circle at 80% 28%, rgba(143, 163, 204, 0.2) 0%, transparent 22%);
+}
+
+@media (max-width: 600px) {
+  .level2 .imageWrapper {
+    width: 220px;
+    aspect-ratio: 1 / 1;
+    padding: 1rem;
+  }
+
+  .level3 .imageWrapper {
+    width: 340px;
+    aspect-ratio: 4 / 3;
+    padding: 1.5rem;
+  }
+}

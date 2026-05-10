@@ -1,0 +1,136 @@
+---
+sidebar_position: 1
+title: SDK Reference
+description: Complete reference for the TraceAgent Python SDK — client initialization, recording runs, events, file operations, commands, and artifacts.
+keywords: [SDK, API, python, client, reference, trace-agent-sdk]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PackageInstall from '@site/src/components/PackageInstall';
+
+# SDK Reference
+
+The TraceAgent SDK is the core Python client for recording agent actions. It provides a simple API to start runs, record events, and attach artifacts.
+
+## Installation
+
+<PackageInstall packages={['trace-agent-sdk']} />
+
+## Client Initialization
+
+```python
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://localhost:8000")
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `server_url` | `str` | Base URL of the TraceAgent server |
+
+## Starting a Run
+
+```python
+run = client.start_run("my-agent", "Perform a system task")
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_name` | `str` | Identifies which agent created the run |
+| `description` | `str` | What the agent is trying to accomplish |
+
+**Returns:** A `Run` object that you use to record events.
+
+## Recording Events
+
+### File Write
+
+Record when the agent creates or modifies a file:
+
+```python
+result = run.record_file_write(
+    "app.py",
+    before_content="",
+    after_content="print('Hello World')"
+)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `file_path` | `str` | Path to the file |
+| `before_content` | `str` | File content before the write |
+| `after_content` | `str` | File content after the write |
+
+### Command Execution
+
+Record shell commands executed by the agent:
+
+```python
+result = run.record_command(
+    ["python", "app.py"],
+    exit_code=0
+)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `command` | `list[str]` | Command and arguments |
+| `exit_code` | `int` | Process exit code |
+
+### Tool Calls
+
+Record custom tool invocations:
+
+```python
+result = run.record_tool_call(
+    "get_weather",
+    parameters={"city": "Madrid"},
+    result={"temp": 22, "condition": "sunny"}
+)
+```
+
+## Finishing a Run
+
+Always close the run when the agent is done:
+
+```python
+finish_result = run.finish({"status": "success"})
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `metadata` | `dict` | Final metadata — status, results, errors, etc. |
+
+:::warning
+Always call `run.finish()` to properly close the session. Unfinished runs will appear as "in progress" indefinitely in the UI.
+:::
+
+## Complete Example
+
+```python title="full_example.py"
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://localhost:8000")
+
+# Start run
+run = client.start_run("code-assistant", "Fix the login bug")
+
+# Record actions
+run.record_file_write(
+    "auth.py",
+    before_content="def login(user):\n    pass",
+    after_content="def login(user):\n    validate(user)\n    return create_session(user)"
+)
+
+run.record_command(["pytest", "tests/test_auth.py"], exit_code=0)
+
+# Finish
+run.finish({"status": "success", "tests_passed": 5})
+```
+
+## What's Next?
+
+- **[LangChain Integration](/docs/instrumentation/langchain)** — Auto-trace LangChain agents
+- **[Examples](/docs/examples/)** — Real-world usage patterns
+- **[Environment Variables](/docs/configuration/environment-variables)** — Configuration options

@@ -1,0 +1,54 @@
+---
+sidebar_position: 1
+title: Introduction
+description: What is TraceAgent and why it exists. Full observability for AI agents — every tool call, file operation, and decision path.
+keywords: [traceagent, observability, AI agents, tracing, monitoring]
+---
+
+# Introduction
+
+> **TraceAgent** gives you complete visibility into what your autonomous agents are actually doing — every tool call, file operation, terminal command, and decision path, recorded and visualized in real time.
+
+## Why TraceAgent?
+
+Traditional observability tools were built for microservices — they don't understand what it means for an agent to "call a tool", "write a file", or "retry a failed command".
+
+TraceAgent fills that gap with an **agent-first tracing specification** and a purpose-built audit UI, giving you full data ownership through a self-hosted setup.
+
+:::info[What makes it different?]
+
+With first-class support for orchestration ecosystems like **LangChain**, TraceAgent captures and reconstructs complete execution across chains, agents, tools, prompts, and callbacks — enabling reproducibility, debugging, compliance auditing, and performance analysis for production-grade AI systems.
+
+:::
+
+## Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Real-time tracing** | Capture tool calls, file operations, shell commands, and artifacts as they happen |
+| **Execution timeline** | Visualize agent behavior through interactive timelines and execution graphs |
+| **LangChain integration** | Native callback handler for LangChain agents and chains, with zero boilerplate |
+| **Self-hosted** | Full data ownership with a FastAPI backend and SQLite/PostgreSQL support |
+
+## Packages
+
+TraceAgent is organized into four packages that work together:
+
+| Package | Purpose |
+|---------|---------|
+| **[TraceAgent SDK](/docs/instrumentation/sdk)** | Python client for recording agent actions |
+| **[TraceAgent LangChain](/docs/instrumentation/langchain)** | Callback handler for automatic LangChain tracing |
+| **TraceAgent Server** | FastAPI backend with SQLite/PostgreSQL storage |
+| **TraceAgent UI** | Interactive dashboard for visualizing traces |
+
+## What's Next?
+
+Ready to get started? Follow these steps:
+
+1. **[Install TraceAgent](/docs/getting-started/installation)** — Get the packages set up
+2. **[Quick Start](/docs/getting-started/quick-start)** — Your first trace in under 5 minutes
+3. **[Architecture](/docs/core-concepts/architecture)** — Understand how the pieces fit together
+
+:::tip
+If you're already familiar with agent tracing concepts, jump straight to the **[Quick Start](/docs/getting-started/quick-start)** guide.
+:::

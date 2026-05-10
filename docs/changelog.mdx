@@ -1,0 +1,64 @@
+---
+sidebar_position: 98
+title: Changelog
+description: TraceAgent release history and notable changes.
+keywords: [changelog, releases, what's new, updates]
+---
+
+# Changelog
+
+All notable changes to TraceAgent are documented here.
+
+:::tip
+For the most up-to-date release information, see the [GitHub Releases](https://github.com/LixusSoftware/TraceAgent/releases) page.
+:::
+
+---
+
+## Unreleased
+
+### Added
+- Documentation site with full SDK reference, LangChain guide, and examples
+- Local search integration
+- Command palette for quick navigation (Ctrl/Cmd + K)
+- Showcase page for community use cases
+
+### Changed
+- Updated branding with new detective cat logo
+
+---
+
+## v0.1.0 — Initial Release
+
+### Added
+- **TraceAgent SDK** — Python client for recording agent actions
+  - Start/finish runs
+  - Record file writes, reads, commands, and tool calls
+  - Attach artifacts and metadata
+- **TraceAgent LangChain** — Callback handler for automatic LangChain tracing
+  - Chain start/end events
+  - LLM call/response capture
+  - Tool usage tracking
+  - Retriever activity logging
+- **TraceAgent Server** — FastAPI backend
+  - SQLite storage (default)
+  - PostgreSQL support
+  - Audit metrics collection
+  - REST API
+- **TraceAgent UI** — Interactive dashboard
+  - Execution timeline visualization
+  - Run listing and search
+  - File diff viewer
+  - Artifact browser
+- Docker images for Server and UI
+- Example scripts:
+  - `sample_agent.py` — Minimal SDK smoke test
+  - `langchain_agent.py` — LangChain callback integration
+  - `lm_studio_agent.py` — Local model with SDK
+  - `lm_studio_planner_agent.py` — Multi-tool planning
+  - `coding_agent_debugger_demo.py` — Synthetic debug scenarios
+  - `rich_demo_agent.py` — Full-fidelity trace demo
+
+---
+
+{/* Future releases go here in reverse chronological order */}

@@ -1,0 +1,67 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TraceAgent Server API",
+    "description": "REST API for TraceAgent — record and query AI agent traces.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000"
+    }
+  ],
+  "paths": {
+    "/runs": {
+      "post": {
+        "summary": "Start a new agent run",
+        "operationId": "start_run",
+        "tags": ["Runs"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "agent_name": { "type": "string" },
+                  "description": { "type": "string" }
+                },
+                "required": ["agent_name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Run started successfully" }
+        }
+      }
+    },
+    "/events": {
+      "post": {
+        "summary": "Record an agent event",
+        "operationId": "record_event",
+        "tags": ["Events"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "run_id": { "type": "string" },
+                  "event_type": { "type": "string" },
+                  "timestamp": { "type": "string", "format": "date-time" },
+                  "payload": { "type": "object" }
+                },
+                "required": ["run_id", "event_type"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Event recorded successfully" }
+        }
+      }
+    }
+  }
+}
