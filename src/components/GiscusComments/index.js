@@ -9,17 +9,17 @@ export default function GiscusComments() {
     <div className="giscus-wrapper">
       <h3>💬 Comments</h3>
       <Giscus
-        repo="LixusSoftware/TraceAgent"
-        repoId="REPLACE_WITH_REPO_ID"
-        category="Documentation"
-        categoryId="REPLACE_WITH_CATEGORY_ID"
+        repo="LixusSoftware/TraceAgentWeb"
+        repoId="R_kgDOSZfueg"
+        category="General"
+        categoryId="DIC_kwDOSZfues4C8uOs"
         mapping="pathname"
         strict="0"
         reactionsEnabled="1"
         emitMetadata="0"
-        inputPosition="top"
+        inputPosition="bottom"
         theme={colorMode === 'dark' ? 'dark_dimmed' : 'light'}
-        lang="en"
+        lang="es"
         loading="lazy"
       />
     </div>

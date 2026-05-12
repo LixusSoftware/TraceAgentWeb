@@ -6,7 +6,7 @@ import CodeBlock from '@theme/CodeBlock';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 import CatIllustration from '@site/src/components/CatIllustration';
-import { Package, Link as LinkIcon, Server, MonitorPlay } from 'lucide-react';
+import { Package, Link as LinkIcon, Server, MonitorPlay, Star } from 'lucide-react';
 import styles from './index.module.css';
 
 function HomepageHero() {
@@ -42,7 +42,7 @@ function HomepageHero() {
               <Link
                 className={clsx('button button--lg', styles.heroSecondary)}
                 href="https://github.com/LixusSoftware/TraceAgent">
-                GitHub
+                <Star size={18} className={styles.starIcon} /> GitHub Star
               </Link>
             </div>
           </div>
@@ -169,6 +169,11 @@ function CTASection() {
               className={clsx('button button--lg', styles.heroPrimary)}
               to="/docs/getting-started/quick-start">
               Quick Start Guide →
+            </Link>
+            <Link
+              className={clsx('button button--lg', styles.heroStar)}
+              href="https://github.com/LixusSoftware/TraceAgent">
+              <Star size={18} className={styles.starIcon} /> Star
             </Link>
           </div>
         </div>

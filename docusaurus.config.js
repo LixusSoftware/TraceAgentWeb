@@ -5,8 +5,8 @@ import {themes as prismThemes} from 'prism-react-renderer';
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'TraceAgent',
-  tagline: 'Observability and tracing platform for AI agents',
-  favicon: 'img/favicon.ico',
+  tagline: 'Observability & tracing for AI agents',
+  favicon: 'img/logo.png',
 
   future: {
     v4: true,
@@ -16,7 +16,7 @@ const config = {
   baseUrl: '/',
 
   organizationName: 'LixusSoftware',
-  projectName: 'TraceAgent',
+  projectName: 'TraceAgentWeb',
 
   onBrokenLinks: 'throw',
 
@@ -79,7 +79,7 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          editUrl: 'https://github.com/LixusSoftware/TraceAgent/tree/main/docs-site/',
+          editUrl: 'https://github.com/LixusSoftware/TraceAgentWeb/tree/main/',
           showLastUpdateTime: true,
           breadcrumbs: true,
         },
@@ -89,7 +89,7 @@ const config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          editUrl: 'https://github.com/LixusSoftware/TraceAgent/tree/main/docs-site/',
+          editUrl: 'https://github.com/LixusSoftware/TraceAgentWeb/tree/main/',
           blogTitle: 'TraceAgent Blog',
           blogDescription: 'Updates, tutorials, and deep dives from the TraceAgent team.',
           postsPerPage: 10,
@@ -145,6 +145,7 @@ const config = {
         logo: {
           alt: 'TraceAgent Logo',
           src: 'img/logo.png',
+          srcDark: 'img/logo.png',
           style: { height: '62px' },
         },
         items: [
@@ -170,7 +171,7 @@ const config = {
             position: 'left',
           },
           {
-            href: 'https://github.com/LixusSoftware/TraceAgent',
+            href: 'https://github.com/LixusSoftware/TraceAgentWeb',
             'aria-label': 'GitHub repository',
             position: 'right',
             className: 'header-github-link',
@@ -200,8 +201,8 @@ const config = {
             title: 'Community',
             items: [
               {label: 'Blog', to: '/blog'},
-              {label: 'GitHub', href: 'https://github.com/LixusSoftware/TraceAgent'},
-              {label: 'Issues', href: 'https://github.com/LixusSoftware/TraceAgent/issues'},
+              {label: 'GitHub', href: 'https://github.com/LixusSoftware/TraceAgentWeb'},
+              {label: 'Issues', href: 'https://github.com/LixusSoftware/TraceAgentWeb/issues'},
             ],
           },
           {
