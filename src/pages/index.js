@@ -187,7 +187,17 @@ export default function Home() {
   return (
     <Layout
       title="AI Agent Observability Platform"
-      description="Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain support.">
+      description="Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain support."
+      keywords={[
+        'ai agent observability',
+        'ai agent tracing',
+        'langchain tracing',
+        'llm tool monitoring',
+        'agent debugging',
+        'open source observability',
+        'traceagent',
+      ]}
+      image="img/logo.png">
       <HomepageHero />
       <main>
         <HomepageFeatures />

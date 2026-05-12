@@ -32,23 +32,6 @@ const config = {
     locales: ['en'],
   },
 
-  // SEO metadata
-  headTags: [
-    {
-      tagName: 'meta',
-      attributes: {
-        name: 'keywords',
-        content: 'AI agent tracing, observability, LangChain, agent monitoring, tool tracing, LLM debugging, self-hosted, open source',
-      },
-    },
-    {
-      tagName: 'meta',
-      attributes: {
-        property: 'og:type',
-        content: 'website',
-      },
-    },
-  ],
 
   themes: [
     '@docusaurus/theme-mermaid',
@@ -114,9 +97,12 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: 'img/social-card.png',
+      image: 'img/logo.png',
       metadata: [
         {name: 'description', content: 'Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain support.'},
+        {name: 'keywords', content: 'AI agent tracing, observability, LangChain, agent monitoring, tool tracing, LLM debugging, self-hosted, open source'},
+        {property: 'og:type', content: 'website'},
+        {property: 'og:site_name', content: 'TraceAgent'},
         {property: 'og:title', content: 'TraceAgent — AI Agent Observability'},
         {property: 'og:description', content: 'Full visibility into what your autonomous agents are actually doing — every tool call, file operation, and decision path.'},
         {name: 'twitter:card', content: 'summary_large_image'},
