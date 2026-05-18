@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Root from '@theme-original/Root';
 import CommandPalette from '@site/src/components/CommandPalette';
 import FaviconManager from '@site/src/components/FaviconManager';
@@ -18,7 +18,7 @@ export default function RootWrapper(props) {
         "@id": `${siteUrl}/#organization`,
         "name": "TraceAgent",
         "url": siteUrl,
-        "logo": `${siteUrl}/img/logo.png",
+        "logo": `${siteUrl}/img/logo.png`,
         "sameAs": [
           "https://github.com/LixusSoftware"
         ]
@@ -40,6 +40,23 @@ export default function RootWrapper(props) {
       }
     ]
   };
+
+  useEffect(() => {
+    try {
+      const suffix = ' · TraceAgent';
+      const current = typeof document !== 'undefined' ? document.title || '' : '';
+      if (!current) return;
+      if (!current.includes('TraceAgent')) {
+        document.title = `${current}${suffix}`;
+      } else if (!current.endsWith('TraceAgent')) {
+        // Normalize existing titles that reference TraceAgent but not the suffix
+        const base = current.replace(/\s*·\s*TraceAgent$/i, '');
+        document.title = `${base}${suffix}`;
+      }
+    } catch (e) {
+      // ignore in SSR or unexpected environments
+    }
+  }, [pathname]);
 
   return (
     <>

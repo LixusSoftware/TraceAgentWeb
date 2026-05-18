@@ -220,9 +220,24 @@ const config = {
     {
       src: 'https://plausible.io/js/script.js',
       defer: true,
-      'data-domain': 'traceagent.dev',
+      'data-domain': 'traceagent.vercel.app',
     },
   ],
+  */
+
+  /*
+  // Google Analytics 4 example (replace G-XXXXXXXX with your measurement ID)
+  scripts: [
+    {
+      src: 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXX',
+      async: true,
+    },
+    {
+      src: '/js/ga4-init.js',
+      defer: true,
+    },
+  ],
+  // If using GA4, create `static/js/ga4-init.js` with your `gtag` config.
   */
 };
 
