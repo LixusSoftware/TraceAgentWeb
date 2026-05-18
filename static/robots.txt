@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://traceagent.dev/sitemap.xml
+Sitemap: https://traceagent.vercel.app/sitemap.xml

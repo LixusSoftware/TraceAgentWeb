@@ -12,7 +12,7 @@ const config = {
     v4: true,
   },
 
-  url: 'https://traceagent.dev',
+  url: 'https://traceagent.vercel.app',
   baseUrl: '/',
 
   organizationName: 'LixusSoftware',
