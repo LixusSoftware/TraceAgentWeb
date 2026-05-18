@@ -2,6 +2,8 @@
 
 import {themes as prismThemes} from 'prism-react-renderer';
 
+const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || '';
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'TraceAgent',
@@ -226,19 +228,20 @@ const config = {
   */
 
   /*
-  // Google Analytics 4 example (replace G-XXXXXXXX with your measurement ID)
-  scripts: [
-    {
-      src: 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXX',
-      async: true,
-    },
-    {
-      src: '/js/ga4-init.js',
-      defer: true,
-    },
-  ],
-  // If using GA4, create `static/js/ga4-init.js` with your `gtag` config.
+  // Google Analytics 4: configure by setting environment variable `GA_MEASUREMENT_ID` in Vercel.
   */
+  scripts: GA_MEASUREMENT_ID
+    ? [
+        {
+          src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
+          async: true,
+        },
+        {
+          // Inline initialization
+          content: `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${GA_MEASUREMENT_ID}');`,
+        },
+      ]
+    : [],
 };
 
 export default config;

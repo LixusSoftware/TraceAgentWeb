@@ -63,6 +63,9 @@ export default function RootWrapper(props) {
       <Head>
         <link rel="canonical" href={canonical} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        <script>
+          {`document.addEventListener('DOMContentLoaded', function(){ document.querySelectorAll('img').forEach(function(img){ try{ if(!img.loading) img.loading = 'lazy'; }catch(e){} }); });`}
+        </script>
       </Head>
       <Root {...props} />
       <CommandPalette />
