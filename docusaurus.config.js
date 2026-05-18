@@ -232,30 +232,18 @@ const config = {
   /*
   // Google Analytics 4: configure by setting environment variable `GA_MEASUREMENT_ID` in Vercel.
   */
-  scripts: [
-    {
-      type: 'application/ld+json',
-      content: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: 'TraceAgent',
-        url: 'https://traceagent.vercel.app',
-        logo: 'https://traceagent.vercel.app/img/logo.png',
-      }),
-    },
-    ...(GA_MEASUREMENT_ID
-      ? [
-          {
-            src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
-            async: true,
-          },
-          {
-            // Inline initialization
-            content: `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${GA_MEASUREMENT_ID}');`,
-          },
-        ]
-      : []),
-  ],
+  scripts: GA_MEASUREMENT_ID
+    ? [
+        {
+          src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
+          async: true,
+        },
+        {
+          // Inline initialization
+          content: `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${GA_MEASUREMENT_ID}');`,
+        },
+      ]
+    : [],
 };
 
 export default config;
