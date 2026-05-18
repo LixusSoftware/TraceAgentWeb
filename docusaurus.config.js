@@ -111,6 +111,8 @@ const config = {
         {name: 'twitter:card', content: 'summary_large_image'},
         {name: 'twitter:title', content: 'TraceAgent — AI Agent Observability'},
         {name: 'twitter:description', content: 'Full visibility into what your autonomous agents are actually doing.'},
+        {property: 'og:image', content: 'https://traceagent.vercel.app/img/logo.png'},
+        {name: 'twitter:image', content: 'https://traceagent.vercel.app/img/logo.png'},
       ],
       colorMode: {
         defaultMode: 'dark',
@@ -160,7 +162,7 @@ const config = {
             position: 'left',
           },
           {
-            href: 'https://github.com/LixusSoftware/TraceAgentWeb',
+            href: 'https://github.com/LixusSoftware/TraceAgent',
             'aria-label': 'GitHub repository',
             position: 'right',
             className: 'header-github-link',
