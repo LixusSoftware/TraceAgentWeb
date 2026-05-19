@@ -4,6 +4,7 @@ import CommandPalette from '@site/src/components/CommandPalette';
 import FaviconManager from '@site/src/components/FaviconManager';
 import Head from '@docusaurus/Head';
 import {useLocation} from '@docusaurus/router';
+import {Analytics} from '@vercel/analytics/react';
 
 export default function RootWrapper(props) {
   const {pathname} = useLocation();
@@ -70,6 +71,7 @@ export default function RootWrapper(props) {
       <Root {...props} />
       <CommandPalette />
       <FaviconManager />
+      <Analytics />
     </>
   );
 }
