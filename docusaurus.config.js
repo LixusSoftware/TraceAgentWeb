@@ -104,6 +104,7 @@ const config = {
         {name: 'description', content: 'Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain support.'},
         {name: 'keywords', content: 'AI agent tracing, observability, LangChain, agent monitoring, tool tracing, LLM debugging, self-hosted, open source'},
         {name: 'google-site-verification', content: '4SPk9TeUsiIRBXj8RSDq_O75aIwPBpYUdvkZn_b__NI'},
+        {name: 'msvalidate.01', content: 'F93562B1FE228BD19FCC2E9BCBFFF7D8'},
         {property: 'og:type', content: 'website'},
         {property: 'og:site_name', content: 'TraceAgent'},
         {property: 'og:title', content: 'TraceAgent — AI Agent Observability'},
