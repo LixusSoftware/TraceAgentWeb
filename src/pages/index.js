@@ -2,7 +2,6 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import Head from '@docusaurus/Head';
 import CodeBlock from '@theme/CodeBlock';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
@@ -186,11 +185,7 @@ function CTASection() {
 export default function Home() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <>
-      <Head>
-        <meta name="msvalidate.01" content="F93562B1FE228BD19FCC2E9BCBFFF7D8" />
-      </Head>
-      <Layout
+    <Layout
       title="AI Agent Observability Platform"
       description="Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain support."
       keywords={[
@@ -210,7 +205,6 @@ export default function Home() {
         <PackagesSection />
         <CTASection />
       </main>
-      </Layout>
-    </>
+    </Layout>
   );
 }

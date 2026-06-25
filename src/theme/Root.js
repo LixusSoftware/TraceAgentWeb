@@ -18,8 +18,13 @@ export default function RootWrapper(props) {
         "@type": "Organization",
         "@id": `${siteUrl}/#organization`,
         "name": "TraceAgent",
+        "alternateName": "Lixus Software",
         "url": siteUrl,
-        "logo": `${siteUrl}/img/logo.png`,
+        "logo": {
+          "@type": "ImageObject",
+          "url": `${siteUrl}/img/logo.png`
+        },
+        "description": "Open-source observability and tracing platform for AI agents.",
         "sameAs": [
           "https://github.com/LixusSoftware"
         ]
@@ -29,7 +34,26 @@ export default function RootWrapper(props) {
         "@id": `${siteUrl}/#website`,
         "url": siteUrl,
         "name": "TraceAgent",
+        "description": "Observability & tracing for AI agents",
+        "inLanguage": "en",
         "publisher": {"@id": `${siteUrl}/#organization`}
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${siteUrl}/#software`,
+        "name": "TraceAgent",
+        "url": siteUrl,
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux, macOS, Windows",
+        "description": "Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain support.",
+        "softwareRequirements": "Python 3.11+",
+        "license": "https://github.com/LixusSoftware/TraceAgent/blob/main/LICENSE",
+        "publisher": {"@id": `${siteUrl}/#organization`},
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
       },
       {
         "@type": "WebPage",
@@ -37,7 +61,8 @@ export default function RootWrapper(props) {
         "url": canonical,
         "inLanguage": "en",
         "name": "TraceAgent",
-        "isPartOf": {"@id": `${siteUrl}/#website`}
+        "isPartOf": {"@id": `${siteUrl}/#website`},
+        "about": {"@id": `${siteUrl}/#software`}
       }
     ]
   };
@@ -62,7 +87,7 @@ export default function RootWrapper(props) {
   return (
     <>
       <Head>
-        <link rel="canonical" href={canonical} />
+        {/* Docusaurus emits <link rel="canonical"> automatically — do not duplicate it here. */}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <script>
           {`document.addEventListener('DOMContentLoaded', function(){ document.querySelectorAll('img').forEach(function(img){ try{ if(!img.loading) img.loading = 'lazy'; }catch(e){} }); });`}
