@@ -34,6 +34,33 @@ const config = {
     locales: ['en'],
   },
 
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'preconnect',
+        href: 'https://fonts.googleapis.com',
+      },
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossorigin: 'anonymous',
+      },
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap',
+        media: 'print',
+        onload: "this.media='all'",
+      },
+    },
+  ],
+
 
   themes: [
     '@docusaurus/theme-mermaid',
@@ -139,9 +166,11 @@ const config = {
         title: 'TraceAgent',
         logo: {
           alt: 'TraceAgent Logo',
-          src: 'img/logo.png',
-          srcDark: 'img/logo.png',
-          style: { height: '62px' },
+          src: 'img/logo.webp',
+          srcDark: 'img/logo.webp',
+          width: 136,
+          height: 156,
+          style: { height: '62px', width: 'auto' },
         },
         items: [
           {

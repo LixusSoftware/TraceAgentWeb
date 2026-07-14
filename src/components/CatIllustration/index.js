@@ -6,20 +6,20 @@ import styles from './styles.module.css';
 
 const STATE_IMAGES = {
   investigating: {
-    light: 'img/cat_investigating.png',
-    dark: 'img/cat_investigating.png',
+    webp: 'img/cat_investigating.webp',
+    png: 'img/cat_investigating.png',
   },
   path: {
-    light: 'img/cat_following_path.png',
-    dark: 'img/cat_following_path.png',
+    webp: 'img/cat_following_path.webp',
+    png: 'img/cat_following_path.png',
   },
   error: {
-    light: 'img/cat_error.png',
-    dark: 'img/cat_error.png',
+    webp: 'img/cat_error.webp',
+    png: 'img/cat_error.png',
   },
   inactive: {
-    light: 'img/cat_inactive.png',
-    dark: 'img/cat_inactive.png',
+    webp: 'img/cat_inactive.webp',
+    png: 'img/cat_inactive.png',
   },
 };
 
@@ -34,11 +34,10 @@ export default function CatIllustration({ state = 'investigating', size = 'level
   const imageSources = STATE_IMAGES[state] || STATE_IMAGES.investigating;
   const altText = ALT_TEXTS[state] || 'TraceAgent Illustration';
 
-  // Provide intrinsic dimensions per size so browser can reserve aspect ratio
   const SIZE_DIMS = {
     level1: { width: 64, height: 64 },
-    level2: { width: 280, height: 210 }, // 4:3
-    level3: { width: 520, height: 325 }, // 16:10 approx
+    level2: { width: 280, height: 210 },
+    level3: { width: 520, height: 325 },
   };
 
   const dims = SIZE_DIMS[size] || SIZE_DIMS.level2;
@@ -47,9 +46,10 @@ export default function CatIllustration({ state = 'investigating', size = 'level
     <figure className={clsx(styles.container, styles[size], className)}>
       <div className={styles.imageWrapper}>
         <picture>
-          <source media="(prefers-color-scheme: dark)" srcSet={useBaseUrl(imageSources.dark)} />
+          <source srcSet={useBaseUrl(imageSources.webp)} type="image/webp" />
+          <source srcSet={useBaseUrl(imageSources.png)} type="image/png" />
           <img
-            src={useBaseUrl(imageSources.light)}
+            src={useBaseUrl(imageSources.png)}
             alt={altText}
             width={dims.width}
             height={dims.height}

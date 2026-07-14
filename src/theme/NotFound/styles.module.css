@@ -24,6 +24,12 @@
   50% { transform: translateY(-15px); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .notFoundImage {
+    animation: none;
+  }
+}
+
 .notFoundTitle {
   font-size: 3rem;
   font-weight: 800;

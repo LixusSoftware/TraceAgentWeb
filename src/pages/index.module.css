@@ -103,6 +103,12 @@
   50% { opacity: 0.5; transform: scale(1.3); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .heroBadgeDot {
+    animation: none;
+  }
+}
+
 .heroTitle {
   font-size: 3.5rem;
   font-weight: 800;
