@@ -1,8 +1,7 @@
-import React, {lazy, Suspense} from 'react';
+import React from 'react';
 import {useLocation} from '@docusaurus/router';
 import Footer from '@theme-original/Footer';
-
-const GhostEasterEgg = lazy(() => import('@site/src/components/GhostEasterEgg'));
+import BrowserOnly from '@docusaurus/BrowserOnly';
 
 export default function FooterWrapper(props) {
   const {pathname} = useLocation();
@@ -13,9 +12,12 @@ export default function FooterWrapper(props) {
       <Footer {...props} />
       {isHomePage && (
         <div className="site-footer-with-easter-egg__ghost-row">
-          <Suspense fallback={null}>
-            <GhostEasterEgg />
-          </Suspense>
+          <BrowserOnly fallback={null}>
+            {() => {
+              const GhostEasterEgg = require('@site/src/components/GhostEasterEgg').default;
+              return <GhostEasterEgg />;
+            }}
+          </BrowserOnly>
         </div>
       )}
     </div>
