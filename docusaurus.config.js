@@ -128,8 +128,8 @@ const config = {
     ({
       image: 'img/logo.png',
       metadata: [
-        {name: 'description', content: 'Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain support.'},
-        {name: 'keywords', content: 'AI agent tracing, observability, LangChain, agent monitoring, tool tracing, LLM debugging, self-hosted, open source'},
+        {name: 'description', content: 'Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain and Pydantic AI support, plus OpenTelemetry ingestion.'},
+        {name: 'keywords', content: 'AI agent tracing, observability, LangChain, Pydantic AI, OpenTelemetry, agent monitoring, tool tracing, LLM debugging, self-hosted, open source'},
         {name: 'google-site-verification', content: '4SPk9TeUsiIRBXj8RSDq_O75aIwPBpYUdvkZn_b__NI'},
         {name: 'msvalidate.01', content: 'F93562B1FE228BD19FCC2E9BCBFFF7D8'},
         {property: 'og:type', content: 'website'},
@@ -218,6 +218,8 @@ const config = {
             items: [
               {label: 'SDK', to: '/docs/instrumentation/sdk'},
               {label: 'LangChain', to: '/docs/instrumentation/langchain'},
+              {label: 'Pydantic AI', to: '/docs/instrumentation/pydantic-ai'},
+              {label: 'OpenTelemetry', to: '/docs/instrumentation/opentelemetry'},
               {label: 'Docker', to: '/docs/configuration/docker'},
             ],
           },

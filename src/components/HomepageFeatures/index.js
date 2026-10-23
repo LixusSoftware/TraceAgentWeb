@@ -25,12 +25,12 @@ const FeatureList = [
     ),
   },
   {
-    title: 'LangChain Native',
+    title: 'Framework Integrations',
     icon: Link,
     description: (
       <>
-        Drop-in callback handler for LangChain agents. Chain steps, LLM calls,
-        tool usage, and retriever activity traced automatically — zero boilerplate.
+        LangChain callback, Pydantic AI capability, or plain OpenTelemetry.
+        Chains, model calls, and tools traced automatically — often with a single line.
       </>
     ),
   },

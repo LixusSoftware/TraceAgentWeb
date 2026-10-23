@@ -3,11 +3,19 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import CodeBlock from '@theme/CodeBlock';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 import CatIllustration from '@site/src/components/CatIllustration';
-import { Package, Link as LinkIcon, Server, MonitorPlay, Star } from 'lucide-react';
+import { Package, Link as LinkIcon, Server, MonitorPlay, Star, Bot } from 'lucide-react';
 import styles from './index.module.css';
+
+const INTEGRATIONS = [
+  {name: 'LangChain', to: '/docs/instrumentation/langchain', isNew: false},
+  {name: 'Pydantic AI', to: '/docs/instrumentation/pydantic-ai', isNew: true},
+  {name: 'OpenTelemetry', to: '/docs/instrumentation/opentelemetry', isNew: true},
+];
 
 function HomepageHero() {
   const {siteConfig} = useDocusaurusContext();
@@ -20,9 +28,20 @@ function HomepageHero() {
       <div className="container">
         <div className={styles.heroLayout}>
           <div className={styles.heroContent}>
-            <div className={styles.heroBadge}>
-              <span className={styles.heroBadgeDot} />
-              Open Source · MIT License
+            <div className={styles.heroTopRow}>
+              <div className={styles.heroBadge}>
+                <span className={styles.heroBadgeDot} />
+                Open Source · MIT License
+              </div>
+              <div className={styles.heroIntegrations}>
+                <span className={styles.heroIntegrationsLabel}>Works with</span>
+                {INTEGRATIONS.map((item) => (
+                  <Link key={item.name} to={item.to} className={styles.integrationPill}>
+                    {item.name}
+                    {item.isNew && <span className={styles.integrationNew}>New</span>}
+                  </Link>
+                ))}
+              </div>
             </div>
             <Heading as="h1" className={styles.heroTitle}>
               See what your{' '}
@@ -64,7 +83,7 @@ function CodePreview() {
             Instrument in <span className={styles.heroGradient}>minutes</span>, not days
           </Heading>
           <p className={styles.sectionSubtitle}>
-            A few lines of Python. That's all it takes to get full observability.
+            A few lines of Python, or none at all with OpenTelemetry. That's all it takes to get full observability.
           </p>
         </div>
         <div className={styles.codeWindow}>
@@ -74,8 +93,40 @@ function CodePreview() {
             <span className={styles.codeWindowDot} style={{background: '#28c840'}} />
             <span className={styles.codeWindowTitle}>my_agent.py</span>
           </div>
-          <CodeBlock language="python" className={styles.codeBlock}>
-            {`from trace_agent_sdk import TraceAgentClient
+          <Tabs className={styles.codeTabs} groupId="home-integration">
+            <TabItem value="pydantic-ai" label="Pydantic AI" default>
+              <CodeBlock language="python" className={styles.codeBlock}>
+                {`from pydantic_ai import Agent
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://localhost:8000")
+run = client.start_run("my-agent", "What is the weather in Madrid?")
+
+agent = Agent(
+    "openai:gpt-4o",
+    capabilities=[run.as_pydantic_ai_capability()],  # one line
+)
+
+result = agent.run_sync("What is the weather in Madrid?")
+run.finish(result.output)`}
+              </CodeBlock>
+            </TabItem>
+            <TabItem value="opentelemetry" label="OpenTelemetry">
+              <CodeBlock language="python" className={styles.codeBlock}>
+                {`from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+# No TraceAgent code in your agent: just export OpenTelemetry traces
+provider = TracerProvider()
+provider.add_span_processor(BatchSpanProcessor(
+    OTLPSpanExporter(endpoint="http://localhost:8000/v1/traces")
+))`}
+              </CodeBlock>
+            </TabItem>
+            <TabItem value="sdk" label="SDK">
+              <CodeBlock language="python" className={styles.codeBlock}>
+                {`from trace_agent_sdk import TraceAgentClient
 
 client = TraceAgentClient("http://localhost:8000")
 run = client.start_run("my-agent", "Fix the login bug")
@@ -85,7 +136,9 @@ run.record_file_write("auth.py", before_content="...", after_content="...")
 run.record_command(["pytest", "tests/"], exit_code=0)
 
 run.finish({"status": "success"})`}
-          </CodeBlock>
+              </CodeBlock>
+            </TabItem>
+          </Tabs>
         </div>
       </div>
     </section>
@@ -107,6 +160,14 @@ function PackagesSection() {
       install: 'pip install trace-agent-langchain',
       link: '/docs/instrumentation/langchain',
       icon: LinkIcon,
+    },
+    {
+      name: 'Pydantic AI',
+      description: 'One-line capability for Pydantic AI agents',
+      install: 'pip install trace-agent-pydantic-ai',
+      link: '/docs/instrumentation/pydantic-ai',
+      icon: Bot,
+      isNew: true,
     },
     {
       name: 'Server',
@@ -132,7 +193,7 @@ function PackagesSection() {
             Modular by design
           </Heading>
           <p className={styles.sectionSubtitle}>
-            Install only what you need. Each package works independently.
+            Install only what you need. Each package works independently. The server also ingests OpenTelemetry traces directly, with no extra package.
           </p>
         </div>
         <div className={styles.packageGrid}>
@@ -141,7 +202,10 @@ function PackagesSection() {
             return (
               <Link key={idx} to={pkg.link} className={styles.packageCard}>
                 <span className={styles.packageIcon}><Icon size={24} /></span>
-                <h3 className={styles.packageName}>{pkg.name}</h3>
+                <h3 className={styles.packageName}>
+                  {pkg.name}
+                  {pkg.isNew && <span className={styles.integrationNew}>New</span>}
+                </h3>
                 <p className={styles.packageDesc}>{pkg.description}</p>
                 <code className={styles.packageInstall}>{pkg.install}</code>
               </Link>
@@ -187,11 +251,13 @@ export default function Home() {
   return (
     <Layout
       title="AI Agent Observability Platform"
-      description="Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain support."
+      description="Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain and Pydantic AI support, plus OpenTelemetry ingestion."
       keywords={[
         'ai agent observability',
         'ai agent tracing',
         'langchain tracing',
+        'pydantic ai tracing',
+        'opentelemetry genai',
         'llm tool monitoring',
         'agent debugging',
         'open source observability',
