@@ -231,11 +231,12 @@ Compares two runs: `GET /api/runs/compare?left_run_id=<id>&right_run_id=<id>`. T
 
 | Key | Content |
 |-----|---------|
-| `left_run`, `right_run` | Summary of each run, in the same format as `GET /api/runs/{id}` |
-| `overview_diff` | Differences in status, duration, tokens and counters |
-| `divergence` | Where the two runs start to differ |
-| `aligned_timeline` | Both timelines aligned step by step |
-| `tool_diff`, `command_diff`, `file_diff`, `artifact_diff` | What changed in tools, commands, files and artifacts |
-| `decision_diff` | Differences in the decisions taken |
-| `root_cause` | The likely cause of the difference |
-| `evidence` | The events that support the root cause |
+| `left_run`, `right_run` | The overview of each run, in the same format as `GET /api/runs/{id}` |
+| `overview_diff` | Differences between the two runs as signed numbers (right minus left): tool, command, error, retry and artifact counts, total tokens and duration in milliseconds. A positive number means the right run has more. `duration_ms_delta` is `null` if either run has not finished |
+| `divergence` | The first point where the two runs stop doing the same thing: the kind of step that differs, the event ids on each side and a one-line summary. It is `null` when the runs never diverge |
+| `aligned_timeline` | The steps of both runs paired up in order (see the pair format below) |
+| `tool_diff`, `command_diff`, `file_diff`, `artifact_diff`, `decision_diff` | The same pair format, limited to tools, commands, file changes, artifacts or decisions |
+| `root_cause` | The most likely reason the runs differ: a label, a summary, the first event on each side that caused the difference, the events that support it (`supporting_event_ids`), the impact and a confidence of `high`, `medium` or `low`. If the runs don't diverge, the label is `no_observable_root_cause` |
+| `evidence` | The full events of both runs, keyed by event id under `left` and `right`, so every event id mentioned above can be looked up |
+
+Each pair in `aligned_timeline` and in the `*_diff` lists has a `relation` (`shared`, `left_only`, `right_only` or `different`), a `kind`, a `summary`, and a `left` and `right` side. Each side has its `label`, `status`, `summary`, `event_ids`, `step_id`, `duration_ms` and `metadata`.
