@@ -9,7 +9,6 @@ import {Analytics} from '@vercel/analytics/react';
 export default function RootWrapper(props) {
   const {pathname} = useLocation();
   const siteUrl = 'https://traceagent.vercel.app';
-  const canonical = `${siteUrl}${pathname}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -45,7 +44,16 @@ export default function RootWrapper(props) {
         "url": siteUrl,
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Linux, macOS, Windows",
-        "description": "Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain support.",
+        "description": "Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain and Pydantic AI support, plus OpenTelemetry ingestion.",
+        "featureList": [
+          "Real-time tracing of tool calls, model calls, file operations and commands",
+          "LangChain callback handler",
+          "Pydantic AI capability",
+          "OpenTelemetry (OTLP/HTTP) GenAI trace receiver",
+          "Execution timeline, graphs and decision analysis",
+          "Self-hosted with SQLite or PostgreSQL"
+        ],
+        "image": `${siteUrl}/img/social-card.jpg`,
         "softwareRequirements": "Python 3.11+",
         "license": "https://github.com/LixusSoftware/TraceAgent/blob/main/LICENSE",
         "publisher": {"@id": `${siteUrl}/#organization`},
@@ -54,15 +62,6 @@ export default function RootWrapper(props) {
           "price": "0",
           "priceCurrency": "USD"
         }
-      },
-      {
-        "@type": "WebPage",
-        "@id": `${canonical}#webpage`,
-        "url": canonical,
-        "inLanguage": "en",
-        "name": "TraceAgent",
-        "isPartOf": {"@id": `${siteUrl}/#website`},
-        "about": {"@id": `${siteUrl}/#software`}
       }
     ]
   };

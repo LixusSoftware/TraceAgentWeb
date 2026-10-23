@@ -1,9 +1,9 @@
 ---
 sidebar_position: 1
 title: API Reference
-description: HTTP endpoints of the TraceAgent server, OpenTelemetry attributes it reads, and the live event stream.
-image: img/logo.png
-keywords: [api, reference, otlp, traces, tool results, sse, endpoints]
+description: "TraceAgent HTTP API reference: runs, tool results, timeline, graph, compare, live SSE stream and the OpenTelemetry OTLP receiver at POST /v1/traces."
+image: img/social-card.jpg
+keywords: [api, api reference, otlp, v1/traces, tool results, sse, endpoints, rest api]
 ---
 
 # API Reference
@@ -227,7 +227,11 @@ The UI shows readable names ("Agent run", "Model call"). In the API, `label` sta
 
 ## GET /api/runs/compare
 
-Compares two runs: `GET /api/runs/compare?left_run_id=<id>&right_run_id=<id>`. The response has these top-level keys:
+Compares two runs: `GET /api/runs/compare?left_run_id=<id>&right_run_id=<id>`. The UI shows the same data in its Compare view, here with the token and duration difference between two runs:
+
+![Compare view showing the token and duration difference between two runs](/img/trace-agent/compare-token-diff.png)
+
+The response has these top-level keys:
 
 | Key | Content |
 |-----|---------|

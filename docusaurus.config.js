@@ -118,6 +118,21 @@ const config = {
           lastmod: 'date',
           changefreq: 'weekly',
           priority: 0.5,
+          // Give the pages that matter most to new visitors a higher priority.
+          createSitemapItems: async (params) => {
+            const {defaultCreateSitemapItems, ...rest} = params;
+            const items = await defaultCreateSitemapItems(rest);
+            return items.map((item) => {
+              const path = new URL(item.url).pathname;
+              let priority = 0.5;
+              if (path === '/') priority = 1.0;
+              else if (path.startsWith('/docs/getting-started/')) priority = 0.9;
+              else if (path.startsWith('/docs/instrumentation/')) priority = 0.9;
+              else if (path.startsWith('/docs/reference/') || path.startsWith('/docs/examples/')) priority = 0.7;
+              else if (path.startsWith('/docs/')) priority = 0.6;
+              return {...item, priority};
+            });
+          },
         },
       }),
     ],
@@ -126,7 +141,7 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: 'img/logo.png',
+      image: 'img/social-card.jpg',
       metadata: [
         {name: 'description', content: 'Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain and Pydantic AI support, plus OpenTelemetry ingestion.'},
         {name: 'keywords', content: 'AI agent tracing, observability, LangChain, Pydantic AI, OpenTelemetry, agent monitoring, tool tracing, LLM debugging, self-hosted, open source'},
@@ -135,15 +150,13 @@ const config = {
         {property: 'og:type', content: 'website'},
         {property: 'og:site_name', content: 'TraceAgent'},
         {property: 'og:locale', content: 'en_US'},
-        {property: 'og:title', content: 'TraceAgent — AI Agent Observability'},
-        {property: 'og:description', content: 'Full visibility into what your autonomous agents are actually doing — every tool call, file operation, and decision path.'},
+        // og:title, og:description, og:image and the twitter:* equivalents are set per page by
+        // Docusaurus (from each page's title, description and `image`), so they are not repeated here.
         {name: 'twitter:card', content: 'summary_large_image'},
-        {name: 'twitter:title', content: 'TraceAgent — AI Agent Observability'},
-        {name: 'twitter:description', content: 'Full visibility into what your autonomous agents are actually doing.'},
-        {property: 'og:image', content: 'https://traceagent.vercel.app/img/logo.png'},
-        {property: 'og:image:alt', content: 'TraceAgent — observability & tracing for AI agents'},
-        {name: 'twitter:image', content: 'https://traceagent.vercel.app/img/logo.png'},
-        {name: 'twitter:image:alt', content: 'TraceAgent — observability & tracing for AI agents'},
+        {property: 'og:image:width', content: '1200'},
+        {property: 'og:image:height', content: '630'},
+        {property: 'og:image:alt', content: 'TraceAgent — observability & tracing for AI agents, with LangChain, Pydantic AI and OpenTelemetry'},
+        {name: 'twitter:image:alt', content: 'TraceAgent — observability & tracing for AI agents, with LangChain, Pydantic AI and OpenTelemetry'},
       ],
       colorMode: {
         defaultMode: 'dark',
@@ -156,8 +169,8 @@ const config = {
         },
       },
       announcementBar: {
-        id: 'beta_notice',
-        content: 'TraceAgent is in active development. <a href="/docs/getting-started/introduction">Get started</a> or <a href="https://github.com/LixusSoftware/TraceAgent">star us on GitHub</a>!',
+        id: 'pydantic_ai_otel_notice',
+        content: 'New: Pydantic AI and OpenTelemetry support. <a href="/docs/instrumentation/hooks-vs-opentelemetry">Choose your integration</a> or <a href="https://github.com/LixusSoftware/TraceAgent">star us on GitHub</a>!',
         backgroundColor: '#2b3a5c',
         textColor: '#ffffff',
         isCloseable: true,
@@ -183,6 +196,18 @@ const config = {
             to: '/docs/instrumentation/sdk',
             label: 'SDK',
             position: 'left',
+          },
+          {
+            type: 'dropdown',
+            label: 'Integrations',
+            position: 'left',
+            to: '/docs/instrumentation/hooks-vs-opentelemetry',
+            items: [
+              {label: 'LangChain', to: '/docs/instrumentation/langchain'},
+              {label: 'Pydantic AI', to: '/docs/instrumentation/pydantic-ai'},
+              {label: 'OpenTelemetry', to: '/docs/instrumentation/opentelemetry'},
+              {label: 'Hooks or OpenTelemetry?', to: '/docs/instrumentation/hooks-vs-opentelemetry'},
+            ],
           },
           {
             to: '/docs/examples/',
