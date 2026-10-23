@@ -1,0 +1,110 @@
+---
+sidebar_position: 3
+title: Pydantic AI Integration
+description: Trace Pydantic AI agents with one line using the TraceAgent capability (hooks).
+image: img/logo.png
+keywords: [pydantic ai, capability, hooks, integration, automatic tracing]
+---
+
+# Pydantic AI Integration
+
+TraceAgent plugs into [Pydantic AI](https://ai.pydantic.dev) as a **capability**: one extra line in your agent records every model call and every tool call into a run.
+
+:::caution Unreleased
+This integration is not on PyPI yet. It will ship in the next release. Until then, [install it from the repository](#installation).
+:::
+
+## Installation
+
+Once released:
+
+```bash
+pip install trace-agent-sdk trace-agent-pydantic-ai
+```
+
+Until then, from a clone of the TraceAgent repository (branch `pydantic-ai-otel`):
+
+```bash
+uv sync --extra dev --extra pydantic-ai
+```
+
+Requirements: **Pydantic AI 2.x** (`>=2,<3`) and Python 3.11+.
+
+## Basic Usage
+
+```python
+from pydantic_ai import Agent
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://127.0.0.1:8000")
+run = client.start_run("weather-agent", "What is the weather in Madrid?")
+
+agent = Agent(
+    "openai:gpt-4o",
+    capabilities=[run.as_pydantic_ai_capability()],  # the TraceAgent line
+)
+
+result = agent.run_sync("What is the weather in Madrid?")
+run.finish(result.output)
+```
+
+Create the run, add `capabilities=[run.as_pydantic_ai_capability()]` to your `Agent`, and call `run.finish()` at the end. Nothing else in your agent changes.
+
+Works with `run_sync`, `run` and `run_stream`, with parallel tools, and with nested agents.
+
+Want to try it without an API key? A Pydantic AI quickstart that runs with a fake model will be added to Examples.
+
+## What Gets Recorded
+
+For the example above, the run contains these events, in order:
+
+```text
+run.started → chain.started → llm.started → llm.completed →
+tool.started → tool.succeeded → llm.started → llm.completed →
+chain.completed → run.completed
+```
+
+The run also gets its provider, model, token totals and the real duration of every tool. Tools appear under the model step that requested them.
+
+## Options
+
+Pass them to `run.as_pydantic_ai_capability(...)`:
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `record_model_events` | `True` | Record each model request as an LLM call (model, provider, tokens, requested tools) |
+| `record_tool_events` | `True` | Record each tool execution (arguments, output summary, duration, errors) |
+| `record_node_events` | `False` | Record every node of the agent graph as an `agent_action` |
+| `redact_fields` | `[]` | Argument and output keys replaced with `[redacted]` |
+| `failure_cooldown` | `30.0` | Seconds to stop sending after a failed delivery. `0` retries every event |
+| `flush_timeout` | `5.0` | Maximum seconds the end of the run waits for pending events |
+
+```python
+capability = run.as_pydantic_ai_capability(
+    redact_fields=["api_key", "password"],
+    record_node_events=True,
+)
+```
+
+## It Never Gets in the Agent's Way
+
+Tracing must not break or slow down your agent, so:
+
+- Events are queued and sent by a background thread.
+- If the TraceAgent server is down, the agent keeps working. It prints a single line (`[trace-agent] could not deliver trace data ... The agent is not affected.`) and pauses sending for `failure_cooldown` seconds.
+- When the run ends, it waits at most `flush_timeout` seconds for pending events, so `run.finish()` always reaches the server after them.
+
+## Good to Know
+
+:::info Silence the Logfire banner
+Pydantic AI prints a startup banner suggesting Logfire. It is unrelated to TraceAgent. Set `PYDANTIC_AI_NO_BANNER=1` to hide it.
+:::
+
+- Only the agent's regular tools are recorded. If the agent's output goes through an output *function* (`output_type=my_function`), that function is not recorded as a tool. This is a known difference with the OpenTelemetry route.
+- Use **either** this capability **or** [OpenTelemetry](/docs/instrumentation/opentelemetry) for a given agent. Using both records the run twice.
+- Tested with real agents on LM Studio (a local model) through the OpenAI and Anthropic-compatible routes. It has not been tested yet against OpenAI, Anthropic or Google themselves.
+
+## What's Next?
+
+- **[OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry)** — Trace Pydantic AI without any TraceAgent code in the agent
+- **[SDK Reference](/docs/instrumentation/sdk)** — Manual instrumentation

@@ -26,6 +26,8 @@ const sidebars = {
       items: [
         'instrumentation/sdk',
         'instrumentation/langchain',
+        'instrumentation/pydantic-ai',
+        'instrumentation/opentelemetry',
       ],
     },
     {
