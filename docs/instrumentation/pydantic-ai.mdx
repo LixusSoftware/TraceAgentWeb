@@ -18,7 +18,7 @@ TraceAgent plugs into [Pydantic AI](https://ai.pydantic.dev) as a **capability**
 
 Requirements: **Pydantic AI 2.x** (`>=2,<3`) and Python 3.11+.
 
-The package depends on `pydantic-ai-slim`, so it does not install any model provider. To use `"openai:gpt-4o"` as below, also install `pydantic-ai-slim[openai]` (or `pydantic-ai`) and set `OPENAI_API_KEY`.
+It works with whichever model your agent already uses: nothing in the integration depends on the provider. The examples use `"openai:gpt-4o"` only as an example model string.
 
 ## Basic Usage
 
@@ -46,7 +46,7 @@ except Exception as exc:
 
 Create the run, add `capabilities=[run.as_pydantic_ai_capability()]` to your `Agent`, and close the run at the end. Nothing else in your agent changes.
 
-:::warning You open and close the run
+:::warning[You open and close the run]
 If the agent raises, the capability records the agent's failure, but the run stays `running` until you call `run.fail(...)`. That is what the `try/except` above is for.
 :::
 
@@ -113,7 +113,7 @@ Tracing must not break or slow down your agent, so:
 
 ## Good to Know
 
-:::info Silence the Logfire banner
+:::info[Silence the Logfire banner]
 Pydantic AI prints a startup banner suggesting Logfire. It is unrelated to TraceAgent. Set `PYDANTIC_AI_NO_BANNER=1` to hide it.
 :::
 

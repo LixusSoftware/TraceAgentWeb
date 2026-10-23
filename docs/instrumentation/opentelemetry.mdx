@@ -14,13 +14,13 @@ The receiver follows the GenAI conventions, so it is not tied to one framework. 
 
 ## Quick Start with Pydantic AI
 
-You only need Pydantic AI and the OpenTelemetry SDK and exporter:
+On top of your existing Pydantic AI install, you only need the OpenTelemetry SDK and exporter:
 
 ```bash
-pip install "pydantic-ai-slim[openai]" opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
+pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
 ```
 
-Start the TraceAgent server (it listens on `http://127.0.0.1:8000`, see the [Quick Start](/docs/getting-started/quick-start)), set `OPENAI_API_KEY`, and run:
+Start the TraceAgent server (it listens on `http://127.0.0.1:8000`, see the [Quick Start](/docs/getting-started/quick-start)) and run your agent. The model string (`"openai:gpt-4o"` here) is just an example: use the model you already have.
 
 ```python
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -53,7 +53,7 @@ provider.shutdown()
 
 Nothing from TraceAgent is imported. The server creates the run by itself, and `name="weather-agent"` is what names it (without a name, the run is called `agent`).
 
-:::warning Call `provider.shutdown()`
+:::warning[Call `provider.shutdown()`]
 The exporter sends spans in batches in the background. A short script that exits right away loses them. Call `provider.shutdown()` (or `provider.force_flush()`) before the script ends. A long-running service doesn't need it.
 :::
 
@@ -65,7 +65,7 @@ Instead of `endpoint=...`, you can use `OTLPSpanExporter()` with no argument and
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:8000
 ```
 
-:::note Base URL vs full URL
+:::note[Base URL vs full URL]
 The environment variable takes the **base URL** (the exporter adds `/v1/traces` itself). The `endpoint=` argument takes the **full URL**, including `/v1/traces`.
 :::
 

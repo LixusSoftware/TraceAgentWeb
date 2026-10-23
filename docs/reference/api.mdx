@@ -84,7 +84,7 @@ Content-Type: application/json
 
 The server creates the run `5b8efff7-9803-8103-d269-b633813fc60c` (the trace id written as a UUID) with agent `weather`, status `completed`, provider `openai`, model `gpt-4o`, 120 prompt tokens and 24 completion tokens.
 
-:::note OTLP/JSON encoding
+:::note[OTLP/JSON encoding]
 In OTLP/JSON, ids are **hexadecimal** strings and 64-bit integers are **strings** (`"intValue": "120"`).
 :::
 
@@ -160,7 +160,7 @@ Reports tool executions of a run. Each result records both `tool.started` and `t
 
 `parent_step_id` is optional. It hangs the tool from its parent step in the timeline.
 
-:::warning Report a tool once
+:::warning[Report a tool once]
 Report a tool through this endpoint **or** through a `tool_call` observation, never both. Doing both duplicates the events and counts errors twice.
 :::
 
@@ -221,7 +221,7 @@ Returns the events of a run grouped by step. This is what the UI timeline is bui
 
 `parent_step_id` is what nests each step under its parent: model calls and tools hang from the agent step. Single events such as `run.started` and `run.completed` have no parent.
 
-:::note API labels vs UI labels
+:::note[API labels vs UI labels]
 The UI shows readable names ("Agent run", "Model call"). In the API, `label` stays the technical event type (`chain.completed`, `llm.completed`) or the tool name.
 :::
 

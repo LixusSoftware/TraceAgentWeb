@@ -10,7 +10,7 @@ keywords: [pydantic ai, hooks, capability, opentelemetry, otlp, comparison]
 
 A Pydantic AI agent can be traced with TraceAgent in two ways: the [Pydantic AI capability](/docs/instrumentation/pydantic-ai) (hooks) or [OpenTelemetry](/docs/instrumentation/opentelemetry). Both end up in the same place: a run with its model calls, tools and tokens.
 
-:::tip Choose in ten seconds
+:::tip[Choose in ten seconds]
 - Already on OpenTelemetry, or you can't touch the agent's code? Use **OpenTelemetry**.
 - Want fine control over what is recorded, or no OpenTelemetry in your stack? Use the **capability**.
 :::
@@ -33,7 +33,7 @@ A Pydantic AI agent can be traced with TraceAgent in two ways: the [Pydantic AI 
 
 ## One Route per Agent
 
-:::warning Use one, never both
+:::warning[Use one, never both]
 For a given agent, use **either** the capability **or** OpenTelemetry. Both record every model call and tool, and they don't know about each other, so the run would appear twice.
 :::
 
