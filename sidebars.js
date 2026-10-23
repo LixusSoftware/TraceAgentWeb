@@ -48,6 +48,8 @@ const sidebars = {
       items: [
         'examples/sample-agent',
         'examples/langchain-agent',
+        'examples/pydantic-ai-hooks',
+        'examples/pydantic-ai-otel',
         'examples/lm-studio-agent',
         'examples/planner-agent',
         'examples/debugger-demo',

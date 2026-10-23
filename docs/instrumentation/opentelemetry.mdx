@@ -10,19 +10,17 @@ keywords: [opentelemetry, otlp, genai, pydantic ai, traces, ingestion]
 
 The TraceAgent server is an **OTLP/HTTP receiver**. If your agent already emits OpenTelemetry traces following the [GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/), point its exporter at the server and the runs appear. **No TraceAgent code goes inside your agent.**
 
-It is not tied to one framework: Pydantic AI is the one tested so far, but any library that emits GenAI spans can use it.
-
-:::caution Unreleased
-The receiver is not in the published packages yet. It will ship with the next release. Until then, run the server from the [repository](https://github.com/LixusSoftware/TraceAgent) (branch `pydantic-ai-otel`).
-:::
+The receiver follows the GenAI conventions, so it is not tied to one framework. Pydantic AI is the only one verified so far. Another library should work if it emits `invoke_agent`, `chat` and `execute_tool` spans with the attributes described in [How Spans Become a Run](#how-spans-become-a-run).
 
 ## Quick Start with Pydantic AI
 
-You only need the OpenTelemetry SDK and exporter:
+You only need Pydantic AI and the OpenTelemetry SDK and exporter:
 
 ```bash
-pip install pydantic-ai-slim opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
+pip install "pydantic-ai-slim[openai]" opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
 ```
+
+Start the TraceAgent server (it listens on `http://127.0.0.1:8000`, see the [Quick Start](/docs/getting-started/quick-start)), set `OPENAI_API_KEY`, and run:
 
 ```python
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -53,7 +51,7 @@ print(result.output)
 provider.shutdown()
 ```
 
-Nothing from TraceAgent is imported. The server creates the run by itself.
+Nothing from TraceAgent is imported. The server creates the run by itself, and `name="weather-agent"` is what names it (without a name, the run is called `agent`).
 
 :::warning Call `provider.shutdown()`
 The exporter sends spans in batches in the background. A short script that exits right away loses them. Call `provider.shutdown()` (or `provider.force_flush()`) before the script ends. A long-running service doesn't need it.
@@ -82,9 +80,12 @@ Only spans with a `gen_ai.operation.name` of `invoke_agent`, `chat` or `execute_
 | `execute_tool` | A tool call | `tool.started`, `tool.succeeded` / `tool.failed` |
 
 The run gets its provider, model, token totals, tool count and real durations.
+
 - **One run per trace.** The trace id is the run id, written as a UUID.
-- **The run ends when no agent call is left open.** This also works for nested agents and for an agent running under a web-server span.
+- **The run ends when no agent call is left open.** This also works for nested agents and for an agent running under a web-server span. It needs an `invoke_agent` span: without one, the run is created but never marked as finished.
 - **Safe to resend.** If a batch is delivered twice, nothing is recorded twice.
+
+Token counts are read from `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens`. The older `prompt_tokens` / `completion_tokens` names are not read, so tokens would show as 0.
 
 ## Attach to a Run Created with the SDK
 
@@ -108,7 +109,15 @@ It must be a **resource** attribute (or be present on every span). If it is only
 
 ## Privacy
 
-Prompts and outputs are stored as **summaries**. The full content is stored only when `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` is enabled on the server.
+Prompts and outputs are always summarized (long values are shortened). The server also keeps the full content (complete messages, tool arguments and results) when `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` is on, which is the default. Set it to `false` to keep only summaries.
+
+To make sure the content **never leaves the agent**, turn it off on the agent side:
+
+```python
+InstrumentationSettings(tracer_provider=provider, include_content=False)
+```
+
+The run is still created, with the goal `OpenTelemetry trace` and without the texts.
 
 ## Configuration
 
@@ -116,14 +125,16 @@ Prompts and outputs are stored as **summaries**. The full content is stored only
 |----------|---------|-------------|
 | `TRACE_AGENT_OTLP_ENABLED` | `true` | Turn the receiver on or off. When off, `POST /v1/traces` answers `404` |
 | `TRACE_AGENT_OTLP_MAX_BODY_BYTES` | `10000000` | Maximum body size, measured after decompression. Larger bodies get `413` |
+| `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` | `true` | Keep the full content as well as the summaries |
 
 ## Good to Know
 
 - Use **either** OpenTelemetry **or** the [Pydantic AI capability](/docs/instrumentation/pydantic-ai) for a given agent. Using both records the run twice.
 - Pydantic AI instrumentation versions 2 to 4 (older span names) are not translated. Version 5, the default in Pydantic AI 2.x, is.
-- Tested with real agents on LM Studio (a local model). It has not been tested yet against OpenAI, Anthropic or Google themselves.
+- Tested with real agents through OpenAI-compatible and Anthropic-compatible APIs (LM Studio with a local model).
 
 ## What's Next?
 
 - **[Pydantic AI Integration](/docs/instrumentation/pydantic-ai)** — The one-line capability alternative
+- **[Pydantic AI via OpenTelemetry](/docs/examples/pydantic-ai-otel)** — Runnable example, no API key needed
 - **[SDK Reference](/docs/instrumentation/sdk)** — Manual instrumentation

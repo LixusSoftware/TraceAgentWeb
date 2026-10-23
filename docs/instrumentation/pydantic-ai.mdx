@@ -8,29 +8,21 @@ keywords: [pydantic ai, capability, hooks, integration, automatic tracing]
 
 # Pydantic AI Integration
 
-TraceAgent plugs into [Pydantic AI](https://ai.pydantic.dev) as a **capability**: one extra line in your agent records every model call and every tool call into a run.
+import PackageInstall from '@site/src/components/PackageInstall';
 
-:::caution Unreleased
-This integration is not on PyPI yet. It will ship in the next release. Until then, [install it from the repository](#installation).
-:::
+TraceAgent plugs into [Pydantic AI](https://ai.pydantic.dev) as a **capability**: one extra line in your agent records every model call and every tool call into a run.
 
 ## Installation
 
-Once released:
-
-```bash
-pip install trace-agent-sdk trace-agent-pydantic-ai
-```
-
-Until then, from a clone of the TraceAgent repository (branch `pydantic-ai-otel`):
-
-```bash
-uv sync --extra dev --extra pydantic-ai
-```
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-pydantic-ai']} />
 
 Requirements: **Pydantic AI 2.x** (`>=2,<3`) and Python 3.11+.
 
+The package depends on `pydantic-ai-slim`, so it does not install any model provider. To use `"openai:gpt-4o"` as below, also install `pydantic-ai-slim[openai]` (or `pydantic-ai`) and set `OPENAI_API_KEY`.
+
 ## Basic Usage
+
+Start the TraceAgent server first (it listens on `http://127.0.0.1:8000`, see the [Quick Start](/docs/getting-started/quick-start)), then:
 
 ```python
 from pydantic_ai import Agent
@@ -44,19 +36,42 @@ agent = Agent(
     capabilities=[run.as_pydantic_ai_capability()],  # the TraceAgent line
 )
 
-result = agent.run_sync("What is the weather in Madrid?")
+try:
+    result = agent.run_sync("What is the weather in Madrid?")
+    run.finish(result.output)
+except Exception as exc:
+    run.fail(type(exc).__name__, str(exc))
+    raise
+```
+
+Create the run, add `capabilities=[run.as_pydantic_ai_capability()]` to your `Agent`, and close the run at the end. Nothing else in your agent changes.
+
+:::warning You open and close the run
+If the agent raises, the capability records the agent's failure, but the run stays `running` until you call `run.fail(...)`. That is what the `try/except` above is for.
+:::
+
+Works with `run_sync`, `run` and `run_stream`, with parallel tools, and with nested agents. For a version that runs without an API key, see the [Pydantic AI quickstart](/docs/examples/pydantic-ai-hooks).
+
+## One Capability, One Run
+
+A capability belongs to one run. If you reuse the same `Agent` for many requests (a web server, for example), don't put the capability in the constructor. Pass it on each call instead. Pydantic AI accepts `capabilities=` in `run`, `run_sync`, `run_stream` and `iter`:
+
+```python
+agent = Agent("openai:gpt-4o")  # one agent, reused
+
+run = client.start_run("weather-agent", "Request 1")
+result = agent.run_sync(
+    "What is the weather in Madrid?",
+    capabilities=[run.as_pydantic_ai_capability()],
+)
 run.finish(result.output)
 ```
 
-Create the run, add `capabilities=[run.as_pydantic_ai_capability()]` to your `Agent`, and call `run.finish()` at the end. Nothing else in your agent changes.
-
-Works with `run_sync`, `run` and `run_stream`, with parallel tools, and with nested agents.
-
-Want to try it without an API key? A Pydantic AI quickstart that runs with a fake model will be added to Examples.
+Each request then gets its own run, and events never mix between them.
 
 ## What Gets Recorded
 
-For the example above, the run contains these events, in order:
+For the first example, the run contains these events, in order:
 
 ```text
 run.started → chain.started → llm.started → llm.completed →
@@ -64,7 +79,7 @@ tool.started → tool.succeeded → llm.started → llm.completed →
 chain.completed → run.completed
 ```
 
-The run also gets its provider, model, token totals and the real duration of every tool. Tools appear under the model step that requested them.
+The run also gets its provider, model, token totals and the real duration of every tool. Model calls and tools appear nested under the agent run, in the order they happened.
 
 ## Options
 
@@ -75,9 +90,9 @@ Pass them to `run.as_pydantic_ai_capability(...)`:
 | `record_model_events` | `True` | Record each model request as an LLM call (model, provider, tokens, requested tools) |
 | `record_tool_events` | `True` | Record each tool execution (arguments, output summary, duration, errors) |
 | `record_node_events` | `False` | Record every node of the agent graph as an `agent_action` |
-| `redact_fields` | `[]` | Argument and output keys replaced with `[redacted]` |
-| `failure_cooldown` | `30.0` | Seconds to stop sending after a failed delivery. `0` retries every event |
-| `flush_timeout` | `5.0` | Maximum seconds the end of the run waits for pending events |
+| `redact_fields` | `[]` | Argument and output keys whose value is replaced with `[redacted]` |
+| `failure_cooldown` | `30.0` | Seconds to stop sending after a failed delivery; events produced meanwhile are dropped. `0` retries every event |
+| `flush_timeout` | `5.0` | Maximum seconds the end of the agent run waits for pending events |
 
 ```python
 capability = run.as_pydantic_ai_capability(
@@ -86,13 +101,15 @@ capability = run.as_pydantic_ai_capability(
 )
 ```
 
+`redact_fields` is a list of **key names**. A key is matched by its exact name, at any depth, inside the arguments and results of your tools, and its value is replaced with `[redacted]`. It does not detect patterns or values. Independently of this option, long texts (over 160 characters) are always shortened.
+
 ## It Never Gets in the Agent's Way
 
 Tracing must not break or slow down your agent, so:
 
 - Events are queued and sent by a background thread.
 - If the TraceAgent server is down, the agent keeps working. It prints a single line (`[trace-agent] could not deliver trace data ... The agent is not affected.`) and pauses sending for `failure_cooldown` seconds.
-- When the run ends, it waits at most `flush_timeout` seconds for pending events, so `run.finish()` always reaches the server after them.
+- When the outermost agent run ends, it waits up to `flush_timeout` seconds for pending events, so `run.finish()` normally reaches the server after them. If the server hangs for longer than that, there is no such guarantee.
 
 ## Good to Know
 
@@ -102,9 +119,10 @@ Pydantic AI prints a startup banner suggesting Logfire. It is unrelated to Trace
 
 - Only the agent's regular tools are recorded. If the agent's output goes through an output *function* (`output_type=my_function`), that function is not recorded as a tool. This is a known difference with the OpenTelemetry route.
 - Use **either** this capability **or** [OpenTelemetry](/docs/instrumentation/opentelemetry) for a given agent. Using both records the run twice.
-- Tested with real agents on LM Studio (a local model) through the OpenAI and Anthropic-compatible routes. It has not been tested yet against OpenAI, Anthropic or Google themselves.
+- Tested with real agents through OpenAI-compatible and Anthropic-compatible APIs (LM Studio with a local model).
 
 ## What's Next?
 
+- **[Pydantic AI Quickstart](/docs/examples/pydantic-ai-hooks)** — Runnable example, no API key needed
 - **[OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry)** — Trace Pydantic AI without any TraceAgent code in the agent
 - **[SDK Reference](/docs/instrumentation/sdk)** — Manual instrumentation
