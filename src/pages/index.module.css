@@ -129,6 +129,13 @@
   background-clip: text;
 }
 
+[data-theme='dark'] .heroGradient {
+  background: linear-gradient(135deg, #9fb4e0, #cbbd94, #e8b963);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .heroSubtitle {
   font-size: 1.15rem;
   line-height: 1.7;
