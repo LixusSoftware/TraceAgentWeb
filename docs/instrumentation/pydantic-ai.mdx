@@ -117,7 +117,7 @@ Tracing must not break or slow down your agent, so:
 Pydantic AI prints a startup banner suggesting Logfire. It is unrelated to TraceAgent. Set `PYDANTIC_AI_NO_BANNER=1` to hide it.
 :::
 
-- Only the agent's regular tools are recorded. If the agent's output goes through an output *function* (`output_type=my_function`), that function is not recorded as a tool. This is a known difference with the OpenTelemetry route.
+- Only the agent's regular tools are recorded. If the agent's output goes through an output *function* (`output_type=my_function`), that function is not recorded as a tool. This is a known difference with the OpenTelemetry route; see [Hooks or OpenTelemetry?](/docs/instrumentation/hooks-vs-opentelemetry).
 - Use **either** this capability **or** [OpenTelemetry](/docs/instrumentation/opentelemetry) for a given agent. Using both records the run twice.
 - Tested with real agents through OpenAI-compatible and Anthropic-compatible APIs.
 
@@ -125,4 +125,5 @@ Pydantic AI prints a startup banner suggesting Logfire. It is unrelated to Trace
 
 - **[Pydantic AI Quickstart](/docs/examples/pydantic-ai-hooks)** — Runnable example, no API key needed
 - **[OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry)** — Trace Pydantic AI without any TraceAgent code in the agent
+- **[Hooks or OpenTelemetry?](/docs/instrumentation/hooks-vs-opentelemetry)** — Which route to choose
 - **[SDK Reference](/docs/instrumentation/sdk)** — Manual instrumentation

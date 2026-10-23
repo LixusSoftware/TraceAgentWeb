@@ -28,6 +28,7 @@ const sidebars = {
         'instrumentation/langchain',
         'instrumentation/pydantic-ai',
         'instrumentation/opentelemetry',
+        'instrumentation/hooks-vs-opentelemetry',
       ],
     },
     {

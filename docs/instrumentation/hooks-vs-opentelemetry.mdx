@@ -1,0 +1,54 @@
+---
+sidebar_position: 5
+title: Hooks or OpenTelemetry?
+description: Compare the two ways to trace a Pydantic AI agent with TraceAgent and choose the right one.
+image: img/logo.png
+keywords: [pydantic ai, hooks, capability, opentelemetry, otlp, comparison]
+---
+
+# Hooks or OpenTelemetry?
+
+A Pydantic AI agent can be traced with TraceAgent in two ways: the [Pydantic AI capability](/docs/instrumentation/pydantic-ai) (hooks) or [OpenTelemetry](/docs/instrumentation/opentelemetry). Both end up in the same place: a run with its model calls, tools and tokens.
+
+:::tip Choose in ten seconds
+- Already on OpenTelemetry, or you can't touch the agent's code? Use **OpenTelemetry**.
+- Want fine control over what is recorded, or no OpenTelemetry in your stack? Use the **capability**.
+:::
+
+## Side by Side
+
+| | Capability (hooks) | OpenTelemetry |
+|---|---|---|
+| **What you install** | `trace-agent-sdk` and `trace-agent-pydantic-ai` in the agent's environment | Only the OpenTelemetry SDK and OTLP exporter. Nothing from TraceAgent in the agent |
+| **What changes in the agent** | `start_run(...)`, `capabilities=[run.as_pydantic_ai_capability()]` and `run.finish()` / `run.fail()` | A tracer provider with the OTLP exporter, Pydantic AI's `Instrumentation`, and `provider.shutdown()` in short scripts. No run to manage |
+| **Who creates the run** | You, with `start_run`: you choose its name and goal | The server, one run per trace: named after the agent, with the first user message as its goal when the content is exported |
+| **Control over what is sent** | `redact_fields` and the `record_*_events` options | `include_content=False` on the agent side to keep prompts and outputs out; `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` on the server |
+| **Works with** | Pydantic AI 2.x only | Pydantic AI 2.x verified. Other frameworks that emit GenAI spans may work, unverified |
+
+## Choose It When
+
+**Use the capability** if you want per-agent control (redaction, what is recorded), you don't use OpenTelemetry, or you want to manage runs yourself.
+
+**Use OpenTelemetry** if you already use OpenTelemetry (or Logfire), you can't or don't want to change the agent's code, or the agent runs in another service.
+
+## One Route per Agent
+
+:::warning Use one, never both
+For a given agent, use **either** the capability **or** OpenTelemetry. Both record every model call and tool, and they don't know about each other, so the run would appear twice.
+:::
+
+There is one combination that is **not** "using both": create the run with the SDK and let OpenTelemetry supply the spans. Pass the run id in the `trace_agent.run_id` resource attribute (see [Attach to a Run Created with the SDK](/docs/instrumentation/opentelemetry#attach-to-a-run-created-with-the-sdk)). In that case, don't add the capability.
+
+## What Differs in the Run
+
+With structured output (`output_type=SomeModel`), both routes record exactly the same run.
+
+There is one known, intentional difference. If the agent's output goes through an output **function** (`output_type=my_function`), Pydantic AI emits a tool span for it (`final_result` by default):
+
+- **OpenTelemetry** records it as one more tool, so the tool count goes up by one and a `final_result` decision appears.
+- **The capability** only wraps the agent's regular tools, so it doesn't record it.
+
+## What's Next?
+
+- **[Pydantic AI Integration](/docs/instrumentation/pydantic-ai)** — The capability in detail
+- **[OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry)** — The receiver in detail
