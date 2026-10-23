@@ -81,6 +81,8 @@ chain.completed → run.completed
 
 The run also gets its provider, model, token totals and the real duration of every tool. Model calls and tools appear nested under the agent run, in the order they happened.
 
+The provider is taken from the model string (for example `openai:gpt-4o`). A custom model object may show it as `unknown`.
+
 ## Options
 
 Pass them to `run.as_pydantic_ai_capability(...)`:
@@ -101,7 +103,7 @@ capability = run.as_pydantic_ai_capability(
 )
 ```
 
-`redact_fields` is a list of **key names**. A key is matched by its exact name, at any depth, inside the arguments and results of your tools, and its value is replaced with `[redacted]`. It does not detect patterns or values. Independently of this option, long texts (over 160 characters) are always shortened.
+`redact_fields` is a list of **key names**. A key is matched by its exact name, at any depth, inside the arguments and results of your tools, and its value is replaced with `[redacted]`. It does not detect patterns or values. Independently of this option, long values are always shortened: text inside tool arguments at 160 characters, and the summaries of prompts and outputs at 220.
 
 ## It Never Gets in the Agent's Way
 

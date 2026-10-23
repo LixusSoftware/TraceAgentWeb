@@ -89,7 +89,7 @@ Token counts are read from `gen_ai.usage.input_tokens` and `gen_ai.usage.output_
 
 ## Attach to a Run Created with the SDK
 
-If you create the run yourself with the SDK, put its id in the `trace_agent.run_id` **resource** attribute and every span is added to that run instead of creating a new one:
+This is the one case where the agent's environment needs `trace-agent-sdk`. If you create the run yourself with the SDK, put its id in the `trace_agent.run_id` **resource** attribute and every span is added to that run instead of creating a new one:
 
 ```python
 from opentelemetry.sdk.resources import Resource

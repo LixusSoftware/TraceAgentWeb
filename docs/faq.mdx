@@ -32,7 +32,7 @@ No, pick one per agent. Both record every model call and tool and don't know abo
 
 ### Will TraceAgent slow down or break my agent if the server is down?
 
-No. Events are queued and sent by a background thread. After a failed delivery the integration pauses for `failure_cooldown` seconds, prints one warning line and keeps the agent running.
+No. Events are queued and sent by a background thread. After a failed delivery the integration pauses for `failure_cooldown` seconds, prints one warning line and keeps the agent running. With OpenTelemetry, the exporter sends spans in the background and only logs a warning if it can't reach the server.
 
 ### Are my prompts and outputs stored?
 
