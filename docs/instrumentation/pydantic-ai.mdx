@@ -119,7 +119,7 @@ Pydantic AI prints a startup banner suggesting Logfire. It is unrelated to Trace
 
 - Only the agent's regular tools are recorded. If the agent's output goes through an output *function* (`output_type=my_function`), that function is not recorded as a tool. This is a known difference with the OpenTelemetry route.
 - Use **either** this capability **or** [OpenTelemetry](/docs/instrumentation/opentelemetry) for a given agent. Using both records the run twice.
-- Tested with real agents through OpenAI-compatible and Anthropic-compatible APIs (LM Studio with a local model).
+- Tested with real agents through OpenAI-compatible and Anthropic-compatible APIs.
 
 ## What's Next?
 
