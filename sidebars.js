@@ -41,6 +41,13 @@ const sidebars = {
     },
     {
       type: 'category',
+      label: 'Reference',
+      items: [
+        'reference/api',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Examples',
       link: {
         type: 'doc',
@@ -57,6 +64,7 @@ const sidebars = {
         'examples/rich-demo',
       ],
     },
+    'troubleshooting',
     'faq',
     'changelog',
   ],
