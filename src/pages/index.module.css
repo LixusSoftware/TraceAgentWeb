@@ -521,3 +521,16 @@
     justify-content: center;
   }
 }
+
+.packageInstallGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: auto;
+  max-width: 100%;
+}
+
+.packageInstallGroup .packageInstall {
+  margin-top: 0;
+}

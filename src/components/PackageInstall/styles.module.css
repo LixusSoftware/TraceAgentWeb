@@ -1,6 +1,6 @@
 .container {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
   background: var(--ta-surface-3);
   border: 1px solid var(--ta-border);
@@ -10,6 +10,21 @@
   font-family: var(--ifm-font-family-monospace);
 }
 
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.label {
+  flex: 0 0 2rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-accent-amber);
+}
+
 .command {
   flex: 1;
   font-size: 0.875rem;
@@ -17,6 +32,7 @@
   border: none !important;
   padding: 0 !important;
   color: var(--ifm-font-color-base);
+  overflow-wrap: anywhere;
 }
 
 .copyBtn {

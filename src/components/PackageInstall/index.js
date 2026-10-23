@@ -2,9 +2,8 @@ import React, {useState} from 'react';
 import { Clipboard, Check } from 'lucide-react';
 import styles from './styles.module.css';
 
-export default function PackageInstall({packages = ['trace-agent-sdk']}) {
+function CommandRow({label, command}) {
   const [copied, setCopied] = useState(false);
-  const command = `pip install ${packages.join(' ')}`;
 
   const handleCopy = async () => {
     try {
@@ -25,11 +24,22 @@ export default function PackageInstall({packages = ['trace-agent-sdk']}) {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.row}>
+      <span className={styles.label}>{label}</span>
       <code className={styles.command}>{command}</code>
-      <button className={styles.copyBtn} onClick={handleCopy} title="Copy to clipboard">
+      <button className={styles.copyBtn} onClick={handleCopy} title={`Copy ${label} command`}>
         {copied ? <Check size={16} /> : <Clipboard size={16} />}
       </button>
+    </div>
+  );
+}
+
+export default function PackageInstall({packages = ['trace-agent-sdk']}) {
+  const list = packages.join(' ');
+  return (
+    <div className={styles.container}>
+      <CommandRow label="pip" command={`pip install ${list}`} />
+      <CommandRow label="uv" command={`uv add ${list}`} />
     </div>
   );
 }

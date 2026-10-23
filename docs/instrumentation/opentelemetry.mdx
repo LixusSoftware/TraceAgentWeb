@@ -8,6 +8,8 @@ keywords: [opentelemetry, otlp, genai semantic conventions, opentelemetry ai age
 
 # OpenTelemetry Ingestion
 
+import PackageInstall from '@site/src/components/PackageInstall';
+
 The TraceAgent server is an **OTLP/HTTP receiver**. If your agent already emits OpenTelemetry traces following the [GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/), point its exporter at the server and the runs appear. **No TraceAgent code goes inside your agent.**
 
 The receiver follows the GenAI conventions, so it is not tied to one framework. Pydantic AI is the only one verified so far. Another library should work if it emits `invoke_agent`, `chat` and `execute_tool` spans with the attributes described in [How Spans Become a Run](#how-spans-become-a-run).
@@ -16,9 +18,7 @@ The receiver follows the GenAI conventions, so it is not tied to one framework. 
 
 On top of your existing Pydantic AI install, you only need the OpenTelemetry SDK and exporter:
 
-```bash
-pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
-```
+<PackageInstall packages={['opentelemetry-sdk', 'opentelemetry-exporter-otlp-proto-http']} />
 
 Start the TraceAgent server (it listens on `http://127.0.0.1:8000`, see the [Quick Start](/docs/getting-started/quick-start)) and run your agent. The model string (`"openai:gpt-4o"` here) is just an example: use the model you already have.
 

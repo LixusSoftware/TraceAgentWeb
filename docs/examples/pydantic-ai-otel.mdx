@@ -8,13 +8,13 @@ keywords: [example, pydantic ai, opentelemetry, otlp, quickstart, opentelemetry 
 
 # Pydantic AI via OpenTelemetry
 
+import PackageInstall from '@site/src/components/PackageInstall';
+
 The same agent as the [Pydantic AI Quickstart](/docs/examples/pydantic-ai-hooks), traced through OpenTelemetry instead. **Nothing from TraceAgent is imported**: the agent only exports OpenTelemetry traces to the server. It uses a fake model, so it **runs without an API key**.
 
 ## Run
 
-```bash
-pip install pydantic-ai-slim opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
-```
+<PackageInstall packages={['pydantic-ai-slim', 'opentelemetry-sdk', 'opentelemetry-exporter-otlp-proto-http']} />
 
 Start the TraceAgent server at `http://127.0.0.1:8000`, save the script below as `otel_quickstart.py` and run:
 

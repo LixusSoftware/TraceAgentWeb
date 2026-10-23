@@ -221,7 +221,10 @@ function PackagesSection() {
                   {pkg.isNew && <span className={styles.integrationNew}>New</span>}
                 </h3>
                 <p className={styles.packageDesc}>{pkg.description}</p>
-                <code className={styles.packageInstall}>{pkg.install}</code>
+                <div className={styles.packageInstallGroup}>
+                  <code className={styles.packageInstall}>{pkg.install}</code>
+                  <code className={styles.packageInstall}>{pkg.install.replace('pip install', 'uv add')}</code>
+                </div>
               </Link>
             );
           })}

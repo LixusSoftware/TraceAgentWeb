@@ -12,11 +12,11 @@ import PackageInstall from '@site/src/components/PackageInstall';
 
 # Installation
 
-TraceAgent requires **Python 3.11+** (tested on 3.11, 3.12 and 3.13) and can be installed via pip, Docker, or from source.
+TraceAgent requires **Python 3.11+** (tested on 3.11, 3.12 and 3.13) and can be installed via pip or uv, Docker, or from source.
 
-## Install via pip
+## Install via pip or uv
 
-Each package can be installed independently:
+Each package can be installed independently, with `pip` or with [uv](https://docs.astral.sh/uv/):
 
 <Tabs>
   <TabItem value="all" label="All Packages" default>
@@ -42,6 +42,10 @@ Each package can be installed independently:
 </Tabs>
 
 TraceAgent is made of five packages: `trace-agent-sdk`, `trace-agent-server`, `trace-agent-langchain`, `trace-agent-pydantic-ai` and `trace-agent-ui`. The Pydantic AI package requires Pydantic AI 2.x. If you trace through [OpenTelemetry](/docs/instrumentation/opentelemetry) instead, you don't need any TraceAgent package in the agent, only on the server.
+
+:::note[uv add vs uv pip install]
+`uv add` adds the packages to your project's `pyproject.toml` and installs them. If you just want to install into an existing environment without a project, use `uv pip install` instead.
+:::
 
 :::tip
 If you only need to **instrument** your agent (and the server runs elsewhere), install just the SDK. The server and UI are only needed for the self-hosted backend.
