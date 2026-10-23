@@ -41,6 +41,14 @@ run.finish({"status": "success"})
 | **Retriever query** | Query, retrieved documents |
 | **Error** | Error type, message, traceback |
 
+## How Tools and Models Are Recorded
+
+The callback reports each tool through a single call to the server, so a tool run appears once in the timeline with its real name and duration, and it is counted once in the run's tool and error totals. A failed tool counts as one error.
+
+For every model call, the callback also remembers the provider and model, so the run shows them (and their token usage when the model reports it).
+
+The callback never slows down or breaks your chain: if the TraceAgent server is down, the chain keeps running.
+
 ## With Local Models (LM Studio)
 
 ```python

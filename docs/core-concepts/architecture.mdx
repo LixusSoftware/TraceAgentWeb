@@ -42,11 +42,16 @@ A **callback handler** that plugs into LangChain's callback system. Once attache
 
 No manual instrumentation needed — just pass the callback.
 
+### TraceAgent Pydantic AI
+
+A **capability** for [Pydantic AI](https://ai.pydantic.dev) 2.x agents. Add it to your agent and it records model calls and tools without blocking the agent. See [Pydantic AI Integration](/docs/instrumentation/pydantic-ai).
+
 ### TraceAgent Server
 
 The **FastAPI backend** that persists and serves trace data:
 
-- Receives events from the SDK and LangChain handler
+- Receives events from the SDK, the LangChain handler and the Pydantic AI capability
+- Receives OpenTelemetry traces at `POST /v1/traces`
 - Stores data in **SQLite** (default) or **PostgreSQL**
 - Exposes REST API for the UI to query
 - Supports audit metrics collection
@@ -62,10 +67,26 @@ The **interactive dashboard** for visualizing traces:
 
 ## Data Flow
 
-1. Your agent code calls the **SDK** (or uses the **LangChain callback**)
-2. The SDK sends events over HTTP to the **Server**
+1. Your agent code calls the **SDK** (or uses the **LangChain callback** or the **Pydantic AI capability**)
+2. The integration sends events over HTTP to the **Server**
 3. The Server persists events in the **database**
 4. The **UI** queries the Server API and renders visualizations
+
+The server also exposes an OTLP/HTTP receiver at `POST /v1/traces`. Spans that follow the GenAI conventions are turned into the same runs and events as the SDK and framework integrations, so agents can be traced without TraceAgent code. See [OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry).
+
+## What a Run Shows
+
+A run shows what the agent actually did, not just a list of events. Each run records the provider, the model and the token usage of its model calls.
+
+Tools appear under the agent step that used them, so the timeline is nested: the agent run contains its model calls and tools, in the order they happened, and nested agents appear inside the step that called them. The inspector shows what happened in plain terms (result, duration, tool, tokens, error) and keeps identifiers and raw data under "Technical details".
+
+![Nested timeline of an agent run with model calls, tools and a nested agent, and the event inspector](/img/trace-agent/timeline-nested.jpg)
+
+When a run finishes or fails, TraceAgent derives its **decisions** (which tool was chosen, retries, recoveries) and flags such as loops. They are not shown while the run is still running. Each decision lists the events it is based on.
+
+![Decision graph of a run where a tool failed, was retried and recovered, with the events behind the retry](/img/trace-agent/decisions-retry.jpg)
+
+The UI updates live while the agent is running.
 
 :::info[Self-hosted]
 All data stays on your infrastructure. There's no external telemetry, no cloud dependency. You own everything.

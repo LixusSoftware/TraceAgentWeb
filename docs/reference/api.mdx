@@ -8,7 +8,29 @@ keywords: [api, reference, otlp, traces, tool results, sse, endpoints]
 
 # API Reference
 
-The TraceAgent server exposes a small HTTP API. This page covers the endpoints used to send data and to follow a run live.
+The TraceAgent server exposes an HTTP API. This page lists the endpoints and details the ones used to send data and to follow a run live. The examples use the default address `http://127.0.0.1:8000`.
+
+## Endpoints
+
+| Method | Path | What it does |
+|--------|------|--------------|
+| `POST` | `/api/runs` | Create a run (agent name, goal, optional metadata) |
+| `GET` | `/api/runs` | List runs, newest first |
+| `GET` | `/api/runs/{id}` | One run: status, counters, provider, model, token usage, flags |
+| `POST` | `/api/runs/{id}/tool-results` | Record tool executions (also counts tools and errors) |
+| `POST` | `/api/runs/{id}/observations` | Record other events: model calls, commands, file changes, framework events |
+| `POST` | `/api/runs/{id}/finish` | Mark the run as completed with its final output |
+| `POST` | `/api/runs/{id}/fail` | Mark the run as failed with an error code and message |
+| `GET` | `/api/runs/{id}/events` | Raw events of the run, in order |
+| `GET` | `/api/runs/{id}/events/stream` | Live events as Server-Sent Events |
+| `GET` | `/api/runs/{id}/timeline` | Events grouped by step (agent run, model call, tool), with durations |
+| `GET` | `/api/runs/{id}/graph?view=execution\|decisions` | Nodes and edges ready for a graph viewer |
+| `GET` | `/api/runs/{id}/explanation` | Plain-language narrative, the decisions taken and flags such as retries or loops |
+| `GET` | `/api/runs/{id}/analytics` | Tool metrics, tool graph and similar runs |
+| `GET` | `/api/runs/compare?left_run_id=…&right_run_id=…` | Difference between two runs, with the likely root cause |
+| `GET` | `/api/dashboard?period=24h\|7d\|30d` | Totals, trends, top tools and top errors |
+| `POST` | `/v1/traces` | OpenTelemetry receiver (OTLP/HTTP, protobuf or JSON, gzip). Root path, not under `/api` |
+| `GET` | `/health` | Health check |
 
 ## Run States
 
@@ -159,3 +181,61 @@ data: {"id": 31, "seq": 5, "type": "run.completed", "actor": "proxy", "summary":
 - The first message is `{"type": "connected"}`.
 - A `{"type": "heartbeat"}` message is sent after every 15 seconds without events.
 - Every other message is one recorded event, and its `type` is the event type itself (`tool.succeeded`, `run.completed`...).
+
+## GET /api/runs/\{id\}/timeline
+
+Returns the events of a run grouped by step. This is what the UI timeline is built from.
+
+```json
+{
+  "run_id": "ce67fce7-8cbe-4df8-b3c0-deef2070afad",
+  "groups": [
+    {
+      "step_id": "run-08b5ddf944d3",
+      "label": "chain.completed",
+      "status": "succeeded",
+      "parent_step_id": null,
+      "event_count": 2,
+      "duration_ms": 21,
+      "events": [
+        { "seq": 2,  "type": "chain.started",   "summary": "Pydantic AI run 'support-agent' started",   "status": "running" },
+        { "seq": 13, "type": "chain.completed", "summary": "Pydantic AI run 'support-agent' completed", "status": "succeeded", "duration_ms": 21 }
+      ]
+    },
+    {
+      "step_id": "tool-a61c92ca8864",
+      "label": "lookup_order",
+      "status": "failed",
+      "tool_name": "lookup_order",
+      "parent_step_id": "run-08b5ddf944d3",
+      "event_count": 2,
+      "duration_ms": 0,
+      "events": [
+        { "seq": 5, "type": "tool.started", "summary": "Started lookup_order." },
+        { "seq": 6, "type": "tool.failed",  "summary": "The orders service timed out, try again", "status": "failed" }
+      ]
+    }
+  ]
+}
+```
+
+`parent_step_id` is what nests each step under its parent: model calls and tools hang from the agent step. Single events such as `run.started` and `run.completed` have no parent.
+
+:::note API labels vs UI labels
+The UI shows readable names ("Agent run", "Model call"). In the API, `label` stays the technical event type (`chain.completed`, `llm.completed`) or the tool name.
+:::
+
+## GET /api/runs/compare
+
+Compares two runs: `GET /api/runs/compare?left_run_id=<id>&right_run_id=<id>`. The response has these top-level keys:
+
+| Key | Content |
+|-----|---------|
+| `left_run`, `right_run` | Summary of each run, in the same format as `GET /api/runs/{id}` |
+| `overview_diff` | Differences in status, duration, tokens and counters |
+| `divergence` | Where the two runs start to differ |
+| `aligned_timeline` | Both timelines aligned step by step |
+| `tool_diff`, `command_diff`, `file_diff`, `artifact_diff` | What changed in tools, commands, files and artifacts |
+| `decision_diff` | Differences in the decisions taken |
+| `root_cause` | The likely cause of the difference |
+| `evidence` | The events that support the root cause |

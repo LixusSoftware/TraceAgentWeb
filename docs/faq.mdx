@@ -24,6 +24,28 @@ Yes. TraceAgent is released under the **MIT License**. You can find the source c
 
 TraceAgent requires **Python 3.11+**.
 
+## Pydantic AI and OpenTelemetry
+
+### Can I use the capability and OpenTelemetry on the same agent?
+
+No, pick one per agent. Both record every model call and tool and don't know about each other, so the run would appear twice. The one valid mix is creating the run with the SDK and letting OpenTelemetry supply the spans. See [Hooks or OpenTelemetry?](/docs/instrumentation/hooks-vs-opentelemetry).
+
+### Will TraceAgent slow down or break my agent if the server is down?
+
+No. Events are queued and sent by a background thread. After a failed delivery the integration pauses for `failure_cooldown` seconds, prints one warning line and keeps the agent running.
+
+### Are my prompts and outputs stored?
+
+The server keeps a summary of each prompt and output. With `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` on (the default) it also keeps the full content; set it to `false` to keep only summaries. With OpenTelemetry you can also stop the content from leaving the agent with `include_content=False`. With the capability, use `redact_fields` for sensitive keys.
+
+### Which Pydantic AI versions are supported?
+
+Pydantic AI 2.x (`>=2,<3`). For OpenTelemetry, the default instrumentation version of Pydantic AI 2.x is supported. Older instrumentation versions (2 to 4) use different span names and are not translated.
+
+### Why does my short script show no run when I use OpenTelemetry?
+
+The exporter sends spans in the background. Call `provider.shutdown()` (or `force_flush()`) before the script exits. See [Troubleshooting](/docs/troubleshooting).
+
 ## Installation
 
 ### Can I install only the SDK without the server?

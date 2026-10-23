@@ -18,7 +18,7 @@ TraceAgent fills that gap with an **agent-first tracing specification** and a pu
 
 :::info[What makes it different?]
 
-With first-class support for orchestration ecosystems like **LangChain**, TraceAgent captures and reconstructs complete execution across chains, agents, tools, prompts, and callbacks — enabling reproducibility, debugging, compliance auditing, and performance analysis for production-grade AI systems.
+With first-class support for orchestration ecosystems like **LangChain** and **Pydantic AI**, and an OpenTelemetry receiver for agents that already emit traces, TraceAgent captures and reconstructs complete execution across chains, agents, tools, prompts, and callbacks — enabling reproducibility, debugging, compliance auditing, and performance analysis for production-grade AI systems.
 
 :::
 
@@ -29,16 +29,18 @@ With first-class support for orchestration ecosystems like **LangChain**, TraceA
 | **Real-time tracing** | Capture tool calls, file operations, shell commands, and artifacts as they happen |
 | **Execution timeline** | Visualize agent behavior through interactive timelines and execution graphs |
 | **LangChain integration** | Native callback handler for LangChain agents and chains, with zero boilerplate |
+| **Pydantic AI integration** | One-line capability for Pydantic AI agents, or no code at all through OpenTelemetry |
 | **Self-hosted** | Full data ownership with a FastAPI backend and SQLite/PostgreSQL support |
 
 ## Packages
 
-TraceAgent is organized into four packages that work together:
+TraceAgent is organized into five packages that work together:
 
 | Package | Purpose |
 |---------|---------|
 | **[TraceAgent SDK](/docs/instrumentation/sdk)** | Python client for recording agent actions |
 | **[TraceAgent LangChain](/docs/instrumentation/langchain)** | Callback handler for automatic LangChain tracing |
+| **[TraceAgent Pydantic AI](/docs/instrumentation/pydantic-ai)** | Capability for automatic Pydantic AI tracing |
 | **TraceAgent Server** | FastAPI backend with SQLite/PostgreSQL storage |
 | **TraceAgent UI** | Interactive dashboard for visualizing traces |
 

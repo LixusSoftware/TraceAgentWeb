@@ -18,6 +18,16 @@ TraceAgent's behavior can be customized via environment variables.
 | `TRACE_AGENT_SERVER_URL` | `http://localhost:8000` | Backend URL used by the UI and SDK |
 | `TRACE_AGENT_AUDIT_METRICS_ENABLED` | `true` | Enables or disables audit metrics collection |
 | `TRACE_AGENT_UI_PORT` | `8080` | Port where the frontend UI is exposed |
+| `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` | `true` | Keep the full content of prompts and outputs as well as their summaries. Set to `false` to keep only summaries |
+
+## OpenTelemetry Receiver
+
+Settings for the OTLP/HTTP receiver at `POST /v1/traces`. See [OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry).
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TRACE_AGENT_OTLP_ENABLED` | `true` | Turn the receiver on or off. When off, `POST /v1/traces` answers `404` |
+| `TRACE_AGENT_OTLP_MAX_BODY_BYTES` | `10000000` | Maximum body size, measured after decompression. Larger bodies get `413` |
 
 ## SDK / Agent Configuration
 

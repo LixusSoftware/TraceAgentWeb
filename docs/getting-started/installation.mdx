@@ -12,7 +12,7 @@ import PackageInstall from '@site/src/components/PackageInstall';
 
 # Installation
 
-TraceAgent requires **Python 3.11+** and can be installed via pip, Docker, or from source.
+TraceAgent requires **Python 3.11+** (tested on 3.11, 3.12 and 3.13) and can be installed via pip, Docker, or from source.
 
 ## Install via pip
 
@@ -21,7 +21,7 @@ Each package can be installed independently:
 <Tabs>
   <TabItem value="all" label="All Packages" default>
 
-<PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain', 'trace-agent-server', 'trace-agent-ui']} />
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain', 'trace-agent-pydantic-ai', 'trace-agent-server', 'trace-agent-ui']} />
 
   </TabItem>
   <TabItem value="sdk" label="SDK Only">
@@ -34,7 +34,14 @@ Each package can be installed independently:
 <PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain']} />
 
   </TabItem>
+  <TabItem value="pydantic-ai" label="SDK + Pydantic AI">
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-pydantic-ai']} />
+
+  </TabItem>
 </Tabs>
+
+TraceAgent is made of five packages: `trace-agent-sdk`, `trace-agent-server`, `trace-agent-langchain`, `trace-agent-pydantic-ai` and `trace-agent-ui`. The Pydantic AI package requires Pydantic AI 2.x. If you trace through [OpenTelemetry](/docs/instrumentation/opentelemetry) instead, you don't need any TraceAgent package in the agent, only on the server.
 
 :::tip
 If you only need to **instrument** your agent (and the server runs elsewhere), install just the SDK. The server and UI are only needed for the self-hosted backend.
@@ -68,14 +75,14 @@ cd TraceAgent
   <TabItem value="uv" label="uv (recommended)" default>
 
 ```bash
-uv sync --extra dev --extra providers --extra langchain
+uv sync --extra dev --extra providers --extra langchain --extra pydantic-ai
 ```
 
   </TabItem>
   <TabItem value="pip" label="pip">
 
 ```bash
-pip install -e ".[dev,providers,langchain]"
+pip install -e ".[dev,providers,langchain,pydantic-ai]"
 ```
 
   </TabItem>
