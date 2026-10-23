@@ -94,6 +94,20 @@ function CodePreview() {
             <span className={styles.codeWindowTitle}>my_agent.py</span>
           </div>
           <Tabs className={styles.codeTabs} groupId="home-integration">
+            <TabItem value="langchain" label="LangChain">
+              <CodeBlock language="python" className={styles.codeBlock}>
+                {`from trace_agent_sdk import TraceAgentClient
+from trace_agent_langchain import TraceAgentLangChainCallback
+
+client = TraceAgentClient("http://localhost:8000")
+run = client.start_run("langchain-agent", "Answer user question")
+
+callback = TraceAgentLangChainCallback(run)  # one line
+agent.invoke({"input": "What's the weather?"}, callbacks=[callback])
+
+run.finish({"status": "success"})`}
+              </CodeBlock>
+            </TabItem>
             <TabItem value="pydantic-ai" label="Pydantic AI" default>
               <CodeBlock language="python" className={styles.codeBlock}>
                 {`from pydantic_ai import Agent
