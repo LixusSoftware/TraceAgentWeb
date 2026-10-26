@@ -9,6 +9,7 @@ import ReactFlow, {
   useEdgesState
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import {translate} from '@docusaurus/Translate';
 import { Bot, Package, Link as LinkIcon, Server, MonitorPlay, Plug, Radio } from 'lucide-react';
 import { useColorMode } from '@docusaurus/theme-common';
 
@@ -74,7 +75,7 @@ export default function ArchitectureDiagram() {
       type: 'custom',
       position: { x: 250, y: 0 },
       data: {
-        label: 'Your Agent Code',
+        label: translate({id: 'architecture.agentCode', message: 'Your Agent Code'}),
         subLabels: ['SDK', 'LangChain', 'Pydantic AI', 'OpenTelemetry'],
         icon: Bot,
         bg: 'var(--ta-surface-3)',

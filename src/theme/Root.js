@@ -5,10 +5,17 @@ import FaviconManager from '@site/src/components/FaviconManager';
 import Head from '@docusaurus/Head';
 import {useLocation} from '@docusaurus/router';
 import {Analytics} from '@vercel/analytics/react';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import {translate} from '@docusaurus/Translate';
 
 export default function RootWrapper(props) {
   const {pathname} = useLocation();
+  const {i18n} = useDocusaurusContext();
   const siteUrl = 'https://traceagent.vercel.app';
+  const siteDescription = translate({
+    id: 'seo.software.description',
+    message: 'Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain and Pydantic AI support, plus OpenTelemetry ingestion.',
+  });
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -23,7 +30,7 @@ export default function RootWrapper(props) {
           "@type": "ImageObject",
           "url": `${siteUrl}/img/logo.png`
         },
-        "description": "Open-source observability and tracing platform for AI agents.",
+        "description": translate({id: 'seo.org.description', message: 'Open-source observability and tracing platform for AI agents.'}),
         "sameAs": [
           "https://github.com/LixusSoftware"
         ]
@@ -33,8 +40,8 @@ export default function RootWrapper(props) {
         "@id": `${siteUrl}/#website`,
         "url": siteUrl,
         "name": "TraceAgent",
-        "description": "Observability & tracing for AI agents",
-        "inLanguage": "en",
+        "description": translate({id: 'seo.website.description', message: 'Observability & tracing for AI agents'}),
+        "inLanguage": i18n.locales,
         "publisher": {"@id": `${siteUrl}/#organization`}
       },
       {
@@ -44,7 +51,7 @@ export default function RootWrapper(props) {
         "url": siteUrl,
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Linux, macOS, Windows",
-        "description": "Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain and Pydantic AI support, plus OpenTelemetry ingestion.",
+        "description": siteDescription,
         "featureList": [
           "Real-time tracing of tool calls, model calls, file operations and commands",
           "LangChain callback handler",

@@ -1,0 +1,640 @@
+{
+  "home.hero.badge": {
+    "message": "Código abierto · Licencia MIT"
+  },
+  "home.hero.worksWith": {
+    "message": "Compatible con"
+  },
+  "home.new": {
+    "message": "Nuevo"
+  },
+  "home.hero.title": {
+    "message": "Mira qué hacen realmente tus {agents}"
+  },
+  "home.hero.titleHighlight": {
+    "message": "agentes de IA"
+  },
+  "home.hero.subtitle": {
+    "message": "{tagline}. Cada llamada a herramientas, operación con archivos, comando de terminal y ruta de decisión, registrados y visualizados en tiempo real."
+  },
+  "home.hero.getStarted": {
+    "message": "Empezar →"
+  },
+  "home.hero.githubStar": {
+    "message": "Estrella en GitHub"
+  },
+  "home.code.title": {
+    "message": "Instrumenta en {minutes}, no en días"
+  },
+  "home.code.titleHighlight": {
+    "message": "minutos"
+  },
+  "home.code.subtitle": {
+    "message": "Unas pocas líneas de Python, o ninguna con OpenTelemetry. Es todo lo que hace falta para tener observabilidad completa."
+  },
+  "home.packages.sdk": {
+    "message": "Cliente Python para registrar las acciones del agente"
+  },
+  "home.packages.langchain": {
+    "message": "Trazabilidad automática para agentes LangChain"
+  },
+  "home.packages.pydanticAi": {
+    "message": "Capacidad de una línea para agentes Pydantic AI"
+  },
+  "home.packages.server": {
+    "message": "Backend FastAPI con SQLite/PostgreSQL"
+  },
+  "home.packages.ui": {
+    "message": "Panel interactivo y línea de tiempo"
+  },
+  "home.packages.title": {
+    "message": "Modular por diseño"
+  },
+  "home.packages.subtitle": {
+    "message": "Instala solo lo que necesites. Cada paquete funciona de forma independiente. El servidor también recibe trazas OpenTelemetry directamente, sin ningún paquete adicional."
+  },
+  "home.cta.title": {
+    "message": "¿Listo para trazar tus agentes?"
+  },
+  "home.cta.subtitle": {
+    "message": "Consigue tu primera traza en menos de 5 minutos. Gratis, de código abierto y autoalojado."
+  },
+  "home.cta.quickStart": {
+    "message": "Guía de inicio rápido →"
+  },
+  "home.cta.star": {
+    "message": "Estrella"
+  },
+  "home.meta.title": {
+    "message": "Plataforma de observabilidad para agentes de IA"
+  },
+  "seo.software.description": {
+    "message": "Plataforma completa de observabilidad y trazabilidad para agentes de IA. Captura llamadas a herramientas, operaciones con archivos y rutas de decisión, con soporte de primera clase para LangChain y Pydantic AI, y ingesta OpenTelemetry."
+  },
+  "home.meta.keywords": {
+    "message": "observabilidad de agentes de ia, trazabilidad de agentes de ia, trazas langchain, trazas pydantic ai, opentelemetry genai, monitorización de herramientas llm, depuración de agentes, observabilidad de código abierto, traceagent"
+  },
+  "seo.org.description": {
+    "message": "Plataforma de código abierto de observabilidad y trazabilidad para agentes de IA."
+  },
+  "seo.website.description": {
+    "message": "Observabilidad y trazabilidad para agentes de IA"
+  },
+  "architecture.agentCode": {
+    "message": "El código de tu agente"
+  },
+  "cat.alt.investigating": {
+    "message": "TraceAgent: investigando los datos de la traza"
+  },
+  "cat.alt.path": {
+    "message": "TraceAgent: siguiendo la ruta de ejecución"
+  },
+  "cat.alt.error": {
+    "message": "TraceAgent: error del sistema detectado"
+  },
+  "cat.alt.inactive": {
+    "message": "TraceAgent: sistema inactivo o en espera"
+  },
+  "cat.alt.default": {
+    "message": "Ilustración de TraceAgent"
+  },
+  "palette.page.introduction": {
+    "message": "Introducción"
+  },
+  "palette.section.gettingstarted": {
+    "message": "Primeros pasos"
+  },
+  "palette.page.installation": {
+    "message": "Instalación"
+  },
+  "palette.page.quickstart": {
+    "message": "Inicio rápido"
+  },
+  "palette.page.architecture": {
+    "message": "Arquitectura"
+  },
+  "palette.section.coreconcepts": {
+    "message": "Conceptos clave"
+  },
+  "palette.page.sdkreference": {
+    "message": "Referencia del SDK"
+  },
+  "palette.section.instrumentation": {
+    "message": "Instrumentación"
+  },
+  "palette.page.langchainintegration": {
+    "message": "Integración con LangChain"
+  },
+  "palette.page.pydanticaiintegration": {
+    "message": "Integración con Pydantic AI"
+  },
+  "palette.page.opentelemetryingestion": {
+    "message": "Ingesta OpenTelemetry"
+  },
+  "palette.page.hooksoropentelemetry": {
+    "message": "¿Hooks u OpenTelemetry?"
+  },
+  "palette.page.apireference": {
+    "message": "Referencia de la API"
+  },
+  "palette.section.reference": {
+    "message": "Referencia"
+  },
+  "palette.page.environmentvariables": {
+    "message": "Variables de entorno"
+  },
+  "palette.section.configuration": {
+    "message": "Configuración"
+  },
+  "palette.page.dockerdeployment": {
+    "message": "Despliegue con Docker"
+  },
+  "palette.page.examples": {
+    "message": "Ejemplos"
+  },
+  "palette.section.examples": {
+    "message": "Ejemplos"
+  },
+  "palette.page.sampleagent": {
+    "message": "Agente de muestra"
+  },
+  "palette.page.langchainagent": {
+    "message": "Agente LangChain"
+  },
+  "palette.page.pydanticaiquickstart": {
+    "message": "Inicio rápido con Pydantic AI"
+  },
+  "palette.page.pydanticaiviaopentelemetry": {
+    "message": "Pydantic AI vía OpenTelemetry"
+  },
+  "palette.page.localmodelagent": {
+    "message": "Agente con modelo local"
+  },
+  "palette.page.planneragent": {
+    "message": "Agente planificador"
+  },
+  "palette.page.debuggerdemo": {
+    "message": "Demo del depurador"
+  },
+  "palette.page.richdemo": {
+    "message": "Demo completa"
+  },
+  "palette.page.troubleshooting": {
+    "message": "Solución de problemas"
+  },
+  "palette.section.help": {
+    "message": "Ayuda"
+  },
+  "palette.page.faq": {
+    "message": "Preguntas frecuentes"
+  },
+  "palette.page.changelog": {
+    "message": "Registro de cambios"
+  },
+  "palette.section.more": {
+    "message": "Más"
+  },
+  "palette.page.blog": {
+    "message": "Blog"
+  },
+  "palette.aria": {
+    "message": "Paleta de comandos"
+  },
+  "palette.placeholder": {
+    "message": "Busca en la documentación, navega..."
+  },
+  "palette.inputAria": {
+    "message": "Campo de búsqueda"
+  },
+  "palette.empty": {
+    "message": "Sin resultados"
+  },
+  "palette.navigate": {
+    "message": "navegar"
+  },
+  "palette.open": {
+    "message": "abrir"
+  },
+  "palette.close": {
+    "message": "cerrar"
+  },
+  "ghost.deadAria": {
+    "message": "El fantasma ha muerto"
+  },
+  "ghost.aria": {
+    "message": "Haz clic en el fantasma para cambiar su color"
+  },
+  "ghost.deadTitle": {
+    "message": "El fantasma ya ha muerto"
+  },
+  "ghost.title": {
+    "message": "Haz clic en el fantasma"
+  },
+  "features.realtime.title": {
+    "message": "Trazabilidad en tiempo real"
+  },
+  "features.realtime.desc": {
+    "message": "Captura llamadas a herramientas, operaciones con archivos, comandos de shell y artefactos mientras ocurren. Monitoriza agentes de larga duración con eventos en directo."
+  },
+  "features.timeline.title": {
+    "message": "Línea de tiempo de ejecución"
+  },
+  "features.timeline.desc": {
+    "message": "Visualiza el comportamiento del agente con líneas de tiempo y grafos de ejecución interactivos. Haz clic en cualquier evento para ver sus parámetros, resultados y diferencias completos."
+  },
+  "features.integrations.title": {
+    "message": "Integraciones con frameworks"
+  },
+  "features.integrations.desc": {
+    "message": "Callback de LangChain, capacidad de Pydantic AI u OpenTelemetry puro. Cadenas, llamadas al modelo y herramientas trazadas automáticamente, a menudo con una sola línea."
+  },
+  "features.selfhosted.title": {
+    "message": "Autoalojado"
+  },
+  "features.selfhosted.desc": {
+    "message": "Control total de tus datos con un backend FastAPI y soporte para SQLite/PostgreSQL. Sin telemetría externa ni dependencia de la nube: tus datos se quedan contigo."
+  },
+  "packageInstall.copy": {
+    "message": "Copiar el comando de {label}"
+  },
+  "comments.title": {
+    "message": "Comentarios"
+  },
+  "notFound.metaTitle": {
+    "message": "404: traza no encontrada"
+  },
+  "notFound.title": {
+    "message": "Traza no encontrada"
+  },
+  "notFound.subtitle": {
+    "message": "Seguimos esta ruta con cuidado, pero parece haber desaparecido de nuestros registros."
+  },
+  "notFound.home": {
+    "message": "Volver al panel"
+  },
+  "notFound.docs": {
+    "message": "Ver la documentación"
+  },
+  "theme.ErrorPageContent.title": {
+    "message": "Esta página ha fallado.",
+    "description": "The title of the fallback page when the page crashed"
+  },
+  "theme.BackToTopButton.buttonAriaLabel": {
+    "message": "Volver al principio",
+    "description": "The ARIA label for the back to top button"
+  },
+  "theme.blog.archive.title": {
+    "message": "Archivo",
+    "description": "The page & hero title of the blog archive page"
+  },
+  "theme.blog.archive.description": {
+    "message": "Archivo",
+    "description": "The page & hero description of the blog archive page"
+  },
+  "theme.blog.paginator.navAriaLabel": {
+    "message": "Navegación por la página de la lista de blogs ",
+    "description": "The ARIA label for the blog pagination"
+  },
+  "theme.blog.paginator.newerEntries": {
+    "message": "Entradas más recientes",
+    "description": "The label used to navigate to the newer blog posts page (previous page)"
+  },
+  "theme.blog.paginator.olderEntries": {
+    "message": "Entradas más antiguas",
+    "description": "The label used to navigate to the older blog posts page (next page)"
+  },
+  "theme.blog.post.paginator.navAriaLabel": {
+    "message": "Barra de paginación de publicaciones del blog",
+    "description": "The ARIA label for the blog posts pagination"
+  },
+  "theme.blog.post.paginator.newerPost": {
+    "message": "Publicación más reciente",
+    "description": "The blog post button label to navigate to the newer/previous post"
+  },
+  "theme.blog.post.paginator.olderPost": {
+    "message": "Publicación más antigua",
+    "description": "The blog post button label to navigate to the older/next post"
+  },
+  "theme.tags.tagsPageLink": {
+    "message": "Ver Todas las Etiquetas",
+    "description": "The label of the link targeting the tag list page"
+  },
+  "theme.colorToggle.ariaLabel.mode.system": {
+    "message": "system mode",
+    "description": "The name for the system color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.light": {
+    "message": "modo claro",
+    "description": "The name for the light color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.dark": {
+    "message": "modo oscuro",
+    "description": "The name for the dark color mode"
+  },
+  "theme.colorToggle.ariaLabel": {
+    "message": "Cambiar entre modo oscuro y claro (actualmente {mode})",
+    "description": "The ARIA label for the color mode toggle"
+  },
+  "theme.docs.breadcrumbs.navAriaLabel": {
+    "message": "Rastro de navegación",
+    "description": "The ARIA label for the breadcrumbs"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "Página del documento",
+    "description": "The ARIA label for the docs pagination"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "Anterior",
+    "description": "The label used to navigate to the previous doc"
+  },
+  "theme.docs.paginator.next": {
+    "message": "Siguiente",
+    "description": "The label used to navigate to the next doc"
+  },
+  "theme.docs.tagDocListPageTitle.nDocsTagged": {
+    "message": "Un documento etiquetado|{count} documentos etiquetados",
+    "description": "Pluralized label for \"{count} docs tagged\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.docs.tagDocListPageTitle": {
+    "message": "{nDocsTagged} con \"{tagName}\"",
+    "description": "The title of the page for a docs tag"
+  },
+  "theme.docs.versionBadge.label": {
+    "message": "Version: {versionLabel}"
+  },
+  "theme.docs.versions.unreleasedVersionLabel": {
+    "message": "Esta es la documentación sin publicar para {siteTitle}, versión {versionLabel}.",
+    "description": "The label used to tell the user that he's browsing an unreleased doc version"
+  },
+  "theme.docs.versions.unmaintainedVersionLabel": {
+    "message": "Esta es la documentación para {siteTitle} {versionLabel}, que ya no se mantiene activamente.",
+    "description": "The label used to tell the user that he's browsing an unmaintained doc version"
+  },
+  "theme.docs.versions.latestVersionSuggestionLabel": {
+    "message": "Para la documentación actualizada, vea {latestVersionLink} ({versionLabel}).",
+    "description": "The label used to tell the user to check the latest version"
+  },
+  "theme.docs.versions.latestVersionLinkLabel": {
+    "message": "última versión",
+    "description": "The label used for the latest version suggestion link label"
+  },
+  "theme.common.editThisPage": {
+    "message": "Editar esta página",
+    "description": "The link label to edit the current page"
+  },
+  "theme.common.headingLinkTitle": {
+    "message": "Enlace directo al {heading}",
+    "description": "Title for link to heading"
+  },
+  "theme.lastUpdated.atDate": {
+    "message": " en {date}",
+    "description": "The words used to describe on which date a page has been last updated"
+  },
+  "theme.lastUpdated.byUser": {
+    "message": " por {user}",
+    "description": "The words used to describe by who the page has been last updated"
+  },
+  "theme.lastUpdated.lastUpdatedAtBy": {
+    "message": "Última actualización{atDate}{byUser}",
+    "description": "The sentence used to display when a page has been last updated, and by who"
+  },
+  "theme.navbar.mobileVersionsDropdown.label": {
+    "message": "Versiones",
+    "description": "The label for the navbar versions dropdown on mobile view"
+  },
+  "theme.NotFound.title": {
+    "message": "Página No Encontrada",
+    "description": "The title of the 404 page"
+  },
+  "theme.tags.tagsListLabel": {
+    "message": "Etiquetas:",
+    "description": "The label alongside a tag list"
+  },
+  "theme.AnnouncementBar.closeButtonAriaLabel": {
+    "message": "Cerrar",
+    "description": "The ARIA label for close button of announcement bar"
+  },
+  "theme.admonition.caution": {
+    "message": "precaución",
+    "description": "The default label used for the Caution admonition (:::caution)"
+  },
+  "theme.admonition.danger": {
+    "message": "peligro",
+    "description": "The default label used for the Danger admonition (:::danger)"
+  },
+  "theme.admonition.info": {
+    "message": "info",
+    "description": "The default label used for the Info admonition (:::info)"
+  },
+  "theme.admonition.note": {
+    "message": "nota",
+    "description": "The default label used for the Note admonition (:::note)"
+  },
+  "theme.admonition.tip": {
+    "message": "tip",
+    "description": "The default label used for the Tip admonition (:::tip)"
+  },
+  "theme.admonition.warning": {
+    "message": "aviso",
+    "description": "The default label used for the Warning admonition (:::warning)"
+  },
+  "theme.blog.sidebar.navAriaLabel": {
+    "message": "Navegación de publicaciones recientes",
+    "description": "The ARIA label for recent posts in the blog sidebar"
+  },
+  "theme.DocSidebarItem.expandCategoryAriaLabel": {
+    "message": "Ampliar la categoría '{label}' de la barra lateral",
+    "description": "The ARIA label to expand the sidebar category"
+  },
+  "theme.DocSidebarItem.collapseCategoryAriaLabel": {
+    "message": "Colapsar categoría '{label}' de la barra lateral",
+    "description": "The ARIA label to collapse the sidebar category"
+  },
+  "theme.IconExternalLink.ariaLabel": {
+    "message": "(opens in new tab)",
+    "description": "The ARIA label for the external link icon"
+  },
+  "theme.NavBar.navAriaLabel": {
+    "message": "Principal",
+    "description": "The ARIA label for the main navigation"
+  },
+  "theme.NotFound.p1": {
+    "message": "No pudimos encontrar lo que buscaba.",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "Comuníquese con el dueño del sitio que le proporcionó la URL original y hágale saber que su vínculo está roto.",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "theme.navbar.mobileLanguageDropdown.label": {
+    "message": "Idiomas",
+    "description": "The label for the mobile language switcher dropdown"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "En esta página",
+    "description": "The label used by the button on the collapsible TOC component"
+  },
+  "theme.blog.post.readMore": {
+    "message": "Leer Más",
+    "description": "The label used in blog post item excerpts to link to full blog posts"
+  },
+  "theme.blog.post.readMoreLabel": {
+    "message": "Leer más acerca de {title}",
+    "description": "The ARIA label for the link to full blog posts from excerpts"
+  },
+  "theme.blog.post.readingTime.plurals": {
+    "message": "Lectura de un minuto|{readingTime} min de lectura",
+    "description": "Pluralized label for \"{readingTime} min read\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.CodeBlock.copy": {
+    "message": "Copiar",
+    "description": "The copy button label on code blocks"
+  },
+  "theme.CodeBlock.copied": {
+    "message": "Copiado",
+    "description": "The copied button label on code blocks"
+  },
+  "theme.CodeBlock.copyButtonAriaLabel": {
+    "message": "Copiar código",
+    "description": "The ARIA label for copy code blocks button"
+  },
+  "theme.docs.breadcrumbs.home": {
+    "message": "Página de Inicio",
+    "description": "The ARIA label for the home page in the breadcrumbs"
+  },
+  "theme.CodeBlock.wordWrapToggle": {
+    "message": "Alternar ajuste de palabras",
+    "description": "The title attribute for toggle word wrapping button of code block lines"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "Colapsar barra lateral",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.collapseButtonAriaLabel": {
+    "message": "Colapsar barra lateral",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "Barra lateral de Documentos",
+    "description": "The ARIA label for the sidebar navigation"
+  },
+  "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
+    "message": "Cerrar barra de lateral",
+    "description": "The ARIA label for close button of mobile sidebar"
+  },
+  "theme.navbar.mobileSidebarSecondaryMenu.backButtonLabel": {
+    "message": "← Volver al menú principal",
+    "description": "The label of the back button to return to main menu, inside the mobile navbar sidebar secondary menu (notably used to display the docs sidebar)"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "Alternar barra lateral",
+    "description": "The ARIA label for hamburger menu button of mobile navigation"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.expandAriaLabel": {
+    "message": "Expand the dropdown",
+    "description": "The ARIA label of the button to expand the mobile dropdown navbar item"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.collapseAriaLabel": {
+    "message": "Collapse the dropdown",
+    "description": "The ARIA label of the button to collapse the mobile dropdown navbar item"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "Expandir barra lateral",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.docs.sidebar.expandButtonAriaLabel": {
+    "message": "Expandir barra lateral",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.SearchPage.existingResultsTitle": {
+    "message": "Search results for \"{query}\"",
+    "description": "The search page title for non-empty query"
+  },
+  "theme.SearchPage.emptyResultsTitle": {
+    "message": "Search the documentation",
+    "description": "The search page title for empty query"
+  },
+  "theme.SearchPage.searchContext.everywhere": {
+    "message": "Everywhere"
+  },
+  "theme.SearchPage.documentsFound.plurals": {
+    "message": "1 document found|{count} documents found",
+    "description": "Pluralized label for \"{count} documents found\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.SearchPage.noResultsText": {
+    "message": "No documents were found",
+    "description": "The paragraph for empty search result"
+  },
+  "theme.SearchBar.noResultsText": {
+    "message": "No results"
+  },
+  "theme.SearchBar.seeAllOutsideContext": {
+    "message": "See all results outside \"{context}\""
+  },
+  "theme.SearchBar.searchInContext": {
+    "message": "See all results within \"{context}\""
+  },
+  "theme.SearchBar.seeAll": {
+    "message": "See all results"
+  },
+  "theme.SearchBar.label": {
+    "message": "Search",
+    "description": "The ARIA label and placeholder for search button"
+  },
+  "theme.blog.post.plurals": {
+    "message": "Una publicación|{count} publicaciones",
+    "description": "Pluralized label for \"{count} posts\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.blog.tagTitle": {
+    "message": "{nPosts} etiquetados con \"{tagName}\"",
+    "description": "The title of the page for a blog tag"
+  },
+  "theme.blog.author.pageTitle": {
+    "message": "{authorName} - {nPosts}",
+    "description": "The title of the page for a blog author"
+  },
+  "theme.blog.authorsList.pageTitle": {
+    "message": "Authors",
+    "description": "The title of the authors page"
+  },
+  "theme.blog.authorsList.viewAll": {
+    "message": "View All Authors",
+    "description": "The label of the link targeting the blog authors page"
+  },
+  "theme.blog.author.noPosts": {
+    "message": "This author has not written any posts yet.",
+    "description": "The text for authors with 0 blog post"
+  },
+  "theme.contentVisibility.unlistedBanner.title": {
+    "message": "Página sin clasificar",
+    "description": "The unlisted content banner title"
+  },
+  "theme.contentVisibility.unlistedBanner.message": {
+    "message": "Esta página está sin clasificar. Los motores de búsqueda no la indexaran, y solo los usuarios con el enlace directo podrán acceder a esta.",
+    "description": "The unlisted content banner message"
+  },
+  "theme.contentVisibility.draftBanner.title": {
+    "message": "Draft page",
+    "description": "The draft content banner title"
+  },
+  "theme.contentVisibility.draftBanner.message": {
+    "message": "This page is a draft. It will only be visible in dev and be excluded from the production build.",
+    "description": "The draft content banner message"
+  },
+  "theme.docs.DocCard.categoryDescription.plurals": {
+    "message": "1 artículo|{count} artículos",
+    "description": "The default description for a category card in the generated index about how many items this category includes"
+  },
+  "theme.ErrorPageContent.tryAgain": {
+    "message": "Intente de nuevo",
+    "description": "The label of the button to try again rendering when the React error boundary captures an error"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "Saltar al contenido principal",
+    "description": "The skip to content label used for accessibility, allowing to rapidly navigate to main content with keyboard tab/enter navigation"
+  },
+  "theme.tags.tagsPageTitle": {
+    "message": "Etiquetas",
+    "description": "The title of the tag list page"
+  }
+}

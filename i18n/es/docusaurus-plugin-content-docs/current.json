@@ -1,0 +1,30 @@
+{
+  "version.label": {
+    "message": "Siguiente",
+    "description": "The label for version current"
+  },
+  "sidebar.docsSidebar.category.Getting Started": {
+    "message": "Primeros pasos",
+    "description": "The label for category 'Getting Started' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Core Concepts": {
+    "message": "Conceptos clave",
+    "description": "The label for category 'Core Concepts' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Instrumentation": {
+    "message": "Instrumentación",
+    "description": "The label for category 'Instrumentation' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Configuration": {
+    "message": "Configuración",
+    "description": "The label for category 'Configuration' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Reference": {
+    "message": "Referencia",
+    "description": "The label for category 'Reference' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Examples": {
+    "message": "Ejemplos",
+    "description": "The label for category 'Examples' in sidebar 'docsSidebar'"
+  }
+}

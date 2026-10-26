@@ -9,7 +9,7 @@ import {useDoc} from '@docusaurus/plugin-content-docs/client';
  * TechArticle structured data with the real title, description and last update.
  */
 export default function MetadataWrapper(props) {
-  const {siteConfig} = useDocusaurusContext();
+  const {siteConfig, i18n} = useDocusaurusContext();
   const {metadata, frontMatter} = useDoc();
   const siteUrl = siteConfig.url;
   const url = `${siteUrl}${metadata.permalink}`;
@@ -24,7 +24,7 @@ export default function MetadataWrapper(props) {
     url,
     mainEntityOfPage: url,
     image,
-    inLanguage: 'en',
+    inLanguage: i18n.currentLocale,
     isPartOf: {'@id': `${siteUrl}/#website`},
     about: {'@id': `${siteUrl}/#software`},
     author: {'@id': `${siteUrl}/#organization`},

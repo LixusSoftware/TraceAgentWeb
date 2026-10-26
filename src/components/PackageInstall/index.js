@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import { Clipboard, Check } from 'lucide-react';
+import {translate} from '@docusaurus/Translate';
 import styles from './styles.module.css';
 
 function CommandRow({label, command}) {
@@ -27,7 +28,7 @@ function CommandRow({label, command}) {
     <div className={styles.row}>
       <span className={styles.label}>{label}</span>
       <code className={styles.command}>{command}</code>
-      <button className={styles.copyBtn} onClick={handleCopy} title={`Copy ${label} command`}>
+      <button className={styles.copyBtn} onClick={handleCopy} title={translate({id: 'packageInstall.copy', message: 'Copy {label} command'}, {label})}>
         {copied ? <Check size={16} /> : <Clipboard size={16} />}
       </button>
     </div>

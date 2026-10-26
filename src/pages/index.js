@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
+import Translate, {translate} from '@docusaurus/Translate';
 import CodeBlock from '@theme/CodeBlock';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -31,37 +32,40 @@ function HomepageHero() {
             <div className={styles.heroTopRow}>
               <div className={styles.heroBadge}>
                 <span className={styles.heroBadgeDot} />
-                Open Source · MIT License
+                <Translate id="home.hero.badge">Open Source · MIT License</Translate>
               </div>
               <div className={styles.heroIntegrations}>
-                <span className={styles.heroIntegrationsLabel}>Works with</span>
+                <span className={styles.heroIntegrationsLabel}><Translate id="home.hero.worksWith">Works with</Translate></span>
                 {INTEGRATIONS.map((item) => (
                   <Link key={item.name} to={item.to} className={styles.integrationPill}>
                     {item.name}
-                    {item.isNew && <span className={styles.integrationNew}>New</span>}
+                    {item.isNew && <span className={styles.integrationNew}><Translate id="home.new">New</Translate></span>}
                   </Link>
                 ))}
               </div>
             </div>
             <Heading as="h1" className={styles.heroTitle}>
-              See what your{' '}
-              <span className={styles.heroGradient}>AI agents</span>{' '}
-              are actually doing
+              <Translate
+                id="home.hero.title"
+                values={{agents: <span className={styles.heroGradient}>{translate({id: 'home.hero.titleHighlight', message: 'AI agents'})}</span>}}>
+                {'See what your {agents} are actually doing'}
+              </Translate>
             </Heading>
             <p className={styles.heroSubtitle}>
-              {siteConfig.tagline}. Every tool call, file operation, terminal command, 
-              and decision path — recorded and visualized in real time.
+              <Translate id="home.hero.subtitle" values={{tagline: siteConfig.tagline}}>
+                {'{tagline}. Every tool call, file operation, terminal command, and decision path — recorded and visualized in real time.'}
+              </Translate>
             </p>
             <div className={styles.heroButtons}>
               <Link
                 className={clsx('button button--lg', styles.heroPrimary)}
                 to="/docs/getting-started/quick-start">
-                Get Started →
+                <Translate id="home.hero.getStarted">Get Started →</Translate>
               </Link>
               <Link
                 className={clsx('button button--lg', styles.heroSecondary)}
                 href="https://github.com/LixusSoftware/TraceAgent">
-                <Star size={18} className={styles.starIcon} /> GitHub Star
+                <Star size={18} className={styles.starIcon} /> <Translate id="home.hero.githubStar">GitHub Star</Translate>
               </Link>
             </div>
           </div>
@@ -80,10 +84,14 @@ function CodePreview() {
       <div className="container">
         <div className={styles.codeSectionHeader}>
           <Heading as="h2" className={styles.sectionTitle}>
-            Instrument in <span className={styles.heroGradient}>minutes</span>, not days
+            <Translate
+              id="home.code.title"
+              values={{minutes: <span className={styles.heroGradient}>{translate({id: 'home.code.titleHighlight', message: 'minutes'})}</span>}}>
+              {'Instrument in {minutes}, not days'}
+            </Translate>
           </Heading>
           <p className={styles.sectionSubtitle}>
-            A few lines of Python, or none at all with OpenTelemetry. That's all it takes to get full observability.
+            <Translate id="home.code.subtitle">A few lines of Python, or none at all with OpenTelemetry. That's all it takes to get full observability.</Translate>
           </p>
         </div>
         <div className={styles.codeWindow}>
@@ -163,21 +171,21 @@ function PackagesSection() {
   const packages = [
     {
       name: 'SDK',
-      description: 'Python client for recording agent actions',
+      description: translate({id: 'home.packages.sdk', message: 'Python client for recording agent actions'}),
       install: 'pip install trace-agent-sdk',
       link: '/docs/instrumentation/sdk',
       icon: Package,
     },
     {
       name: 'LangChain',
-      description: 'Automatic tracing for LangChain agents',
+      description: translate({id: 'home.packages.langchain', message: 'Automatic tracing for LangChain agents'}),
       install: 'pip install trace-agent-langchain',
       link: '/docs/instrumentation/langchain',
       icon: LinkIcon,
     },
     {
       name: 'Pydantic AI',
-      description: 'One-line capability for Pydantic AI agents',
+      description: translate({id: 'home.packages.pydanticAi', message: 'One-line capability for Pydantic AI agents'}),
       install: 'pip install trace-agent-pydantic-ai',
       link: '/docs/instrumentation/pydantic-ai',
       icon: Bot,
@@ -185,14 +193,14 @@ function PackagesSection() {
     },
     {
       name: 'Server',
-      description: 'FastAPI backend with SQLite/PostgreSQL',
+      description: translate({id: 'home.packages.server', message: 'FastAPI backend with SQLite/PostgreSQL'}),
       install: 'pip install trace-agent-server',
       link: '/docs/configuration/docker',
       icon: Server,
     },
     {
       name: 'UI',
-      description: 'Interactive dashboard and timeline',
+      description: translate({id: 'home.packages.ui', message: 'Interactive dashboard and timeline'}),
       install: 'pip install trace-agent-ui',
       link: '/docs/getting-started/quick-start',
       icon: MonitorPlay,
@@ -204,10 +212,10 @@ function PackagesSection() {
       <div className="container">
         <div className={styles.codeSectionHeader}>
           <Heading as="h2" className={styles.sectionTitle}>
-            Modular by design
+            <Translate id="home.packages.title">Modular by design</Translate>
           </Heading>
           <p className={styles.sectionSubtitle}>
-            Install only what you need. Each package works independently. The server also ingests OpenTelemetry traces directly, with no extra package.
+            <Translate id="home.packages.subtitle">Install only what you need. Each package works independently. The server also ingests OpenTelemetry traces directly, with no extra package.</Translate>
           </p>
         </div>
         <div className={styles.packageGrid}>
@@ -218,7 +226,7 @@ function PackagesSection() {
                 <span className={styles.packageIcon}><Icon size={24} /></span>
                 <h3 className={styles.packageName}>
                   {pkg.name}
-                  {pkg.isNew && <span className={styles.integrationNew}>New</span>}
+                  {pkg.isNew && <span className={styles.integrationNew}><Translate id="home.new">New</Translate></span>}
                 </h3>
                 <p className={styles.packageDesc}>{pkg.description}</p>
                 <div className={styles.packageInstallGroup}>
@@ -240,21 +248,21 @@ function CTASection() {
       <div className="container">
         <div className={styles.ctaContent}>
           <Heading as="h2" className={styles.ctaTitle}>
-            Ready to trace your agents?
+            <Translate id="home.cta.title">Ready to trace your agents?</Translate>
           </Heading>
           <p className={styles.ctaSubtitle}>
-            Get your first trace running in under 5 minutes. Free, open source, self-hosted.
+            <Translate id="home.cta.subtitle">Get your first trace running in under 5 minutes. Free, open source, self-hosted.</Translate>
           </p>
           <div className={styles.heroButtons}>
             <Link
               className={clsx('button button--lg', styles.heroPrimary)}
               to="/docs/getting-started/quick-start">
-              Quick Start Guide →
+              <Translate id="home.cta.quickStart">Quick Start Guide →</Translate>
             </Link>
             <Link
               className={clsx('button button--lg', styles.heroStar)}
               href="https://github.com/LixusSoftware/TraceAgent">
-              <Star size={18} className={styles.starIcon} /> Star
+              <Star size={18} className={styles.starIcon} /> <Translate id="home.cta.star">Star</Translate>
             </Link>
           </div>
         </div>
@@ -267,20 +275,10 @@ export default function Home() {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title="AI Agent Observability Platform"
-      description="Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain and Pydantic AI support, plus OpenTelemetry ingestion."
-      keywords={[
-        'ai agent observability',
-        'ai agent tracing',
-        'langchain tracing',
-        'pydantic ai tracing',
-        'opentelemetry genai',
-        'llm tool monitoring',
-        'agent debugging',
-        'open source observability',
-        'traceagent',
-      ]}
-      image="img/logo.png">
+      title={translate({id: 'home.meta.title', message: 'AI Agent Observability Platform'})}
+      description={translate({id: 'seo.software.description', message: 'Complete observability and tracing platform for AI agents. Capture tool calls, file operations, and decision paths with first-class LangChain and Pydantic AI support, plus OpenTelemetry ingestion.'})}
+      keywords={translate({id: 'home.meta.keywords', message: 'ai agent observability, ai agent tracing, langchain tracing, pydantic ai tracing, opentelemetry genai, llm tool monitoring, agent debugging, open source observability, traceagent'}).split(', ')}
+      image="img/social-card.jpg">
       <HomepageHero />
       <main>
         <HomepageFeatures />
