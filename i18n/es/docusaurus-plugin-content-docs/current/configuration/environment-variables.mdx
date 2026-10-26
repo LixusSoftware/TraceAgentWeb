@@ -1,24 +1,24 @@
 ---
 sidebar_position: 1
 title: Variables de entorno
-description: "Todas las opciones de configuración de TraceAgent mediante variables de entorno."
+description: "Todas las variables de entorno de TraceAgent en un solo lugar, con su valor por defecto: servidor, receptor OpenTelemetry, auditoría, UI y scripts de ejemplo."
 image: img/social-card.jpg
-keywords: [configuración, variables de entorno, ajustes]
+keywords: [configuración, variables de entorno, ajustes, TRACE_AGENT, valores por defecto]
 ---
 
 # Variables de entorno
 
-El comportamiento de TraceAgent se puede personalizar mediante variables de entorno.
+El comportamiento de TraceAgent se puede personalizar mediante variables de entorno. El servidor las lee del entorno, o de un archivo `.env` en su directorio de trabajo.
 
-## Configuración del servidor
+## Servidor
 
 | Variable | Por defecto | Descripción |
 |----------|---------|-------------|
-| `TRACE_AGENT_DATABASE_URL` | `sqlite:///./data/trace_agent.db` | URL de conexión a la base de datos (SQLite o PostgreSQL) |
-| `TRACE_AGENT_SERVER_URL` | `http://localhost:8000` | URL del backend que usan la UI y el SDK |
-| `TRACE_AGENT_AUDIT_METRICS_ENABLED` | `true` | Activa o desactiva la recopilación de métricas de auditoría |
-| `TRACE_AGENT_UI_PORT` | `8080` | Puerto en el que se expone la interfaz |
+| `TRACE_AGENT_DATABASE_URL` | `sqlite:///./trace_agent.db` | URL de la base de datos (SQLite o PostgreSQL). Consulta [TraceAgent en producción](/es/docs/configuration/production) |
+| `TRACE_AGENT_APP_NAME` | `TraceAgent` | Nombre de la aplicación |
+| `TRACE_AGENT_CORS_ORIGINS` | `["http://localhost:5173"]` | Orígenes permitidos por CORS, como lista JSON |
 | `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` | `true` | Conserva el contenido completo de los prompts y las salidas además de sus resúmenes. Ponlo a `false` para conservar solo los resúmenes |
+| `TRACE_AGENT_MODEL_PRICING` | `{}` | Precios por modelo en JSON, usados para calcular costes |
 
 ## Receptor OpenTelemetry
 
@@ -29,44 +29,69 @@ Ajustes del receptor OTLP/HTTP en `POST /v1/traces`. Consulta la [ingesta OpenTe
 | `TRACE_AGENT_OTLP_ENABLED` | `true` | Activa o desactiva el receptor. Si está desactivado, `POST /v1/traces` responde `404` |
 | `TRACE_AGENT_OTLP_MAX_BODY_BYTES` | `10000000` | Tamaño máximo del cuerpo, medido tras la descompresión. Los cuerpos mayores reciben `413` |
 
-## Configuración del SDK y del agente
+## Auditoría y métricas
 
 | Variable | Por defecto | Descripción |
 |----------|---------|-------------|
-| `TRACE_AGENT_BASE_URL` | `http://localhost:8000` | URL del servidor que usa el cliente del SDK |
-| `TRACE_AGENT_PROXY_URL` | *(ninguna)* | URL del proxy para la conectividad con modelos locales |
-| `TRACE_AGENT_PROXY_TIMEOUT` | *(ninguno)* | Tiempo de espera de las conexiones del proxy |
-| `TRACE_AGENT_TEST_MODEL` | *(ninguno)* | Nombre del modelo para los scripts de prueba y de ejemplo |
+| `TRACE_AGENT_AUDIT_METRICS_ENABLED` | `true` | Expone métricas de Prometheus en `/metrics` |
+| `TRACE_AGENT_AUDIT_ENABLE_GUARDRAILS` | `false` | Detecta datos personales e inyección de prompts solo en el endpoint de modelos del servidor |
+| `TRACE_AGENT_AUDIT_FAIL_ON_PROMPT_INJECTION` | `false` | Rechaza las peticiones en las que se detecta inyección de prompts |
+| `TRACE_AGENT_AUDIT_ENABLE_PII_ANONYMIZATION` | `false` | Anonimiza los datos personales |
+| `TRACE_AGENT_AUDIT_PROMPT_INJECTION_THRESHOLD` | `0.85` | Umbral de detección |
+| `TRACE_AGENT_AUDIT_PII_ENTITIES` | `CREDIT_CARD, CRYPTO, EMAIL_ADDRESS, IBAN_CODE, IP_ADDRESS, PERSON, PHONE_NUMBER, US_SSN` | Tipos de entidad que se detectan |
+| `TRACE_AGENT_AUDIT_ENABLE_OTEL` | `false` | Exporta los datos OpenTelemetry del propio servidor |
+| `TRACE_AGENT_AUDIT_OTEL_SERVICE_NAME` | `trace-agent-backend` | Nombre del servicio de esa exportación |
+| `TRACE_AGENT_AUDIT_OTEL_EXPORTER_ENDPOINT` | *(ninguno)* | Endpoint de esa exportación |
+| `TRACE_AGENT_AUDIT_OTEL_EXPORTER_PROTOCOL` | `grpc` | Protocolo de esa exportación |
 
-## Configuración del LLM (ejemplos)
+Los guardarraíles no se aplican a la capacidad de Pydantic AI, a la ingesta OpenTelemetry ni a otros eventos registrados. Consulta [Privacidad y redacción](/es/docs/instrumentation/privacy).
+
+## UI
 
 | Variable | Por defecto | Descripción |
 |----------|---------|-------------|
-| `OPENAI_BASE_URL` | *(ninguna)* | Endpoint compatible con OpenAI (p. ej., un servidor de modelos local) |
-| `OPENAI_API_KEY` | *(ninguna)* | Clave de API del proveedor del modelo |
+| `TRACE_AGENT_SERVER_URL` | `http://127.0.0.1:8000` | Servidor con el que habla la UI. La imagen de Docker lo fija a `http://server:8000` |
+| `TRACE_AGENT_UI_HOST` | `0.0.0.0` | Dirección en la que escucha la UI |
+| `TRACE_AGENT_UI_PORT` | `8080` | Puerto en el que escucha la UI |
+
+Solo la UI lee `TRACE_AGENT_SERVER_URL`. El SDK recibe la dirección del servidor como argumento: `TraceAgentClient("http://127.0.0.1:8000")`.
+
+## Solo para los scripts de ejemplo
+
+Estas las leen los scripts de la carpeta `examples/`. Ni el servidor ni el SDK las usan.
+
+| Variable | Descripción |
+|----------|-------------|
+| `TRACE_AGENT_BASE_URL` | URL del servidor que usa el ejemplo de LangChain |
+| `TRACE_AGENT_PROXY_URL` | URL del proxy del modelo local |
+| `TRACE_AGENT_PROXY_TIMEOUT` | Tiempo de espera de las conexiones del proxy |
+| `TRACE_AGENT_TEST_MODEL` | Nombre del modelo para los scripts de ejemplo |
+| `OPENAI_BASE_URL` | Endpoint compatible con OpenAI (por ejemplo, un servidor de modelos local) |
+| `OPENAI_API_KEY` | Clave de API del proveedor del modelo |
 
 ## Ejemplo de archivo `.env`
 
 ```bash title=".env"
 # Servidor de TraceAgent
-TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
-TRACE_AGENT_SERVER_URL=http://localhost:8000
+TRACE_AGENT_DATABASE_URL=sqlite:///./trace_agent.db
+TRACE_AGENT_CAPTURE_FULL_PAYLOADS=true
 TRACE_AGENT_AUDIT_METRICS_ENABLED=true
-TRACE_AGENT_UI_PORT=8080
 
-# Modelo local (servidor compatible con OpenAI)
-OPENAI_BASE_URL=http://localhost:5000/v1
-OPENAI_API_KEY=not-needed
+# UI
+TRACE_AGENT_SERVER_URL=http://127.0.0.1:8000
+TRACE_AGENT_UI_PORT=8080
 ```
 
 :::warning
-Si usas PostgreSQL, asegúrate de que la base de datos existe y de que la URL de conexión incluye las credenciales:
+Si usas PostgreSQL, instala un controlador de PostgreSQL, asegúrate de que la base de datos existe y de que la URL incluye las credenciales:
 ```bash
 TRACE_AGENT_DATABASE_URL=postgresql://user:password@localhost:5432/traceagent
 ```
+Consulta [TraceAgent en producción](/es/docs/configuration/production) para saber qué tener en cuenta antes de usarlo.
 :::
 
 ## ¿Y ahora qué?
 
+- **[TraceAgent en producción](/es/docs/configuration/production)**: datos, seguridad y lo que aún no está disponible
 - **[Despliegue con Docker](/es/docs/configuration/docker)**: instalación basada en contenedores
 - **[Inicio rápido](/es/docs/getting-started/quick-start)**: consigue trazas en 5 minutos

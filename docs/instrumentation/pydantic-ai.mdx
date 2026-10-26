@@ -18,6 +18,10 @@ TraceAgent plugs into [Pydantic AI](https://ai.pydantic.dev) as a **capability**
 
 Requirements: **Pydantic AI 2.x** (`>=2,<3`) and Python 3.11+.
 
+:::note[`ModuleNotFoundError: trace_agent_pydantic_ai`]
+`trace-agent-sdk` alone does not include the integration. Without `trace-agent-pydantic-ai`, `run.as_pydantic_ai_capability()` fails with `ModuleNotFoundError: No module named 'trace_agent_pydantic_ai'`. Install both packages as shown above.
+:::
+
 It works with whichever model your agent already uses: nothing in the integration depends on the provider. The examples use `"openai:gpt-4o"` only as an example model string.
 
 ## Basic Usage
@@ -103,7 +107,7 @@ capability = run.as_pydantic_ai_capability(
 )
 ```
 
-`redact_fields` is a list of **key names**. A key is matched by its exact name, at any depth, inside the arguments and results of your tools, and its value is replaced with `[redacted]`. It does not detect patterns or values. Independently of this option, long values are always shortened: text inside tool arguments at 160 characters, and the summaries of prompts and outputs at 220.
+`redact_fields` is a list of **key names**. A key is matched by its exact name, at any depth, inside the arguments and results of your tools, and its value is replaced with `[redacted]` before it is sent. Nothing is redacted by default, and it does not detect patterns or values. See [Privacy and Redaction](/docs/instrumentation/privacy). Independently of this option, long values are always shortened: text inside tool arguments at 160 characters, and the summaries of prompts and outputs at 220.
 
 ## It Never Gets in the Agent's Way
 
@@ -112,6 +116,11 @@ Tracing must not break or slow down your agent, so:
 - Events are queued and sent by a background thread.
 - If the TraceAgent server is down, the agent keeps working. It prints a single line (`[trace-agent] could not deliver trace data ... The agent is not affected.`) and pauses sending for `failure_cooldown` seconds.
 - When the outermost agent run ends, it waits up to `flush_timeout` seconds for pending events, so `run.finish()` normally reaches the server after them. If the server hangs for longer than that, there is no such guarantee.
+- The internal queue holds up to 1000 pending events. Any beyond that are dropped.
+
+:::warning[Your own calls can still fail]
+The capability isolates its events, but `client.start_run(...)`, `run.finish(...)` and `run.fail(...)` are **your** calls. With the server down they raise `httpx.ConnectError`. If the agent must not fail because of tracing, wrap them in `try/except httpx.HTTPError`. See [When the Server Is Down](/docs/instrumentation/sdk#when-the-server-is-down).
+:::
 
 ## Good to Know
 

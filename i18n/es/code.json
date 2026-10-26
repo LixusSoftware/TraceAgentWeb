@@ -636,5 +636,14 @@
   "theme.tags.tagsPageTitle": {
     "message": "Etiquetas",
     "description": "The title of the tag list page"
+  },
+  "palette.page.runsmetadataandsearch": {
+    "message": "Ejecuciones, metadatos y búsqueda"
+  },
+  "palette.page.privacyandredaction": {
+    "message": "Privacidad y redacción"
+  },
+  "palette.page.runninginproduction": {
+    "message": "TraceAgent en producción"
   }
 }

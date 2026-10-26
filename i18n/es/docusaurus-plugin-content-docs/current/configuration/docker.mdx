@@ -17,6 +17,13 @@ TraceAgent ofrece imágenes de Docker ya construidas para el servidor y la UI.
 | Servidor | `ghcr.io/lixussoftware/trace-agent-server:latest` |
 | UI | `ghcr.io/lixussoftware/trace-agent-ui:latest` |
 
+| Puerto | Componente |
+|------|-----------|
+| `8000` | API del servidor (y receptor OpenTelemetry) |
+| `8080` | UI |
+
+Las imágenes se publican con los tags `0.2.0` (versión exacta), `0.2` (actualizaciones de parche) y `latest`. Usa `latest` para probar y fija `0.2.0` en producción. Consulta [TraceAgent en producción](/es/docs/configuration/production).
+
 ## Docker Compose
 
 Crea un `docker-compose.yml` para ejecutar los dos servicios:
@@ -107,6 +114,10 @@ volumes:
 
 :::danger
 Cambia el `POSTGRES_PASSWORD` por defecto antes de desplegar en producción.
+:::
+
+:::warning[Antes de usar PostgreSQL]
+La imagen del servidor no incluye un controlador de PostgreSQL: tienes que añadir uno (por ejemplo `psycopg`). Las pruebas del proyecto se ejecutan sobre SQLite y no hay migraciones, así que un cambio de esquema en una versión nueva no actualiza una base de datos existente. Consulta [TraceAgent en producción](/es/docs/configuration/production).
 :::
 
 ## Verificar

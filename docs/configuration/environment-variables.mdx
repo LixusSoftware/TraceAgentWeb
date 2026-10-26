@@ -1,24 +1,24 @@
 ---
 sidebar_position: 1
 title: Environment Variables
-description: "All configuration options for TraceAgent via environment variables."
+description: "Every TraceAgent environment variable in one place, with its default: server, OpenTelemetry receiver, audit, UI and example scripts."
 image: img/social-card.jpg
-keywords: [configuration, environment variables, settings]
+keywords: [configuration, environment variables, settings, TRACE_AGENT, defaults]
 ---
 
 # Environment Variables
 
-TraceAgent's behavior can be customized via environment variables.
+TraceAgent's behavior can be customized via environment variables. The server reads them from the environment, or from a `.env` file in its working directory.
 
-## Server Configuration
+## Server
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `TRACE_AGENT_DATABASE_URL` | `sqlite:///./data/trace_agent.db` | Database connection URL (SQLite or PostgreSQL) |
-| `TRACE_AGENT_SERVER_URL` | `http://localhost:8000` | Backend URL used by the UI and SDK |
-| `TRACE_AGENT_AUDIT_METRICS_ENABLED` | `true` | Enables or disables audit metrics collection |
-| `TRACE_AGENT_UI_PORT` | `8080` | Port where the frontend UI is exposed |
+| `TRACE_AGENT_DATABASE_URL` | `sqlite:///./trace_agent.db` | Database URL (SQLite or PostgreSQL). See [Running in Production](/docs/configuration/production) |
+| `TRACE_AGENT_APP_NAME` | `TraceAgent` | Application name |
+| `TRACE_AGENT_CORS_ORIGINS` | `["http://localhost:5173"]` | Origins allowed by CORS, as a JSON list |
 | `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` | `true` | Keep the full content of prompts and outputs as well as their summaries. Set to `false` to keep only summaries |
+| `TRACE_AGENT_MODEL_PRICING` | `{}` | Pricing per model as JSON, used to compute costs |
 
 ## OpenTelemetry Receiver
 
@@ -29,44 +29,69 @@ Settings for the OTLP/HTTP receiver at `POST /v1/traces`. See [OpenTelemetry Ing
 | `TRACE_AGENT_OTLP_ENABLED` | `true` | Turn the receiver on or off. When off, `POST /v1/traces` answers `404` |
 | `TRACE_AGENT_OTLP_MAX_BODY_BYTES` | `10000000` | Maximum body size, measured after decompression. Larger bodies get `413` |
 
-## SDK / Agent Configuration
+## Audit and Metrics
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `TRACE_AGENT_BASE_URL` | `http://localhost:8000` | Server URL used by the SDK client |
-| `TRACE_AGENT_PROXY_URL` | *(none)* | Proxy URL for local model connectivity |
-| `TRACE_AGENT_PROXY_TIMEOUT` | *(none)* | Timeout for proxy connections |
-| `TRACE_AGENT_TEST_MODEL` | *(none)* | Model name for test/example scripts |
+| `TRACE_AGENT_AUDIT_METRICS_ENABLED` | `true` | Exposes Prometheus metrics at `/metrics` |
+| `TRACE_AGENT_AUDIT_ENABLE_GUARDRAILS` | `false` | Detect personal data and prompt injection on the server's model endpoint only |
+| `TRACE_AGENT_AUDIT_FAIL_ON_PROMPT_INJECTION` | `false` | Reject requests where prompt injection is detected |
+| `TRACE_AGENT_AUDIT_ENABLE_PII_ANONYMIZATION` | `false` | Anonymize personal data |
+| `TRACE_AGENT_AUDIT_PROMPT_INJECTION_THRESHOLD` | `0.85` | Detection threshold |
+| `TRACE_AGENT_AUDIT_PII_ENTITIES` | `CREDIT_CARD, CRYPTO, EMAIL_ADDRESS, IBAN_CODE, IP_ADDRESS, PERSON, PHONE_NUMBER, US_SSN` | Entity types to detect |
+| `TRACE_AGENT_AUDIT_ENABLE_OTEL` | `false` | Export the server's own OpenTelemetry data |
+| `TRACE_AGENT_AUDIT_OTEL_SERVICE_NAME` | `trace-agent-backend` | Service name of that export |
+| `TRACE_AGENT_AUDIT_OTEL_EXPORTER_ENDPOINT` | *(none)* | Endpoint of that export |
+| `TRACE_AGENT_AUDIT_OTEL_EXPORTER_PROTOCOL` | `grpc` | Protocol of that export |
 
-## LLM Configuration (Examples)
+The guardrails do not apply to the Pydantic AI capability, OpenTelemetry ingestion or other recorded events. See [Privacy and Redaction](/docs/instrumentation/privacy).
+
+## UI
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OPENAI_BASE_URL` | *(none)* | OpenAI-compatible endpoint (e.g., a local model server) |
-| `OPENAI_API_KEY` | *(none)* | API key for the model provider |
+| `TRACE_AGENT_SERVER_URL` | `http://127.0.0.1:8000` | Server the UI talks to. The Docker image sets it to `http://server:8000` |
+| `TRACE_AGENT_UI_HOST` | `0.0.0.0` | Address the UI listens on |
+| `TRACE_AGENT_UI_PORT` | `8080` | Port the UI listens on |
+
+Only the UI reads `TRACE_AGENT_SERVER_URL`. The SDK takes the server address as an argument: `TraceAgentClient("http://127.0.0.1:8000")`.
+
+## Only for the Example Scripts
+
+The scripts in the `examples/` folder read these. Neither the server nor the SDK use them.
+
+| Variable | Description |
+|----------|-------------|
+| `TRACE_AGENT_BASE_URL` | Server URL used by the LangChain example |
+| `TRACE_AGENT_PROXY_URL` | URL for the local model proxy |
+| `TRACE_AGENT_PROXY_TIMEOUT` | Timeout for proxy connections |
+| `TRACE_AGENT_TEST_MODEL` | Model name for the example scripts |
+| `OPENAI_BASE_URL` | OpenAI-compatible endpoint (for example, a local model server) |
+| `OPENAI_API_KEY` | API key for the model provider |
 
 ## Example `.env` File
 
 ```bash title=".env"
 # TraceAgent Server
-TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
-TRACE_AGENT_SERVER_URL=http://localhost:8000
+TRACE_AGENT_DATABASE_URL=sqlite:///./trace_agent.db
+TRACE_AGENT_CAPTURE_FULL_PAYLOADS=true
 TRACE_AGENT_AUDIT_METRICS_ENABLED=true
-TRACE_AGENT_UI_PORT=8080
 
-# Local model (OpenAI-compatible server)
-OPENAI_BASE_URL=http://localhost:5000/v1
-OPENAI_API_KEY=not-needed
+# UI
+TRACE_AGENT_SERVER_URL=http://127.0.0.1:8000
+TRACE_AGENT_UI_PORT=8080
 ```
 
 :::warning
-When using PostgreSQL, make sure the database exists and the connection URL includes credentials:
+When using PostgreSQL, install a PostgreSQL driver, make sure the database exists and the URL includes credentials:
 ```bash
 TRACE_AGENT_DATABASE_URL=postgresql://user:password@localhost:5432/traceagent
 ```
+See [Running in Production](/docs/configuration/production) for what to know before using it.
 :::
 
 ## What's Next?
 
+- **[Running in Production](/docs/configuration/production)** — Data, security and what is not available yet
 - **[Docker Deployment](/docs/configuration/docker)** — Container-based setup
 - **[Quick Start](/docs/getting-started/quick-start)** — Get tracing in 5 minutes

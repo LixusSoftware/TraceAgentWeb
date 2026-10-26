@@ -32,7 +32,8 @@ client = TraceAgentClient("http://localhost:8000")
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `server_url` | `str` | Base URL of the TraceAgent server |
+| `base_url` | `str` | Base URL of the TraceAgent server. Required: the SDK does not read it from an environment variable |
+| `api_key` | `str` | Optional. Sent as an `Authorization: Bearer` header. The server does not check it today (see [Running in Production](/docs/configuration/production)) |
 
 ## Starting a Run
 
@@ -44,6 +45,7 @@ run = client.start_run("my-agent", "Perform a system task")
 |-----------|------|-------------|
 | `agent_name` | `str` | Identifies which agent created the run |
 | `description` | `str` | What the agent is trying to accomplish |
+| `metadata` | `dict` | Optional. Extra information stored with the run (see [Runs, Metadata and Search](/docs/core-concepts/runs)) |
 
 **Returns:** A `Run` object that you use to record events.
 
@@ -80,20 +82,79 @@ result = run.record_command(
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `command` | `list[str]` | Command and arguments |
+| `command` | `str` or `list[str]` | Command and arguments (a list is joined into text) |
+| `status` | `str` | `"running"`, `"succeeded"` (default) or `"failed"` |
 | `exit_code` | `int` | Process exit code |
+| `cwd` | `str` | Working directory |
+| `duration_ms` | `int` | How long it took |
+| `stdout_summary`, `stderr_summary` | `str` | Short summaries of the output |
+| `output` | `str` | Output of the command |
+| `error_code`, `error_summary` | `str` | Error code and message, for failed commands |
+| `step_id`, `parent_step_id` | `str` | Place the command in the timeline |
+| `metadata` | `dict` | Extra information |
 
-### Tool Calls
-
-Record custom tool invocations:
+`record_command` only records what you tell it. To run a command **and** record it, use `run.commands.run`:
 
 ```python
-result = run.record_tool_call(
-    "get_weather",
-    parameters={"city": "Madrid"},
-    result={"temp": 22, "condition": "sunny"}
+done = run.commands.run(["pytest", "-q"], cwd="./my-project")
+print(done.returncode, done.stdout)
+
+# Raise subprocess.CalledProcessError on failure (the command is recorded first)
+run.commands.run(["pytest", "-q"], cwd="./my-project", check=True)
+```
+
+`run.commands.run(command, *, cwd=None, timeout=None, check=False, shell=False, encoding="utf-8")` runs the command and returns a `subprocess.CompletedProcess`. A non-zero exit code is recorded as a failed command (`error_code="CommandError"`, with the `exit_code`); zero is a success. The duration and the stdout and stderr summaries are always saved (shortened, not redacted). If you pass a `timeout` and it is exceeded, `subprocess.TimeoutExpired` is raised **before** anything is recorded, so that command does not appear in the run.
+
+#### Example: an agent that runs generated code
+
+When an LLM writes code and your agent runs it, record the file and its result so the run shows what was generated and what happened:
+
+```python
+import subprocess
+
+code = llm_generated_code  # the code the model wrote
+run.record_file_write("generated.py", before_content="", after_content=code)
+
+proc = subprocess.run(["python", "generated.py"], capture_output=True, text=True)
+
+run.record_command(
+    ["python", "generated.py"],
+    status="succeeded" if proc.returncode == 0 else "failed",
+    exit_code=proc.returncode,
+    stdout_summary=proc.stdout[-500:],
+    stderr_summary=proc.stderr[-500:],
 )
 ```
+
+Or let `run.commands.run(["python", "generated.py"])` do the running and the recording in one call.
+
+### Tools
+
+`run.record_tool_call` does not exist. How you record tools depends on how your agent calls the model:
+
+- **Pydantic AI, LangChain or OpenTelemetry:** tools are recorded automatically by the [Pydantic AI capability](/docs/instrumentation/pydantic-ai), the [LangChain callback](/docs/instrumentation/langchain) or [OpenTelemetry ingestion](/docs/instrumentation/opentelemetry).
+- **The server's model endpoint:** register your functions with `@run.tool` and call `run.create_model_turn`. The tool runs, and its result or error is recorded when the model asks for it.
+- **Your own agent loop:** report the executions to `POST /api/runs/{id}/tool-results` (see the [API Reference](/docs/reference/api)).
+
+```python
+@run.tool(name="charge", description="Charge a customer.")
+def charge(customer: str) -> dict:
+    return {"ok": True, "customer": customer}
+
+result = run.create_model_turn(
+    [{"role": "user", "content": "Charge ana"}],
+    model="gpt-4o",       # model name sent to the provider
+    provider="openai",    # default; also "anthropic", "google", ...
+)
+print(result.assistant_message["content"])
+print([(t["name"], t["status"]) for t in result.executed_tools])  # [('charge', 'succeeded')]
+```
+
+This route needs a model provider configured on the **server** (for example `TRACE_AGENT_OPENAI_API_KEY`). `@run.tool` only registers the function; arguments are passed as named parameters and the input schema comes from the type annotations. The events are `tool.requested`, `tool.started` and `tool.succeeded`; if the function raises, `tool.failed` is recorded with the exception class as `error_code` and its message as `error_summary`, and the error goes back to the model instead of breaking your program.
+
+:::warning[`redact_fields` on `@run.tool`]
+It only masks the timeline summaries. See [Privacy and Redaction](/docs/instrumentation/privacy) before putting sensitive data in tool arguments.
+:::
 
 ## Finishing a Run
 
@@ -110,6 +171,33 @@ finish_result = run.finish({"status": "success"})
 :::warning
 Always call `run.finish()` to properly close the session. Unfinished runs will appear as "in progress" indefinitely in the UI.
 :::
+
+## When the Server Is Down
+
+The SDK does not catch errors. With the server down, `start_run`, `finish`, `fail` and every `record_*` call raise `httpx.ConnectError` (or `httpx.ConnectTimeout` if the port does not answer). Both are `httpx.TransportError`, a subclass of `httpx.HTTPError`. If the server answers with an error (for example, an unknown run), you get `httpx.HTTPStatusError`.
+
+The Pydantic AI capability and the LangChain callback never break your agent, but **your own calls to `start_run`, `run.finish()` and `run.fail()` can still raise**. If observability must never stop the agent, guard them:
+
+```python
+import httpx
+
+try:
+    run = client.start_run("my-agent", "Answer the question")
+except httpx.HTTPError:
+    run = None  # the agent keeps working, untraced
+
+agent = Agent(
+    "openai:gpt-4o",
+    capabilities=[run.as_pydantic_ai_capability()] if run else [],
+)
+result = agent.run_sync("What is the weather in Madrid?")
+
+if run:
+    try:
+        run.finish(result.output)
+    except httpx.HTTPError:
+        pass
+```
 
 ## Complete Example
 

@@ -18,6 +18,10 @@ TraceAgent se conecta a [Pydantic AI](https://ai.pydantic.dev) como una **capaci
 
 Requisitos: **Pydantic AI 2.x** (`>=2,<3`) y Python 3.11+.
 
+:::note[`ModuleNotFoundError: trace_agent_pydantic_ai`]
+`trace-agent-sdk` por sí solo no incluye la integración. Sin `trace-agent-pydantic-ai`, `run.as_pydantic_ai_capability()` falla con `ModuleNotFoundError: No module named 'trace_agent_pydantic_ai'`. Instala los dos paquetes como se muestra arriba.
+:::
+
 Funciona con el modelo que ya use tu agente: nada de la integración depende del proveedor. Los ejemplos usan `"openai:gpt-4o"` solo como cadena de modelo de ejemplo.
 
 ## Uso básico
@@ -103,7 +107,7 @@ capability = run.as_pydantic_ai_capability(
 )
 ```
 
-`redact_fields` es una lista de **nombres de clave**. Una clave se detecta por su nombre exacto, a cualquier profundidad, dentro de los argumentos y los resultados de tus herramientas, y su valor se sustituye por `[redacted]`. No detecta patrones ni valores. Con independencia de esta opción, los valores largos siempre se acortan: el texto dentro de los argumentos de herramientas a 160 caracteres, y los resúmenes de prompts y salidas a 220.
+`redact_fields` es una lista de **nombres de clave**. Una clave se detecta por su nombre exacto, a cualquier profundidad, dentro de los argumentos y los resultados de tus herramientas, y su valor se sustituye por `[redacted]` antes de enviarlo. Por defecto no se redacta nada, y no detecta patrones ni valores. Consulta [Privacidad y redacción](/es/docs/instrumentation/privacy). Con independencia de esta opción, los valores largos siempre se acortan: el texto dentro de los argumentos de herramientas a 160 caracteres, y los resúmenes de prompts y salidas a 220.
 
 ## Nunca estorba al agente
 
@@ -112,6 +116,11 @@ La trazabilidad no debe romper ni ralentizar tu agente, por eso:
 - Los eventos se encolan y los envía un hilo en segundo plano.
 - Si el servidor de TraceAgent está caído, el agente sigue funcionando. Imprime una sola línea (`[trace-agent] could not deliver trace data ... The agent is not affected.`) y pausa el envío durante `failure_cooldown` segundos.
 - Cuando termina la ejecución del agente más externo, espera hasta `flush_timeout` segundos a los eventos pendientes, de modo que `run.finish()` normalmente llega al servidor después de ellos. Si el servidor se cuelga durante más tiempo, esa garantía no existe.
+- La cola interna admite hasta 1000 eventos pendientes. Los que sobren se descartan.
+
+:::warning[Tus propias llamadas aún pueden fallar]
+La capacidad aísla sus eventos, pero `client.start_run(...)`, `run.finish(...)` y `run.fail(...)` son llamadas **tuyas**. Con el servidor caído lanzan `httpx.ConnectError`. Si el agente no debe fallar por culpa de la trazabilidad, envuélvelas en `try/except httpx.HTTPError`. Consulta [Cuando el servidor está caído](/es/docs/instrumentation/sdk#when-the-server-is-down).
+:::
 
 ## Conviene saber
 

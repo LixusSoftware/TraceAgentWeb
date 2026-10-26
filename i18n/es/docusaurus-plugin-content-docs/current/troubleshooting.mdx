@@ -8,6 +8,18 @@ keywords: [solución de problemas, problemas, ejecuciones que faltan, ejecucione
 
 # Solución de problemas
 
+## `ModuleNotFoundError: No module named 'trace_agent_pydantic_ai'`
+
+`trace-agent-sdk` por sí solo no incluye las integraciones con frameworks. Instala `trace-agent-pydantic-ai` para la capacidad de Pydantic AI, o `trace-agent-langchain` (`No module named 'trace_agent_langchain'`) para el callback de LangChain. Consulta [Instalación](/es/docs/getting-started/installation).
+
+## `httpx.ConnectError` al iniciar una ejecución
+
+El servidor no está en marcha o la dirección es incorrecta. El SDK no captura estos errores: `start_run`, `finish` y `fail` lanzan `httpx.ConnectError`. Comprueba que el servidor responde en `http://localhost:8000/health`. Para que tu agente siga funcionando con el servidor caído, consulta [Cuando el servidor está caído](/es/docs/instrumentation/sdk#when-the-server-is-down).
+
+## Mis ejecuciones desaparecen al recrear el contenedor
+
+Por defecto el servidor guarda su archivo SQLite dentro del contenedor. Monta un volumen y apunta `TRACE_AGENT_DATABASE_URL` a él. Consulta [TraceAgent en producción](/es/docs/configuration/production#keep-your-data).
+
 ## No aparece ninguna ejecución tras un script corto (OpenTelemetry)
 
 El exportador envía los spans por lotes en segundo plano, y el script terminó antes de enviarlos. Llama a `provider.shutdown()` (o a `provider.force_flush()`) antes de que acabe el script. Consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry).

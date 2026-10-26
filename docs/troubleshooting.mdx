@@ -8,6 +8,18 @@ keywords: [troubleshooting, problems, missing runs, duplicate runs, opentelemetr
 
 # Troubleshooting
 
+## `ModuleNotFoundError: No module named 'trace_agent_pydantic_ai'`
+
+`trace-agent-sdk` alone does not include the framework integrations. Install `trace-agent-pydantic-ai` for the Pydantic AI capability, or `trace-agent-langchain` (`No module named 'trace_agent_langchain'`) for the LangChain callback. See [Installation](/docs/getting-started/installation).
+
+## `httpx.ConnectError` when starting a run
+
+The server is not running or the address is wrong. The SDK does not catch these errors: `start_run`, `finish` and `fail` raise `httpx.ConnectError`. Check that the server answers at `http://localhost:8000/health`. To keep your agent working when the server is down, see [When the Server Is Down](/docs/instrumentation/sdk#when-the-server-is-down).
+
+## My runs disappear when I recreate the container
+
+By default the server stores its SQLite file inside the container. Mount a volume and point `TRACE_AGENT_DATABASE_URL` to it. See [Running in Production](/docs/configuration/production#keep-your-data).
+
 ## No run appears after a short script (OpenTelemetry)
 
 The exporter sends spans in batches in the background, and the script ended before it sent them. Call `provider.shutdown()` (or `provider.force_flush()`) before the script ends. See [OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry).

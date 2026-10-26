@@ -18,6 +18,7 @@ const sidebars = {
       label: 'Core Concepts',
       items: [
         'core-concepts/architecture',
+        'core-concepts/runs',
       ],
     },
     {
@@ -29,6 +30,7 @@ const sidebars = {
         'instrumentation/pydantic-ai',
         'instrumentation/opentelemetry',
         'instrumentation/hooks-vs-opentelemetry',
+        'instrumentation/privacy',
       ],
     },
     {
@@ -37,6 +39,7 @@ const sidebars = {
       items: [
         'configuration/environment-variables',
         'configuration/docker',
+        'configuration/production',
       ],
     },
     {

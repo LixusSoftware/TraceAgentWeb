@@ -38,6 +38,26 @@ A run is in one of these states: `running`, `completed` or `failed`. A finished 
 
 Decisions (tool choice, retry, recovery) and flags are derived when a run **ends** or fails, not while it runs. A running run shows none yet.
 
+## GET /api/runs
+
+Lists runs, newest first. Filters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `limit` | Number of runs, from 1 to 200 (default 50) |
+| `offset` | Runs to skip |
+| `agent_name` | Exact match on the agent name |
+| `status` | `running`, `completed` or `failed` |
+| `provider`, `model` | Provider or model of the run |
+| `search` | Case-insensitive partial match on the goal or the id |
+| `started_after`, `started_before` | ISO date-time bounds |
+
+There is no filter by `metadata`. See [Runs, Metadata and Search](/docs/core-concepts/runs).
+
+:::warning[No authentication]
+The API has no authentication: anyone who can reach it can read and write runs. See [Running in Production](/docs/configuration/production).
+:::
+
 ## POST /v1/traces
 
 OTLP/HTTP receiver for OpenTelemetry traces. See [OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry) for how to set it up.

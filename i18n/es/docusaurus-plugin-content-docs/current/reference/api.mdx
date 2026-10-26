@@ -38,6 +38,26 @@ Una ejecución está en uno de estos estados: `running`, `completed` o `failed`.
 
 Las decisiones (elección de herramienta, reintento, recuperación) y las señales se deducen cuando una ejecución **termina** o falla, no mientras se ejecuta. Una ejecución en curso todavía no muestra ninguna.
 
+## GET /api/runs
+
+Lista las ejecuciones, de más reciente a más antigua. Filtros:
+
+| Parámetro | Descripción |
+|-----------|-------------|
+| `limit` | Número de ejecuciones, de 1 a 200 (por defecto 50) |
+| `offset` | Ejecuciones que se saltan |
+| `agent_name` | Coincidencia exacta con el nombre del agente |
+| `status` | `running`, `completed` o `failed` |
+| `provider`, `model` | Proveedor o modelo de la ejecución |
+| `search` | Coincidencia parcial, sin distinguir mayúsculas, con el objetivo o el id |
+| `started_after`, `started_before` | Límites de fecha y hora ISO |
+
+No hay filtro por `metadata`. Consulta [Ejecuciones, metadatos y búsqueda](/es/docs/core-concepts/runs).
+
+:::warning[Sin autenticación]
+La API no tiene autenticación: cualquiera que pueda llegar a ella puede leer y escribir ejecuciones. Consulta [TraceAgent en producción](/es/docs/configuration/production).
+:::
+
 ## POST /v1/traces
 
 Receptor OTLP/HTTP para trazas OpenTelemetry. Consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry) para saber cómo configurarlo.
@@ -46,7 +66,7 @@ Receptor OTLP/HTTP para trazas OpenTelemetry. Consulta la [ingesta OpenTelemetry
 
 **Respuesta:** `200 OK` con una `ExportTraceServiceResponse` vacía (`{}` en JSON). Si algún span no se pudo entender, una respuesta protobuf los indica en `partial_success.rejected_spans`.
 
-### Ejemplo (JSON)
+### Ejemplo (JSON) {/* #example-json */}
 
 ```http
 POST /v1/traces
@@ -98,7 +118,7 @@ En OTLP/JSON, los ids son cadenas **hexadecimales** y los enteros de 64 bits son
 | Cuerpo mayor que `TRACE_AGENT_OTLP_MAX_BODY_BYTES` | `413` |
 | Receptor desactivado (`TRACE_AGENT_OTLP_ENABLED=false`) | `404` `{"detail":"The OTLP receiver is disabled."}` |
 
-### Atributos de span que se leen
+### Atributos de span que se leen {/* #span-attributes-read */}
 
 Solo se usan los spans cuyo `gen_ai.operation.name` es `invoke_agent`, `chat` o `execute_tool`. El id del span pasa a ser el id del paso, el id del span padre pasa a ser el paso padre, y las horas y duraciones salen del inicio y el fin del span. Un estado de span `UNSET` u `OK` es un éxito; solo `ERROR` es un fallo, con el nombre de la clase de la excepción como código de error y el mensaje de la excepción como mensaje de error.
 

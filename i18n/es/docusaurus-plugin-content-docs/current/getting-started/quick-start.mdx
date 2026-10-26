@@ -8,20 +8,35 @@ keywords: [inicio rápido, primera traza, primeros pasos, tutorial]
 
 # Inicio rápido
 
-Consigue tu primera traza en **menos de 5 minutos**.
+import PackageInstall from '@site/src/components/PackageInstall';
+
+Consigue tu primera traza en **menos de 5 minutos**: arranca el servidor y la UI, instrumenta un script pequeño y mira la traza en el navegador.
 
 ## Requisitos previos
 
 - Python 3.11+
-- SDK de TraceAgent instalado (`pip install trace-agent-sdk` o `uv add trace-agent-sdk`)
-- Servidor de TraceAgent en ejecución en `http://localhost:8000`
 
-:::tip[Cómo arrancar el servidor]
+## Paso 0: arrancar el servidor y la UI
 
-Si usas Docker:
+Instala el SDK, el servidor y la UI:
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-server', 'trace-agent-ui']} />
+
+Arranca el servidor y la UI, cada uno en su propia terminal:
+
 ```bash
-docker run -p 8000:8000 ghcr.io/lixussoftware/trace-agent-server:latest
+trace-agent-server   # API en http://localhost:8000
+trace-agent-ui       # UI en http://localhost:8080
 ```
+
+El servidor escucha en el puerto **8000** y la UI en el **8080**. La UI busca el servidor en `http://127.0.0.1:8000` salvo que definas `TRACE_AGENT_SERVER_URL`. El servidor guarda sus datos en un archivo `trace_agent.db` en la carpeta desde la que lo arrancas.
+
+:::tip[¿Prefieres Docker?]
+Sigue la [guía de despliegue con Docker](/es/docs/configuration/docker) para ejecutar ambos con `docker compose up`.
+:::
+
+:::note[¿Usas un framework?]
+Para Pydantic AI instala también `trace-agent-pydantic-ai`, y para LangChain `trace-agent-langchain`. El SDK por sí solo no los incluye.
 :::
 
 ## Paso 1: crear un cliente
@@ -120,7 +135,11 @@ Acabas de:
 Todo esto ya se ve en la **UI de TraceAgent**, en `http://localhost:8080`.
 
 :::info
-Abre la UI de TraceAgent para ver tu traza en la línea de tiempo interactiva. Verás la escritura del archivo y la ejecución del comando como eventos en la línea de tiempo.
+Abre `http://localhost:8080` para ver tu traza en la línea de tiempo interactiva. Verás la escritura del archivo y la ejecución del comando como eventos en la línea de tiempo.
+:::
+
+:::warning[¿El servidor no está en marcha?]
+Si el servidor está caído, `client.start_run(...)` lanza `httpx.ConnectError`. Consulta [Cuando el servidor está caído](/es/docs/instrumentation/sdk#when-the-server-is-down).
 :::
 
 ## ¿Y ahora qué?
