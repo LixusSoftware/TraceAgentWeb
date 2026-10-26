@@ -42,7 +42,7 @@ Settings for the OTLP/HTTP receiver at `POST /v1/traces`. See [OpenTelemetry Ing
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OPENAI_BASE_URL` | *(none)* | OpenAI-compatible endpoint (e.g., LM Studio) |
+| `OPENAI_BASE_URL` | *(none)* | OpenAI-compatible endpoint (e.g., a local model server) |
 | `OPENAI_API_KEY` | *(none)* | API key for the model provider |
 
 ## Example `.env` File
@@ -54,8 +54,8 @@ TRACE_AGENT_SERVER_URL=http://localhost:8000
 TRACE_AGENT_AUDIT_METRICS_ENABLED=true
 TRACE_AGENT_UI_PORT=8080
 
-# Local Model (LM Studio)
-OPENAI_BASE_URL=http://localhost:1234/v1
+# Local model (OpenAI-compatible server)
+OPENAI_BASE_URL=http://localhost:5000/v1
 OPENAI_API_KEY=not-needed
 ```
 

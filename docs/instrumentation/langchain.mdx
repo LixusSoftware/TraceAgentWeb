@@ -49,13 +49,13 @@ For every model call, the callback also remembers the provider and model, so the
 
 The callback never slows down or breaks your chain: if the TraceAgent server is down, the chain keeps running.
 
-## With Local Models (LM Studio)
+## With Local Models
 
 ```python
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    base_url="http://localhost:1234/v1",
+    base_url="http://localhost:5000/v1",
     api_key="not-needed",
     model="local-model"
 )

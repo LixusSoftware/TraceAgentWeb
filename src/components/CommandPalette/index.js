@@ -38,7 +38,7 @@ const PAGES = [
   {label: 'LangChain Agent', path: '/docs/examples/langchain-agent', section: 'Examples', icon: LinkIcon},
   {label: 'Pydantic AI Quickstart', path: '/docs/examples/pydantic-ai-hooks', section: 'Examples', icon: FlaskConical},
   {label: 'Pydantic AI via OpenTelemetry', path: '/docs/examples/pydantic-ai-otel', section: 'Examples', icon: FlaskConical},
-  {label: 'LM Studio Agent', path: '/docs/examples/lm-studio-agent', section: 'Examples', icon: Box},
+  {label: 'Local Model Agent', path: '/docs/examples/local-model-agent', section: 'Examples', icon: Box},
   {label: 'Planner Agent', path: '/docs/examples/planner-agent', section: 'Examples', icon: ClipboardList},
   {label: 'Debugger Demo', path: '/docs/examples/debugger-demo', section: 'Examples', icon: Bug},
   {label: 'Rich Demo', path: '/docs/examples/rich-demo', section: 'Examples', icon: Target},

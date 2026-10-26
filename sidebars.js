@@ -58,7 +58,7 @@ const sidebars = {
         'examples/langchain-agent',
         'examples/pydantic-ai-hooks',
         'examples/pydantic-ai-otel',
-        'examples/lm-studio-agent',
+        'examples/local-model-agent',
         'examples/planner-agent',
         'examples/debugger-demo',
         'examples/rich-demo',
