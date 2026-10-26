@@ -1,0 +1,45 @@
+---
+sidebar_position: 97
+title: Solución de problemas
+description: "Soluciona los problemas habituales de TraceAgent: spans de OpenTelemetry que no aparecen, ejecuciones duplicadas, ejecuciones atascadas en running, un servidor inalcanzable y conflictos de dependencias."
+image: img/social-card.jpg
+keywords: [solución de problemas, problemas, ejecuciones que faltan, ejecuciones duplicadas, opentelemetry, pydantic ai, errores]
+---
+
+# Solución de problemas
+
+## No aparece ninguna ejecución tras un script corto (OpenTelemetry)
+
+El exportador envía los spans por lotes en segundo plano, y el script terminó antes de enviarlos. Llama a `provider.shutdown()` (o a `provider.force_flush()`) antes de que acabe el script. Consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry).
+
+## Llegan spans pero no se crea ninguna ejecución
+
+Comprueba estas dos causas:
+
+- El receptor OTLP está desactivado (`TRACE_AGENT_OTLP_ENABLED=false`). Recibirías un `404` en `POST /v1/traces`.
+- Ninguno de los spans tiene un `gen_ai.operation.name` igual a `invoke_agent`, `chat` o `execute_tool`. Los demás spans se ignoran.
+
+## La ejecución aparece dos veces
+
+El mismo agente usa a la vez la capacidad de Pydantic AI y OpenTelemetry, así que cada llamada se registra dos veces. Elige una. Consulta [¿Hooks u OpenTelemetry?](/es/docs/instrumentation/hooks-vs-opentelemetry).
+
+## La ejecución se queda en `running`
+
+- Con la capacidad de Pydantic AI, tú abres y cierras la ejecución. Si el agente lanzó una excepción, llama a `run.fail(...)`. Consulta la [integración con Pydantic AI](/es/docs/instrumentation/pydantic-ai).
+- Con OpenTelemetry, una ejecución termina cuando acaba su span `invoke_agent`. Si la librería solo emite spans `chat`, la ejecución se crea pero nunca se marca como finalizada.
+
+## Una ejecución en curso no muestra decisiones
+
+Es normal. Las decisiones (elección de herramienta, reintento, recuperación) se deducen cuando la ejecución termina.
+
+## El servidor está caído y mi agente va lento o imprime un aviso
+
+La trazabilidad nunca detiene al agente. Tras un fallo de entrega, TraceAgent imprime una línea (`could not deliver trace data ... The agent is not affected.`) y pausa el envío durante `failure_cooldown` segundos (30 por defecto). Los eventos que se producen mientras tanto se descartan.
+
+## Pip informa de un conflicto con `openai`
+
+El servidor acepta `openai>=1.52,<4`, así que se instala junto a `pydantic-ai-slim[openai]`. Si aun así ves un conflicto, actualiza `trace-agent-server`.
+
+## Pydantic AI imprime un banner de Logfire
+
+No tiene relación con TraceAgent. Define `PYDANTIC_AI_NO_BANNER=1` para ocultarlo.

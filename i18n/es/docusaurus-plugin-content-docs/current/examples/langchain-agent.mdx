@@ -1,0 +1,37 @@
+---
+sidebar_position: 3
+title: Agente LangChain
+description: "Ejemplo de integración con LangChain con trazabilidad automática mediante el callback."
+image: img/social-card.jpg
+keywords: [ejemplo, langchain, callback, trazabilidad automática]
+---
+
+# Agente LangChain
+
+**Archivo:** `examples/langchain_agent.py`
+
+Demuestra la integración con LangChain. Adjunta `TraceAgentLangChainCallback` a un agente de LangChain para que los pasos de las cadenas, las llamadas al LLM, el uso de herramientas y la actividad de los recuperadores se tracen automáticamente.
+
+## Ejecutar
+
+```bash
+uv run examples/langchain_agent.py
+```
+
+## Variables de entorno
+
+Este ejemplo espera un endpoint compatible con OpenAI, como un servidor de modelos local:
+
+| Variable | Descripción |
+|----------|-------------|
+| `TRACE_AGENT_BASE_URL` | URL del servidor de TraceAgent |
+| `OPENAI_BASE_URL` | Endpoint compatible con OpenAI |
+| `OPENAI_API_KEY` | Clave de API del proveedor del modelo |
+
+## Qué hace
+
+1. Inicializa el cliente de TraceAgent e inicia una ejecución
+2. Crea un agente de LangChain con herramientas
+3. Adjunta `TraceAgentLangChainCallback` como callback
+4. Ejecuta el agente: todos los pasos se trazan automáticamente
+5. Finaliza la ejecución

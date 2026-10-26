@@ -1,0 +1,88 @@
+---
+sidebar_position: 5
+title: Pydantic AI vía OpenTelemetry
+description: "Ejemplo ejecutable de Pydantic AI trazado con OpenTelemetry, sin código de TraceAgent en el agente. Sin clave de API."
+image: img/social-card.jpg
+keywords: [ejemplo, pydantic ai, opentelemetry, otlp, inicio rápido, ejemplo de opentelemetry]
+---
+
+# Pydantic AI vía OpenTelemetry
+
+import PackageInstall from '@site/src/components/PackageInstall';
+
+El mismo agente que el [inicio rápido de Pydantic AI](/es/docs/examples/pydantic-ai-hooks), pero trazado con OpenTelemetry. **No se importa nada de TraceAgent**: el agente solo exporta trazas OpenTelemetry al servidor. Usa un modelo simulado, así que **se ejecuta sin clave de API**.
+
+## Ejecutar
+
+<PackageInstall packages={['pydantic-ai-slim', 'opentelemetry-sdk', 'opentelemetry-exporter-otlp-proto-http']} />
+
+Arranca el servidor de TraceAgent en `http://127.0.0.1:8000`, guarda el script de abajo como `otel_quickstart.py` y ejecuta:
+
+```bash
+python otel_quickstart.py
+```
+
+## El script
+
+```python
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from pydantic_ai import Agent
+from pydantic_ai.capabilities import Instrumentation
+from pydantic_ai.messages import ModelResponse, TextPart, ToolCallPart
+from pydantic_ai.models.function import FunctionModel
+from pydantic_ai.models.instrumented import InstrumentationSettings
+
+
+def fake_model(messages, info):
+    """Hace de LLM: primero pide la herramienta y luego responde."""
+    if len(messages) == 1:
+        return ModelResponse(parts=[ToolCallPart("weather", {"city": "Madrid"})])
+    return ModelResponse(parts=[TextPart("It is sunny in Madrid, 23 degrees.")])
+
+
+# 1. Envía las trazas OpenTelemetry al servidor de TraceAgent. No se importa nada de TraceAgent.
+provider = TracerProvider()
+provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint="http://127.0.0.1:8000/v1/traces")))
+
+# 2. Tu agente de siempre, con la instrumentación propia de Pydantic AI.
+agent = Agent(
+    FunctionModel(fake_model),  # en tu propio agente, usa una cadena de modelo real, p. ej. "openai:gpt-4o"
+    name="otel-quickstart",
+    capabilities=[Instrumentation(settings=InstrumentationSettings(tracer_provider=provider))],
+)
+
+
+@agent.tool_plain
+def weather(city: str) -> str:
+    """Devuelve el tiempo de una ciudad."""
+    return f"Sunny, 23 degrees in {city}."
+
+
+# 3. Úsalo como siempre.
+result = agent.run_sync("What is the weather in Madrid?")
+print(result.output)
+
+# 4. Un script corto debe vaciar el exportador antes de salir, o las trazas se pierden.
+provider.shutdown()
+```
+
+Salida:
+
+```text
+It is sunny in Madrid, 23 degrees.
+```
+
+## Qué hace
+
+1. Configura un exportador OpenTelemetry que apunta al servidor de TraceAgent
+2. Construye un agente de Pydantic AI con su propia instrumentación
+3. El modelo simulado pide la herramienta `weather` y después responde
+4. Vacía el exportador para que no se pierda ningún span
+
+El servidor crea la ejecución por sí mismo, con el nombre `otel-quickstart` y los mismos eventos que la versión con hooks.
+
+## Más información
+
+- **[Ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry)**: cómo se convierten los spans en una ejecución, cómo asociar a una ejecución del SDK y la privacidad

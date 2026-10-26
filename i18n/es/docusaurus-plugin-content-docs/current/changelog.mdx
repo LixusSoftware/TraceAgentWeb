@@ -1,0 +1,80 @@
+---
+sidebar_position: 98
+title: Registro de cambios
+description: "Historial de versiones y cambios destacados de TraceAgent."
+image: img/social-card.jpg
+keywords: [registro de cambios, versiones, novedades, actualizaciones]
+---
+
+# Registro de cambios
+
+Todos los cambios relevantes de TraceAgent se documentan aquí.
+
+:::tip
+Para la información de versiones más actualizada, consulta la página de [GitHub Releases](https://github.com/LixusSoftware/TraceAgent/releases).
+:::
+
+---
+
+## Sin publicar
+
+### Añadido
+- Integración con Pydantic AI (`trace-agent-pydantic-ai`): una capacidad que registra las llamadas al modelo y las herramientas de agentes Pydantic AI 2.x sin bloquearlos, disponible como `run.as_pydantic_ai_capability()`
+- Ingesta OpenTelemetry: receptor OTLP/HTTP en `POST /v1/traces` (protobuf o JSON, gzip). Una ejecución por traza; se asocia a una ejecución del SDK con el atributo de recurso `trace_agent.run_id`. Ajustes `TRACE_AGENT_OTLP_ENABLED` y `TRACE_AGENT_OTLP_MAX_BODY_BYTES`
+- Ejemplos para ambas vías (`pydantic_ai_agent.py`, `pydantic_ai_otel_agent.py`)
+- Nombres en lenguaje claro en la línea de tiempo y los grafos, y un inspector legible para eventos y decisiones. Cada decisión muestra los eventos en los que se basa
+- `parent_step_id` en `POST /api/runs/{id}/tool-results`, para colgar una herramienta de su paso padre
+- Sitio de documentación con referencia completa del SDK, guía de LangChain y ejemplos
+- Integración de búsqueda local
+- Paleta de comandos para navegar rápido (Ctrl/Cmd + K)
+- Página escaparate con casos de uso de la comunidad
+
+### Cambiado
+- Las ejecuciones muestran proveedor, modelo y totales de tokens para las integraciones con frameworks (antes solo para las ejecuciones creadas con el proxy de modelos del propio servidor). La vista de comparación también cuenta esos tokens
+- La línea de tiempo anida las llamadas al modelo y las herramientas bajo el paso del agente que las ejecutó
+- El inspector oculta identificadores, coordenadas y JSON en bruto bajo «Technical details»
+- El servidor ahora acepta `openai>=1.52,<4` (antes era `<2`), así que se instala junto a `pydantic-ai-slim[openai]`, y depende de `opentelemetry-proto`
+- Marca actualizada con un nuevo logotipo de gato detective
+
+### Corregido
+- LangChain: una llamada a una herramienta se registraba dos veces y contaba dos veces como error. Ahora aparece una vez, con su nombre, proveedor y modelo reales
+- Las actualizaciones en directo (SSE) no llegaban a la UI por un desajuste en el tipo de evento
+- Los eventos de los pasos anidados estaban ocultos en la línea de tiempo
+- Inspeccionar un evento o un nodo del grafo de una ejecución ya no lo muestra al cambiar a otra ejecución
+
+---
+
+## v0.1.0 — Primera versión
+
+### Añadido
+- **TraceAgent SDK**: cliente Python para registrar las acciones del agente
+  - Iniciar y finalizar ejecuciones
+  - Registrar escrituras y lecturas de archivos, comandos y llamadas a herramientas
+  - Adjuntar artefactos y metadatos
+- **TraceAgent LangChain**: callback para la trazabilidad automática de LangChain
+  - Eventos de inicio y fin de cadenas
+  - Captura de llamadas y respuestas del LLM
+  - Seguimiento del uso de herramientas
+  - Registro de la actividad de los recuperadores
+- **TraceAgent Server**: backend FastAPI
+  - Almacenamiento en SQLite (por defecto)
+  - Soporte para PostgreSQL
+  - Recopilación de métricas de auditoría
+  - API REST
+- **TraceAgent UI**: panel interactivo
+  - Visualización de la línea de tiempo de ejecución
+  - Listado y búsqueda de ejecuciones
+  - Visor de diferencias de archivos
+  - Explorador de artefactos
+- Imágenes de Docker para el servidor y la UI
+- Scripts de ejemplo:
+  - `sample_agent.py`: prueba mínima del SDK
+  - `langchain_agent.py`: integración con el callback de LangChain
+  - Agente con modelo local: cualquier modelo compatible con OpenAI usando el SDK
+  - Agente planificador: planificación con varias herramientas
+  - `coding_agent_debugger_demo.py`: escenarios de depuración sintéticos
+  - `rich_demo_agent.py`: demo de traza con máxima fidelidad
+
+---
+
+{/* Future releases go here in reverse chronological order */}

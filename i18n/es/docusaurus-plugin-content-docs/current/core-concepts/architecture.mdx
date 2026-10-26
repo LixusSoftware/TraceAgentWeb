@@ -1,0 +1,98 @@
+---
+sidebar_position: 1
+title: Arquitectura
+description: "Cómo funciona TraceAgent: el SDK, las integraciones con LangChain y Pydantic AI, el receptor OpenTelemetry, el servidor y la UI, y qué muestra una ejecución."
+image: img/social-card.jpg
+keywords: [arquitectura, diseño del sistema, paquetes, componentes, receptor otlp, ejecución de agente, línea de tiempo]
+---
+
+import ArchitectureDiagram from '@site/src/components/ArchitectureDiagram';
+
+# Arquitectura
+
+TraceAgent sigue una arquitectura **cliente-servidor** con un diseño modular por paquetes. Entender cómo encajan las piezas te ayuda a sacar el máximo partido a la plataforma.
+
+## Visión general del sistema
+
+<ArchitectureDiagram />
+
+## Desglose de paquetes
+
+### TraceAgent SDK
+
+El cliente Python principal. Úsalo para:
+
+- **Iniciar y finalizar ejecuciones**: crea sesiones con nombre y descripción
+- **Registrar operaciones con archivos**: lecturas, escrituras, parches y diferencias
+- **Registrar comandos**: ejecuciones de shell con sus códigos de salida
+- **Registrar llamadas a herramientas**: invocaciones personalizadas con parámetros y resultados
+- **Adjuntar artefactos**: cualquier salida derivada del agente
+
+El SDK se comunica con el servidor mediante llamadas a la API REST.
+
+### TraceAgent LangChain
+
+Un **callback** que se conecta al sistema de callbacks de LangChain. Una vez adjuntado, captura automáticamente:
+
+- Inicios y finales de cadenas
+- Llamadas al LLM (prompts y respuestas)
+- Uso de herramientas y sus resultados
+- Actividad de los recuperadores (*retrievers*)
+- Estados de error
+
+No hace falta instrumentar nada a mano: solo pasa el callback.
+
+### TraceAgent Pydantic AI
+
+Una **capacidad** (*capability*) para agentes de [Pydantic AI](https://ai.pydantic.dev) 2.x. Añádela a tu agente y registra las llamadas al modelo y las herramientas sin bloquear al agente. Consulta la [integración con Pydantic AI](/es/docs/instrumentation/pydantic-ai).
+
+### TraceAgent Server
+
+El **backend FastAPI** que guarda y sirve los datos de las trazas:
+
+- Recibe eventos del SDK, del callback de LangChain y de la capacidad de Pydantic AI
+- Recibe trazas OpenTelemetry en `POST /v1/traces`
+- Almacena los datos en **SQLite** (por defecto) o **PostgreSQL**
+- Expone una API REST para que la UI consulte
+- Admite la recopilación de métricas de auditoría
+
+### TraceAgent UI
+
+El **panel interactivo** para visualizar trazas:
+
+- Líneas de tiempo de ejecución con el detalle de cada evento
+- Listado de ejecuciones con búsqueda y filtros
+- Visor de diferencias para las ediciones registradas
+- Explorador de artefactos
+
+## Flujo de datos
+
+1. El código de tu agente llama al **SDK** (o usa el **callback de LangChain** o la **capacidad de Pydantic AI**)
+2. La integración envía los eventos por HTTP al **servidor**
+3. El servidor guarda los eventos en la **base de datos**
+4. La **UI** consulta la API del servidor y dibuja las visualizaciones
+
+El servidor también expone un receptor OTLP/HTTP en `POST /v1/traces`. Los spans que siguen las convenciones GenAI se convierten en las mismas ejecuciones y eventos que genera el SDK y las integraciones con frameworks, así que puedes trazar agentes sin código de TraceAgent. Consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry).
+
+## Qué muestra una ejecución
+
+Una ejecución muestra lo que hizo realmente el agente, no solo una lista de eventos. Cada ejecución registra el proveedor, el modelo y el uso de tokens de sus llamadas al modelo.
+
+Las herramientas aparecen bajo el paso del agente que las usó, así que la línea de tiempo es jerárquica: la ejecución del agente contiene sus llamadas al modelo y sus herramientas, en el orden en que ocurrieron, y los agentes anidados aparecen dentro del paso que los llamó. El inspector explica lo ocurrido en lenguaje claro (resultado, duración, herramienta, tokens, error) y deja los identificadores y los datos en bruto en «Technical details».
+
+![Línea de tiempo jerárquica de una ejecución con llamadas al modelo, herramientas y un agente anidado, junto al inspector de eventos](/img/trace-agent/timeline-nested.jpg)
+
+Cuando una ejecución termina o falla, TraceAgent deduce sus **decisiones** (qué herramienta se eligió, reintentos, recuperaciones) y señala patrones como los bucles. No se muestran mientras la ejecución sigue en marcha. Cada decisión lista los eventos en los que se basa.
+
+![Grafo de decisiones de una ejecución en la que una herramienta falló, se reintentó y se recuperó, con los eventos que hay detrás del reintento](/img/trace-agent/decisions-retry.jpg)
+
+La UI se actualiza en directo mientras el agente se ejecuta.
+
+:::info[Autoalojado]
+Todos los datos se quedan en tu infraestructura. No hay telemetría externa ni dependencia de la nube. Todo es tuyo.
+:::
+
+## ¿Y ahora qué?
+
+- **[Referencia del SDK](/es/docs/instrumentation/sdk)**: instrumenta tu agente
+- **[Configuración](/es/docs/configuration/environment-variables)**: personaliza la instalación

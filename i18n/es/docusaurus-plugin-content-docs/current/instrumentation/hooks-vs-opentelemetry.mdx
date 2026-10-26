@@ -1,0 +1,54 @@
+---
+sidebar_position: 5
+title: ¿Hooks u OpenTelemetry?
+description: "¿Capacidad de Pydantic AI u OpenTelemetry? Compara las dos formas de trazar un agente con TraceAgent, mira qué registra cada una y elige la adecuada."
+image: img/social-card.jpg
+keywords: [pydantic ai, hooks, capacidad, opentelemetry, otlp, comparación, cuál elegir]
+---
+
+# ¿Hooks u OpenTelemetry?
+
+Un agente de Pydantic AI se puede trazar con TraceAgent de dos formas: con la [capacidad de Pydantic AI](/es/docs/instrumentation/pydantic-ai) (hooks) o con [OpenTelemetry](/es/docs/instrumentation/opentelemetry). Las dos acaban en el mismo sitio: una ejecución con sus llamadas al modelo, herramientas y tokens.
+
+:::tip[Elige en diez segundos]
+- ¿Ya usas OpenTelemetry, o no puedes tocar el código del agente? Usa **OpenTelemetry**.
+- ¿Quieres un control fino de lo que se registra, o no tienes OpenTelemetry en tu stack? Usa la **capacidad**.
+:::
+
+## Comparación
+
+| | Capacidad (hooks) | OpenTelemetry |
+|---|---|---|
+| **Qué instalas** | `trace-agent-sdk` y `trace-agent-pydantic-ai` en el entorno del agente | Solo el SDK de OpenTelemetry y el exportador OTLP. Nada de TraceAgent en el agente |
+| **Qué cambia en el agente** | `start_run(...)`, `capabilities=[run.as_pydantic_ai_capability()]` y `run.finish()` / `run.fail()` | Un proveedor de trazas con el exportador OTLP, el `Instrumentation` de Pydantic AI y `provider.shutdown()` en scripts cortos. No hay ejecución que gestionar |
+| **Quién crea la ejecución** | Tú, con `start_run`: eliges su nombre y su objetivo | El servidor, una ejecución por traza: se nombra como el agente y, si se exporta el contenido, usa el primer mensaje del usuario como objetivo |
+| **Control de lo que se envía** | `redact_fields` y las opciones `record_*_events` | `include_content=False` en el agente para dejar fuera prompts y salidas; `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` en el servidor |
+| **Compatible con** | Solo Pydantic AI 2.x | Pydantic AI 2.x verificado. Otros frameworks que emitan spans GenAI pueden funcionar, sin verificar |
+
+## Elígela cuando
+
+**Usa la capacidad** si quieres control por agente (redacción de campos, qué se registra), no usas OpenTelemetry o quieres gestionar tú las ejecuciones.
+
+**Usa OpenTelemetry** si ya usas OpenTelemetry (o Logfire), no puedes o no quieres cambiar el código del agente, o el agente se ejecuta en otro servicio.
+
+## Una sola vía por agente
+
+:::warning[Usa una, nunca las dos]
+Para un mismo agente, usa **o bien** la capacidad **o bien** OpenTelemetry. Las dos registran cada llamada al modelo y cada herramienta, y no se conocen entre sí, así que la ejecución aparecería duplicada.
+:::
+
+Hay una combinación que **no** cuenta como «usar las dos»: crear la ejecución con el SDK y dejar que OpenTelemetry aporte los spans. Pasa el id de la ejecución en el atributo de recurso `trace_agent.run_id` (consulta [Asociar a una ejecución creada con el SDK](/es/docs/instrumentation/opentelemetry#attach-to-a-run-created-with-the-sdk)). En ese caso, no añadas la capacidad.
+
+## Qué cambia en la ejecución
+
+Con salida estructurada (`output_type=SomeModel`), las dos vías registran exactamente la misma ejecución.
+
+Hay una diferencia conocida e intencionada. Si la salida del agente pasa por una **función** de salida (`output_type=my_function`), Pydantic AI emite un span de herramienta para ella (`final_result` por defecto):
+
+- **OpenTelemetry** la registra como una herramienta más, así que el recuento de herramientas sube en uno y aparece una decisión `final_result`.
+- **La capacidad** solo envuelve las herramientas normales del agente, así que no la registra.
+
+## ¿Y ahora qué?
+
+- **[Integración con Pydantic AI](/es/docs/instrumentation/pydantic-ai)**: la capacidad en detalle
+- **[Ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry)**: el receptor en detalle

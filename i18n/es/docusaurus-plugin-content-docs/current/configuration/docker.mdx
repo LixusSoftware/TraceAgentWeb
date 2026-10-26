@@ -1,0 +1,125 @@
+---
+sidebar_position: 2
+title: Despliegue con Docker
+description: "Despliega TraceAgent con Docker y Docker Compose."
+image: img/social-card.jpg
+keywords: [docker, despliegue, contenedores, docker-compose]
+---
+
+# Despliegue con Docker
+
+TraceAgent ofrece imágenes de Docker ya construidas para el servidor y la UI.
+
+## Imágenes
+
+| Componente | Imagen |
+|-----------|-------|
+| Servidor | `ghcr.io/lixussoftware/trace-agent-server:latest` |
+| UI | `ghcr.io/lixussoftware/trace-agent-ui:latest` |
+
+## Docker Compose
+
+Crea un `docker-compose.yml` para ejecutar los dos servicios:
+
+```yaml title="docker-compose.yml"
+version: "3.8"
+
+services:
+  server:
+    image: ghcr.io/lixussoftware/trace-agent-server:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
+      - TRACE_AGENT_AUDIT_METRICS_ENABLED=true
+    volumes:
+      - trace-data:/app/data
+
+  ui:
+    image: ghcr.io/lixussoftware/trace-agent-ui:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - TRACE_AGENT_SERVER_URL=http://server:8000
+    depends_on:
+      - server
+
+volumes:
+  trace-data:
+```
+
+```bash
+docker compose up -d
+```
+
+La UI estará disponible en `http://localhost:8080` y la API del servidor en `http://localhost:8000`.
+
+## Receptor OpenTelemetry
+
+El contenedor del servidor también recibe trazas OpenTelemetry por el mismo puerto, en `http://localhost:8000/v1/traces`. No hace falta ningún puerto ni servicio adicional: apunta el exportador OTLP de tu agente a esa URL. Consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry).
+
+Para ajustar o desactivar el receptor, añade estas variables al `environment` del servicio `server`:
+
+```yaml
+    environment:
+      - TRACE_AGENT_OTLP_ENABLED=true
+      - TRACE_AGENT_OTLP_MAX_BODY_BYTES=10000000
+```
+
+## Con PostgreSQL
+
+Para despliegues en producción, usa PostgreSQL en lugar de SQLite:
+
+```yaml title="docker-compose.prod.yml"
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: traceagent
+      POSTGRES_USER: traceagent
+      POSTGRES_PASSWORD: changeme
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  server:
+    image: ghcr.io/lixussoftware/trace-agent-server:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - TRACE_AGENT_DATABASE_URL=postgresql://traceagent:changeme@db:5432/traceagent
+    depends_on:
+      - db
+
+  ui:
+    image: ghcr.io/lixussoftware/trace-agent-ui:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - TRACE_AGENT_SERVER_URL=http://server:8000
+    depends_on:
+      - server
+
+volumes:
+  pg-data:
+```
+
+:::danger
+Cambia el `POSTGRES_PASSWORD` por defecto antes de desplegar en producción.
+:::
+
+## Verificar
+
+```bash
+# Comprueba el estado del servidor
+curl http://localhost:8000/health
+
+# Abre la UI
+open http://localhost:8080
+```
+
+## ¿Y ahora qué?
+
+- **[Variables de entorno](/es/docs/configuration/environment-variables)**: referencia completa de configuración
+- **[Inicio rápido](/es/docs/getting-started/quick-start)**: crea tu primera traza

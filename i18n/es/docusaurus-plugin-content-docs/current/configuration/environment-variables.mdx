@@ -1,0 +1,72 @@
+---
+sidebar_position: 1
+title: Variables de entorno
+description: "Todas las opciones de configuración de TraceAgent mediante variables de entorno."
+image: img/social-card.jpg
+keywords: [configuración, variables de entorno, ajustes]
+---
+
+# Variables de entorno
+
+El comportamiento de TraceAgent se puede personalizar mediante variables de entorno.
+
+## Configuración del servidor
+
+| Variable | Por defecto | Descripción |
+|----------|---------|-------------|
+| `TRACE_AGENT_DATABASE_URL` | `sqlite:///./data/trace_agent.db` | URL de conexión a la base de datos (SQLite o PostgreSQL) |
+| `TRACE_AGENT_SERVER_URL` | `http://localhost:8000` | URL del backend que usan la UI y el SDK |
+| `TRACE_AGENT_AUDIT_METRICS_ENABLED` | `true` | Activa o desactiva la recopilación de métricas de auditoría |
+| `TRACE_AGENT_UI_PORT` | `8080` | Puerto en el que se expone la interfaz |
+| `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` | `true` | Conserva el contenido completo de los prompts y las salidas además de sus resúmenes. Ponlo a `false` para conservar solo los resúmenes |
+
+## Receptor OpenTelemetry
+
+Ajustes del receptor OTLP/HTTP en `POST /v1/traces`. Consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry).
+
+| Variable | Por defecto | Descripción |
+|----------|---------|-------------|
+| `TRACE_AGENT_OTLP_ENABLED` | `true` | Activa o desactiva el receptor. Si está desactivado, `POST /v1/traces` responde `404` |
+| `TRACE_AGENT_OTLP_MAX_BODY_BYTES` | `10000000` | Tamaño máximo del cuerpo, medido tras la descompresión. Los cuerpos mayores reciben `413` |
+
+## Configuración del SDK y del agente
+
+| Variable | Por defecto | Descripción |
+|----------|---------|-------------|
+| `TRACE_AGENT_BASE_URL` | `http://localhost:8000` | URL del servidor que usa el cliente del SDK |
+| `TRACE_AGENT_PROXY_URL` | *(ninguna)* | URL del proxy para la conectividad con modelos locales |
+| `TRACE_AGENT_PROXY_TIMEOUT` | *(ninguno)* | Tiempo de espera de las conexiones del proxy |
+| `TRACE_AGENT_TEST_MODEL` | *(ninguno)* | Nombre del modelo para los scripts de prueba y de ejemplo |
+
+## Configuración del LLM (ejemplos)
+
+| Variable | Por defecto | Descripción |
+|----------|---------|-------------|
+| `OPENAI_BASE_URL` | *(ninguna)* | Endpoint compatible con OpenAI (p. ej., un servidor de modelos local) |
+| `OPENAI_API_KEY` | *(ninguna)* | Clave de API del proveedor del modelo |
+
+## Ejemplo de archivo `.env`
+
+```bash title=".env"
+# Servidor de TraceAgent
+TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
+TRACE_AGENT_SERVER_URL=http://localhost:8000
+TRACE_AGENT_AUDIT_METRICS_ENABLED=true
+TRACE_AGENT_UI_PORT=8080
+
+# Modelo local (servidor compatible con OpenAI)
+OPENAI_BASE_URL=http://localhost:5000/v1
+OPENAI_API_KEY=not-needed
+```
+
+:::warning
+Si usas PostgreSQL, asegúrate de que la base de datos existe y de que la URL de conexión incluye las credenciales:
+```bash
+TRACE_AGENT_DATABASE_URL=postgresql://user:password@localhost:5432/traceagent
+```
+:::
+
+## ¿Y ahora qué?
+
+- **[Despliegue con Docker](/es/docs/configuration/docker)**: instalación basada en contenedores
+- **[Inicio rápido](/es/docs/getting-started/quick-start)**: consigue trazas en 5 minutos

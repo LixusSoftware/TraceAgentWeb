@@ -1,0 +1,27 @@
+---
+sidebar_position: 4
+title: Agente con modelo local
+description: "Ejemplo con un modelo local usando el SDK de TraceAgent y cualquier endpoint compatible con OpenAI."
+image: img/social-card.jpg
+keywords: [ejemplo, modelo local, compatible con openai, sdk]
+---
+
+# Agente con modelo local
+
+Usa `TraceAgentClient` con cualquier modelo local compatible con OpenAI, registra una herramienta y graba un único turno trazado.
+
+## Ejecutar
+
+Busca el script del modelo local en la carpeta `examples/` del repositorio y ejecútalo con `uv run`. Antes, define las variables de abajo.
+
+## Variables de entorno
+
+| Variable | Descripción |
+|----------|-------------|
+| `TRACE_AGENT_PROXY_URL` | URL del proxy del modelo local |
+| `TRACE_AGENT_TEST_MODEL` | Nombre del modelo que se usará |
+| `TRACE_AGENT_PROXY_TIMEOUT` | Tiempo de espera de la conexión |
+
+## Cuándo usarlo
+
+Es una buena opción cuando quieres validar la conectividad con un modelo local y comprobar que TraceAgent puede capturar las llamadas a herramientas de un LLM alojado en local.

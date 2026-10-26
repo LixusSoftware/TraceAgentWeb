@@ -1,0 +1,246 @@
+---
+sidebar_position: 1
+title: Referencia de la API
+description: "Referencia de la API HTTP de TraceAgent: ejecuciones, resultados de herramientas, línea de tiempo, grafo, comparación, flujo SSE en directo y el receptor OpenTelemetry OTLP en POST /v1/traces."
+image: img/social-card.jpg
+keywords: [api, referencia de la api, otlp, v1/traces, resultados de herramientas, sse, endpoints, api rest]
+---
+
+# Referencia de la API
+
+El servidor de TraceAgent expone una API HTTP. Esta página lista los endpoints y detalla los que sirven para enviar datos y para seguir una ejecución en directo. Los ejemplos usan la dirección por defecto, `http://127.0.0.1:8000`.
+
+## Endpoints
+
+| Método | Ruta | Qué hace |
+|--------|------|--------------|
+| `POST` | `/api/runs` | Crea una ejecución (nombre del agente, objetivo y metadatos opcionales) |
+| `GET` | `/api/runs` | Lista las ejecuciones, de más reciente a más antigua |
+| `GET` | `/api/runs/{id}` | Una ejecución: estado, contadores, proveedor, modelo, uso de tokens y señales |
+| `POST` | `/api/runs/{id}/tool-results` | Registra ejecuciones de herramientas (también cuenta herramientas y errores) |
+| `POST` | `/api/runs/{id}/observations` | Registra otros eventos: llamadas al modelo, comandos, cambios en archivos y eventos de frameworks |
+| `POST` | `/api/runs/{id}/finish` | Marca la ejecución como completada con su salida final |
+| `POST` | `/api/runs/{id}/fail` | Marca la ejecución como fallida con un código y un mensaje de error |
+| `GET` | `/api/runs/{id}/events` | Eventos en bruto de la ejecución, en orden |
+| `GET` | `/api/runs/{id}/events/stream` | Eventos en directo como Server-Sent Events |
+| `GET` | `/api/runs/{id}/timeline` | Eventos agrupados por paso (ejecución del agente, llamada al modelo, herramienta), con duraciones |
+| `GET` | `/api/runs/{id}/graph?view=execution\|decisions` | Nodos y aristas listos para un visor de grafos |
+| `GET` | `/api/runs/{id}/explanation` | Relato en lenguaje claro, las decisiones tomadas y señales como reintentos o bucles |
+| `GET` | `/api/runs/{id}/analytics` | Métricas de herramientas, grafo de herramientas y ejecuciones similares |
+| `GET` | `/api/runs/compare?left_run_id=…&right_run_id=…` | Diferencia entre dos ejecuciones, con la causa raíz más probable |
+| `GET` | `/api/dashboard?period=24h\|7d\|30d` | Totales, tendencias, herramientas más usadas y errores más frecuentes |
+| `POST` | `/v1/traces` | Receptor OpenTelemetry (OTLP/HTTP, protobuf o JSON, gzip). Ruta raíz, no está bajo `/api` |
+| `GET` | `/health` | Comprobación de estado |
+
+## Estados de una ejecución
+
+Una ejecución está en uno de estos estados: `running`, `completed` o `failed`. Una ejecución terminada es `completed` (no «finished»).
+
+Las decisiones (elección de herramienta, reintento, recuperación) y las señales se deducen cuando una ejecución **termina** o falla, no mientras se ejecuta. Una ejecución en curso todavía no muestra ninguna.
+
+## POST /v1/traces
+
+Receptor OTLP/HTTP para trazas OpenTelemetry. Consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry) para saber cómo configurarlo.
+
+**Tipos de contenido:** `application/x-protobuf` (lo que envían los exportadores por defecto) y `application/json`. Se aceptan `Content-Encoding: gzip` y `deflate`.
+
+**Respuesta:** `200 OK` con una `ExportTraceServiceResponse` vacía (`{}` en JSON). Si algún span no se pudo entender, una respuesta protobuf los indica en `partial_success.rejected_spans`.
+
+### Ejemplo (JSON)
+
+```http
+POST /v1/traces
+Content-Type: application/json
+```
+
+```json
+{
+  "resourceSpans": [{
+    "resource": {"attributes": [{"key": "service.name", "value": {"stringValue": "weather-service"}}]},
+    "scopeSpans": [{
+      "scope": {"name": "pydantic-ai"},
+      "spans": [
+        {"traceId": "5b8efff798038103d269b633813fc60c", "spanId": "eee19b7ec3c1b174", "name": "invoke_agent weather",
+         "startTimeUnixNano": "1792764785544708352", "endTimeUnixNano": "1792764788544708352",
+         "attributes": [
+           {"key": "gen_ai.operation.name", "value": {"stringValue": "invoke_agent"}},
+           {"key": "gen_ai.agent.name", "value": {"stringValue": "weather"}},
+           {"key": "gen_ai.agent.call.id", "value": {"stringValue": "call-1"}},
+           {"key": "final_result", "value": {"stringValue": "It is sunny in Madrid."}}]},
+        {"traceId": "5b8efff798038103d269b633813fc60c", "spanId": "eee19b7ec3c1b175", "parentSpanId": "eee19b7ec3c1b174",
+         "name": "chat gpt-4o", "startTimeUnixNano": "1792764785644708352", "endTimeUnixNano": "1792764787044708352",
+         "attributes": [
+           {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+           {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+           {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4o"}},
+           {"key": "gen_ai.usage.input_tokens", "value": {"intValue": "120"}},
+           {"key": "gen_ai.usage.output_tokens", "value": {"intValue": "24"}},
+           {"key": "gen_ai.agent.call.id", "value": {"stringValue": "call-1"}}]}
+      ]
+    }]
+  }]
+}
+```
+
+El servidor crea la ejecución `5b8efff7-9803-8103-d269-b633813fc60c` (el id de la traza escrito como UUID) con el agente `weather`, estado `completed`, proveedor `openai`, modelo `gpt-4o`, 120 tokens de prompt y 24 tokens de respuesta.
+
+:::note[Codificación OTLP/JSON]
+En OTLP/JSON, los ids son cadenas **hexadecimales** y los enteros de 64 bits son **cadenas** (`"intValue": "120"`).
+:::
+
+### Errores
+
+| Caso | Respuesta |
+|------|----------|
+| Cuerpo que no es OTLP | `400` `{"detail":"Invalid OTLP protobuf body: ..."}` |
+| Tipo de contenido no admitido | `400` `{"detail":"Unsupported Content-Type 'text/plain'."}` |
+| gzip corrupto o `Content-Encoding` desconocido | `400` `{"detail":"Invalid gzip body: ..."}` / `{"detail":"Unsupported Content-Encoding 'br'."}` |
+| Cuerpo mayor que `TRACE_AGENT_OTLP_MAX_BODY_BYTES` | `413` |
+| Receptor desactivado (`TRACE_AGENT_OTLP_ENABLED=false`) | `404` `{"detail":"The OTLP receiver is disabled."}` |
+
+### Atributos de span que se leen
+
+Solo se usan los spans cuyo `gen_ai.operation.name` es `invoke_agent`, `chat` o `execute_tool`. El id del span pasa a ser el id del paso, el id del span padre pasa a ser el paso padre, y las horas y duraciones salen del inicio y el fin del span. Un estado de span `UNSET` u `OK` es un éxito; solo `ERROR` es un fallo, con el nombre de la clase de la excepción como código de error y el mensaje de la excepción como mensaje de error.
+
+**`invoke_agent`** → `chain.started`, `chain.completed` / `chain.failed`
+
+| Atributo | Para qué se usa |
+|-----------|----------|
+| `gen_ai.agent.name` | Nombre del agente. Da nombre a la ejecución cuando se crea |
+| `gen_ai.agent.call.id` | Identifica la llamada al agente. La ejecución termina cuando no queda ninguna llamada abierta |
+| `gen_ai.conversation.id` | Se guarda en los metadatos del evento |
+| `gen_ai.aggregated_usage.input_tokens` / `output_tokens` | Metadatos del evento |
+| `final_result` | Salida final de la ejecución (resumida) |
+
+**`chat`** → `llm.started`, `llm.completed` / `llm.failed`
+
+| Atributo | Para qué se usa |
+|-----------|----------|
+| `gen_ai.provider.name` (alternativa `gen_ai.system`) | Proveedor del evento y de la ejecución |
+| `gen_ai.response.model` (preferido) / `gen_ai.request.model` | Modelo del evento y de la ejecución |
+| `gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens` | Tokens de prompt y de respuesta, sumados a los totales de la ejecución |
+| `gen_ai.response.finish_reasons` | Metadatos del evento |
+| `gen_ai.input.messages` | Objetivo de la ejecución (el primer texto del usuario, cuando se crea la ejecución) |
+| `gen_ai.output.messages` | Nombres de las herramientas solicitadas |
+
+**`execute_tool`** → `tool.started`, `tool.succeeded` / `tool.failed`
+
+| Atributo | Para qué se usa |
+|-----------|----------|
+| `gen_ai.tool.name` | Nombre de la herramienta |
+| `gen_ai.tool.call.id` | Id de la llamada |
+| `gen_ai.tool.call.arguments` | Argumentos (los valores largos se truncan) |
+| `gen_ai.tool.call.result` | Resumen de la salida |
+
+**Atributos que configuran TraceAgent**
+
+| Atributo | Para qué se usa |
+|-----------|----------|
+| `service.name` (recurso) | Nombre del agente alternativo |
+| `trace_agent.run_id` (recurso, o en cada span) | Asocia los spans a una ejecución existente |
+
+## POST /api/runs/\{id\}/tool-results
+
+Informa de las ejecuciones de herramientas de una ejecución. Cada resultado registra tanto `tool.started` como `tool.succeeded` / `tool.failed`, y actualiza los contadores de la ejecución.
+
+```json
+{
+  "results": [{
+    "call_id": "c1",
+    "name": "weather",
+    "step_id": "tool-1",
+    "parent_step_id": "llm-1",
+    "status": "succeeded",
+    "args": {"city": "Madrid"},
+    "output_summary": "Sunny",
+    "duration_ms": 12
+  }]
+}
+```
+
+`parent_step_id` es opcional. Cuelga la herramienta de su paso padre en la línea de tiempo.
+
+:::warning[Informa de cada herramienta una sola vez]
+Informa de una herramienta por este endpoint **o** mediante una observación `tool_call`, nunca por los dos. Hacer las dos cosas duplica los eventos y cuenta los errores dos veces.
+:::
+
+## GET /api/runs/\{id\}/events/stream
+
+Flujo de Server-Sent Events para seguir una ejecución en directo. La respuesta es `200` con `content-type: text/event-stream`.
+
+```text
+data: {"type": "connected", "run_id": "ad76681d-6a6a-4666-be32-377ae8544420"}
+
+data: {"id": 29, "seq": 3, "type": "tool.started", "actor": "sdk", "summary": "Started weather.", "status": "running", "step_id": "tool-1", "tool_name": "weather", "timestamp": "2026-10-23T14:13:12.435113+00:00"}
+
+data: {"id": 30, "seq": 4, "type": "tool.succeeded", "actor": "sdk", "summary": "Sunny", "status": "succeeded", "step_id": "tool-1", "tool_name": "weather", "timestamp": "2026-10-23T14:13:12.439109+00:00"}
+
+data: {"id": 31, "seq": 5, "type": "run.completed", "actor": "proxy", "summary": "It is sunny in Madrid.", "status": "completed", "step_id": null, "tool_name": null, "timestamp": "2026-10-23T14:13:12.487165+00:00"}
+```
+
+- El primer mensaje es `{"type": "connected"}`.
+- Se envía un mensaje `{"type": "heartbeat"}` cada 15 segundos sin eventos.
+- Cualquier otro mensaje es un evento registrado, y su `type` es el propio tipo del evento (`tool.succeeded`, `run.completed`...).
+
+## GET /api/runs/\{id\}/timeline
+
+Devuelve los eventos de una ejecución agrupados por paso. Es lo que usa la UI para construir la línea de tiempo.
+
+```json
+{
+  "run_id": "ce67fce7-8cbe-4df8-b3c0-deef2070afad",
+  "groups": [
+    {
+      "step_id": "run-08b5ddf944d3",
+      "label": "chain.completed",
+      "status": "succeeded",
+      "parent_step_id": null,
+      "event_count": 2,
+      "duration_ms": 21,
+      "events": [
+        { "seq": 2,  "type": "chain.started",   "summary": "Pydantic AI run 'support-agent' started",   "status": "running" },
+        { "seq": 13, "type": "chain.completed", "summary": "Pydantic AI run 'support-agent' completed", "status": "succeeded", "duration_ms": 21 }
+      ]
+    },
+    {
+      "step_id": "tool-a61c92ca8864",
+      "label": "lookup_order",
+      "status": "failed",
+      "tool_name": "lookup_order",
+      "parent_step_id": "run-08b5ddf944d3",
+      "event_count": 2,
+      "duration_ms": 0,
+      "events": [
+        { "seq": 5, "type": "tool.started", "summary": "Started lookup_order." },
+        { "seq": 6, "type": "tool.failed",  "summary": "The orders service timed out, try again", "status": "failed" }
+      ]
+    }
+  ]
+}
+```
+
+`parent_step_id` es lo que anida cada paso bajo su padre: las llamadas al modelo y las herramientas cuelgan del paso del agente. Los eventos sueltos como `run.started` y `run.completed` no tienen padre.
+
+:::note[Etiquetas de la API frente a etiquetas de la UI]
+La UI muestra nombres legibles («Agent run», «Model call»). En la API, `label` sigue siendo el tipo técnico del evento (`chain.completed`, `llm.completed`) o el nombre de la herramienta.
+:::
+
+## GET /api/runs/compare
+
+Compara dos ejecuciones: `GET /api/runs/compare?left_run_id=<id>&right_run_id=<id>`. La UI muestra los mismos datos en su vista de comparación, aquí con la diferencia de tokens y de duración entre dos ejecuciones:
+
+![Vista de comparación con la diferencia de tokens y de duración entre dos ejecuciones](/img/trace-agent/compare-token-diff.png)
+
+La respuesta tiene estas claves de primer nivel:
+
+| Clave | Contenido |
+|-----|---------|
+| `left_run`, `right_run` | El resumen de cada ejecución, con el mismo formato que `GET /api/runs/{id}` |
+| `overview_diff` | Diferencias entre las dos ejecuciones como números con signo (derecha menos izquierda): recuentos de herramientas, comandos, errores, reintentos y artefactos, total de tokens y duración en milisegundos. Un número positivo significa que la ejecución de la derecha tiene más. `duration_ms_delta` es `null` si alguna de las dos no ha terminado |
+| `divergence` | El primer punto en el que las dos ejecuciones dejan de hacer lo mismo: el tipo de paso que difiere, los ids de evento de cada lado y un resumen de una línea. Es `null` cuando las ejecuciones nunca divergen |
+| `aligned_timeline` | Los pasos de ambas ejecuciones emparejados en orden (consulta el formato de los pares más abajo) |
+| `tool_diff`, `command_diff`, `file_diff`, `artifact_diff`, `decision_diff` | El mismo formato de pares, limitado a herramientas, comandos, cambios en archivos, artefactos o decisiones |
+| `root_cause` | El motivo más probable por el que las ejecuciones difieren: una etiqueta, un resumen, el primer evento de cada lado que causó la diferencia, los eventos que lo respaldan (`supporting_event_ids`), el impacto y una confianza `high`, `medium` o `low`. Si las ejecuciones no divergen, la etiqueta es `no_observable_root_cause` |
+| `evidence` | Los eventos completos de ambas ejecuciones, indexados por id de evento bajo `left` y `right`, para poder consultar cualquier id de evento mencionado arriba |
+
+Cada par de `aligned_timeline` y de las listas `*_diff` tiene una `relation` (`shared`, `left_only`, `right_only` o `different`), un `kind`, un `summary` y un lado `left` y otro `right`. Cada lado tiene su `label`, `status`, `summary`, `event_ids`, `step_id`, `duration_ms` y `metadata`.

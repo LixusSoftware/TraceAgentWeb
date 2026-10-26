@@ -1,0 +1,141 @@
+---
+sidebar_position: 1
+title: Referencia del SDK
+description: "Referencia completa del SDK de Python de TraceAgent: inicialización del cliente, registro de ejecuciones, eventos, operaciones con archivos, comandos y artefactos."
+image: img/social-card.jpg
+keywords: [SDK, API, python, cliente, referencia, trace-agent-sdk]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PackageInstall from '@site/src/components/PackageInstall';
+
+# Referencia del SDK
+
+El SDK de TraceAgent es el cliente Python principal para registrar las acciones de un agente. Ofrece una API sencilla para iniciar ejecuciones, registrar eventos y adjuntar artefactos.
+
+:::tip[¿Usas un framework?]
+Si tu agente usa LangChain o Pydantic AI, no hace falta registrar cada paso a mano: usa el [callback de LangChain](/es/docs/instrumentation/langchain) o la [capacidad de Pydantic AI](/es/docs/instrumentation/pydantic-ai). Para trazar sin ningún código de TraceAgent en el agente, consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry).
+:::
+
+## Instalación
+
+<PackageInstall packages={['trace-agent-sdk']} />
+
+## Inicialización del cliente
+
+```python
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://localhost:8000")
+```
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `server_url` | `str` | URL base del servidor de TraceAgent |
+
+## Iniciar una ejecución
+
+```python
+run = client.start_run("my-agent", "Perform a system task")
+```
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `agent_name` | `str` | Identifica qué agente creó la ejecución |
+| `description` | `str` | Qué intenta lograr el agente |
+
+**Devuelve:** un objeto `Run` que usas para registrar eventos.
+
+## Registrar eventos
+
+### Escritura de archivos
+
+Registra cuándo el agente crea o modifica un archivo:
+
+```python
+result = run.record_file_write(
+    "app.py",
+    before_content="",
+    after_content="print('Hello World')"
+)
+```
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `file_path` | `str` | Ruta del archivo |
+| `before_content` | `str` | Contenido del archivo antes de la escritura |
+| `after_content` | `str` | Contenido del archivo después de la escritura |
+
+### Ejecución de comandos
+
+Registra los comandos de shell que ejecuta el agente:
+
+```python
+result = run.record_command(
+    ["python", "app.py"],
+    exit_code=0
+)
+```
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `command` | `list[str]` | Comando y argumentos |
+| `exit_code` | `int` | Código de salida del proceso |
+
+### Llamadas a herramientas
+
+Registra invocaciones personalizadas de herramientas:
+
+```python
+result = run.record_tool_call(
+    "get_weather",
+    parameters={"city": "Madrid"},
+    result={"temp": 22, "condition": "sunny"}
+)
+```
+
+## Finalizar una ejecución
+
+Cierra siempre la ejecución cuando el agente termine:
+
+```python
+finish_result = run.finish({"status": "success"})
+```
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `metadata` | `dict` | Metadatos finales: estado, resultados, errores, etc. |
+
+:::warning
+Llama siempre a `run.finish()` para cerrar bien la sesión. Las ejecuciones sin finalizar aparecerán como «en curso» indefinidamente en la UI.
+:::
+
+## Ejemplo completo
+
+```python title="full_example.py"
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://localhost:8000")
+
+# Inicia la ejecución
+run = client.start_run("code-assistant", "Fix the login bug")
+
+# Registra las acciones
+run.record_file_write(
+    "auth.py",
+    before_content="def login(user):\n    pass",
+    after_content="def login(user):\n    validate(user)\n    return create_session(user)"
+)
+
+run.record_command(["pytest", "tests/test_auth.py"], exit_code=0)
+
+# Finaliza
+run.finish({"status": "success", "tests_passed": 5})
+```
+
+## ¿Y ahora qué?
+
+- **[Integración con LangChain](/es/docs/instrumentation/langchain)**: traza agentes LangChain automáticamente
+- **[Ejemplos](/es/docs/examples/)**: patrones de uso reales
+- **[Variables de entorno](/es/docs/configuration/environment-variables)**: opciones de configuración
