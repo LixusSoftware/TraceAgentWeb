@@ -14,6 +14,10 @@ import PackageInstall from '@site/src/components/PackageInstall';
 
 The TraceAgent SDK is the core Python client for recording agent actions. It provides a simple API to start runs, record events, and attach artifacts.
 
+:::tip[Using a framework?]
+If your agent uses LangChain or Pydantic AI, you don't have to record every step by hand: use the [LangChain callback](/docs/instrumentation/langchain) or the [Pydantic AI capability](/docs/instrumentation/pydantic-ai). To trace without any TraceAgent code in the agent, see [OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry).
+:::
+
 ## Installation
 
 <PackageInstall packages={['trace-agent-sdk']} />

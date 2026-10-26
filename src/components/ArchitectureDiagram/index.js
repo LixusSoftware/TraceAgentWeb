@@ -9,7 +9,7 @@ import ReactFlow, {
   useEdgesState
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Bot, Package, Link as LinkIcon, Server, MonitorPlay } from 'lucide-react';
+import { Bot, Package, Link as LinkIcon, Server, MonitorPlay, Plug, Radio } from 'lucide-react';
 import { useColorMode } from '@docusaurus/theme-common';
 
 const CustomNode = ({ data, isConnectable }) => {
@@ -73,8 +73,9 @@ export default function ArchitectureDiagram() {
       id: 'agent',
       type: 'custom',
       position: { x: 250, y: 0 },
-      data: { 
-        label: 'Your Agent Code', 
+      data: {
+        label: 'Your Agent Code',
+        subLabels: ['SDK', 'LangChain', 'Pydantic AI', 'OpenTelemetry'],
         icon: Bot,
         bg: 'var(--ta-surface-3)',
         border: 'var(--ta-border)',
@@ -84,9 +85,9 @@ export default function ArchitectureDiagram() {
     {
       id: 'sdk',
       type: 'custom',
-      position: { x: 100, y: 150 },
-      data: { 
-        label: 'TraceAgent SDK', 
+      position: { x: -200, y: 170 },
+      data: {
+        label: 'TraceAgent SDK',
         icon: Package,
         bg: isDark ? 'rgba(143, 163, 204, 0.1)' : 'rgba(43, 58, 92, 0.08)',
         color: isDark ? '#c9d3e8' : 'var(--ta-accent-navy)',
@@ -98,9 +99,9 @@ export default function ArchitectureDiagram() {
     {
       id: 'langchain',
       type: 'custom',
-      position: { x: 400, y: 150 },
-      data: { 
-        label: 'LangChain Callback', 
+      position: { x: 100, y: 170 },
+      data: {
+        label: 'LangChain Callback',
         icon: LinkIcon,
         bg: isDark ? 'rgba(212, 165, 78, 0.08)' : 'rgba(201, 148, 62, 0.08)',
         color: isDark ? 'var(--ta-accent-amber)' : 'var(--ta-accent-amber-dark)',
@@ -110,13 +111,42 @@ export default function ArchitectureDiagram() {
       },
     },
     {
+      id: 'pydantic',
+      type: 'custom',
+      position: { x: 400, y: 170 },
+      data: {
+        label: 'Pydantic AI Capability',
+        icon: Plug,
+        bg: isDark ? 'rgba(212, 165, 78, 0.08)' : 'rgba(201, 148, 62, 0.08)',
+        color: isDark ? 'var(--ta-accent-amber)' : 'var(--ta-accent-amber-dark)',
+        border: isDark ? 'rgba(212, 165, 78, 0.2)' : 'rgba(201, 148, 62, 0.2)',
+        hasTopHandle: true,
+        hasBottomHandle: true
+      },
+    },
+    {
+      id: 'otel',
+      type: 'custom',
+      position: { x: 700, y: 170 },
+      data: {
+        label: 'OpenTelemetry Exporter',
+        icon: Radio,
+        subLabels: ['OTLP/HTTP'],
+        bg: isDark ? 'rgba(143, 163, 204, 0.1)' : 'rgba(43, 58, 92, 0.08)',
+        color: isDark ? '#c9d3e8' : 'var(--ta-accent-navy)',
+        border: isDark ? 'rgba(143, 163, 204, 0.2)' : 'rgba(43, 58, 92, 0.2)',
+        hasTopHandle: true,
+        hasBottomHandle: true
+      },
+    },
+    {
       id: 'server',
       type: 'custom',
       position: { x: 250, y: 300 },
       data: { 
-        label: 'TraceAgent Server', 
+        label: 'TraceAgent Server',
         icon: Server,
-        subLabels: ['FastAPI', 'SQLite / PostgreSQL'],
+        subLabels: ['FastAPI', 'SQLite / PostgreSQL', 'OTLP receiver'],
         bg: 'var(--ta-gradient-primary)',
         color: 'white',
         hasTopHandle: true,
@@ -151,6 +181,8 @@ export default function ArchitectureDiagram() {
   const initialEdges = [
     { id: 'e1', source: 'agent', target: 'sdk', ...edgeOptions },
     { id: 'e2', source: 'agent', target: 'langchain', ...edgeOptions },
+    { id: 'e2b', source: 'agent', target: 'pydantic', ...edgeOptions },
+    { id: 'e2c', source: 'agent', target: 'otel', ...edgeOptions },
     { 
       id: 'e3', source: 'sdk', target: 'server', 
       label: 'HTTP / REST',
@@ -158,8 +190,19 @@ export default function ArchitectureDiagram() {
       labelBgStyle: { fill: isDark ? '#131b2c' : '#f8fafc', fillOpacity: 0.8 },
       ...edgeOptions 
     },
-    { 
+    {
       id: 'e4', source: 'langchain', target: 'server',
+      ...edgeOptions
+    },
+    {
+      id: 'e4b', source: 'pydantic', target: 'server',
+      ...edgeOptions
+    },
+    {
+      id: 'e4c', source: 'otel', target: 'server',
+      label: 'POST /v1/traces',
+      labelStyle: { fill: isDark ? '#c9d3e8' : '#2b3a5c', fontWeight: 600, fontSize: 11 },
+      labelBgStyle: { fill: isDark ? '#131b2c' : '#f8fafc', fillOpacity: 0.8 },
       ...edgeOptions
     },
     { 
