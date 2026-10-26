@@ -1,0 +1,45 @@
+---
+sidebar_position: 97
+title: Troubleshooting
+description: "Fix common TraceAgent problems: missing OpenTelemetry spans, duplicated runs, runs stuck in running, an unreachable server and dependency conflicts."
+image: img/social-card.jpg
+keywords: [troubleshooting, problems, missing runs, duplicate runs, opentelemetry, pydantic ai, errors]
+---
+
+# Troubleshooting
+
+## No run appears after a short script (OpenTelemetry)
+
+The exporter sends spans in batches in the background, and the script ended before it sent them. Call `provider.shutdown()` (or `provider.force_flush()`) before the script ends. See [OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry).
+
+## Spans arrive but no run is created
+
+Check these two causes:
+
+- The OTLP receiver is off (`TRACE_AGENT_OTLP_ENABLED=false`). You would get a `404` from `POST /v1/traces`.
+- None of the spans has a `gen_ai.operation.name` of `invoke_agent`, `chat` or `execute_tool`. Other spans are ignored.
+
+## The run appears twice
+
+The same agent uses both the Pydantic AI capability and OpenTelemetry, so every call is recorded twice. Pick one. See [Hooks or OpenTelemetry?](/docs/instrumentation/hooks-vs-opentelemetry).
+
+## The run stays `running`
+
+- With the Pydantic AI capability, you open and close the run. If the agent raised an exception, call `run.fail(...)`. See [Pydantic AI Integration](/docs/instrumentation/pydantic-ai).
+- With OpenTelemetry, a run ends when its `invoke_agent` span ends. If the library emits only `chat` spans, the run is created but never marked as finished.
+
+## A running run shows no decisions
+
+This is normal. Decisions (tool choice, retry, recovery) are derived when the run ends.
+
+## The server is down and my agent is slow or prints a warning
+
+Tracing never stops the agent. After a failed delivery, TraceAgent prints one line (`could not deliver trace data ... The agent is not affected.`) and pauses sending for `failure_cooldown` seconds (30 by default). Events produced meanwhile are dropped.
+
+## Pip reports a conflict with `openai`
+
+The server accepts `openai>=1.52,<4`, so it installs next to `pydantic-ai-slim[openai]`. If you still see a conflict, upgrade `trace-agent-server`.
+
+## Pydantic AI prints a Logfire banner
+
+It is unrelated to TraceAgent. Set `PYDANTIC_AI_NO_BANNER=1` to hide it.

@@ -1,0 +1,70 @@
+---
+title: "Trace Pydantic AI agents with TraceAgent: hooks or OpenTelemetry"
+description: "TraceAgent now supports Pydantic AI with a one-line capability and ingests OpenTelemetry GenAI traces over OTLP/HTTP. See how to pick the right route for your agent."
+image: img/social-card.jpg
+slug: pydantic-ai-and-opentelemetry
+authors: [traceagent]
+tags: [release, tutorial]
+keywords: [pydantic ai observability, opentelemetry ai agents, otlp genai, traceagent release]
+---
+
+TraceAgent now traces **Pydantic AI** agents, and the server can receive **OpenTelemetry** traces directly. Two routes, one result: a run with every model call, tool, token count and decision.
+
+{/* truncate */}
+
+## Route 1: the Pydantic AI capability
+
+Add one line to your agent and TraceAgent records its model calls and tools, without ever blocking the agent:
+
+```python
+from pydantic_ai import Agent
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://127.0.0.1:8000")
+run = client.start_run("weather-agent", "What is the weather in Madrid?")
+
+agent = Agent(
+    "openai:gpt-4o",
+    capabilities=[run.as_pydantic_ai_capability()],  # the TraceAgent line
+)
+
+result = agent.run_sync("What is the weather in Madrid?")
+run.finish(result.output)
+```
+
+You choose the run's name and goal, and you can redact sensitive fields. Read the [Pydantic AI integration guide](/docs/instrumentation/pydantic-ai).
+
+## Route 2: OpenTelemetry, with no TraceAgent code in the agent
+
+The TraceAgent server is an OTLP/HTTP receiver at `POST /v1/traces`. If your agent already emits OpenTelemetry traces that follow the GenAI conventions, point the exporter at the server:
+
+```python
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+provider = TracerProvider()
+provider.add_span_processor(
+    BatchSpanProcessor(OTLPSpanExporter(endpoint="http://127.0.0.1:8000/v1/traces"))
+)
+```
+
+The server turns each trace into a run. Read the [OpenTelemetry ingestion guide](/docs/instrumentation/opentelemetry), and remember to call `provider.shutdown()` in short scripts so no span is lost.
+
+## Which one should I use?
+
+Use **one route per agent**: using both records the run twice.
+
+- Already on OpenTelemetry, or you can't touch the agent's code? Use OpenTelemetry.
+- Want fine control over what is recorded, or no OpenTelemetry in your stack? Use the capability.
+
+The full comparison is in [Hooks or OpenTelemetry?](/docs/instrumentation/hooks-vs-opentelemetry).
+
+## Also in this release
+
+- Runs show their provider, model and token totals for every framework integration, and the Compare view counts those tokens too.
+- The timeline is nested: model calls and tools appear under the agent step that ran them.
+- A readable inspector for events and decisions, with technical details folded away.
+- LangChain: each tool is now recorded once, with its real name.
+
+See the [changelog](/docs/changelog) for the complete list, and [get started](/docs/getting-started/installation) to try it.

@@ -1,47 +1,44 @@
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
+import Translate from '@docusaurus/Translate';
 import { Zap, Activity, Link, Server } from 'lucide-react';
 import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Real-time Tracing',
+    title: <Translate id="features.realtime.title">Real-time Tracing</Translate>,
     icon: Zap,
     description: (
-      <>
-        Capture tool calls, file operations, shell commands, and artifacts
-        as they happen. Monitor long-running agents with live event streaming.
-      </>
+      <Translate id="features.realtime.desc">
+        Capture tool calls, file operations, shell commands, and artifacts as they happen. Monitor long-running agents with live event streaming.
+      </Translate>
     ),
   },
   {
-    title: 'Execution Timeline',
+    title: <Translate id="features.timeline.title">Execution Timeline</Translate>,
     icon: Activity,
     description: (
-      <>
-        Visualize agent behavior through interactive timelines and execution graphs.
-        Click any event to see full parameters, results, and diffs.
-      </>
+      <Translate id="features.timeline.desc">
+        Visualize agent behavior through interactive timelines and execution graphs. Click any event to see full parameters, results, and diffs.
+      </Translate>
     ),
   },
   {
-    title: 'LangChain Native',
+    title: <Translate id="features.integrations.title">Framework Integrations</Translate>,
     icon: Link,
     description: (
-      <>
-        Drop-in callback handler for LangChain agents. Chain steps, LLM calls,
-        tool usage, and retriever activity traced automatically — zero boilerplate.
-      </>
+      <Translate id="features.integrations.desc">
+        LangChain callback, Pydantic AI capability, or plain OpenTelemetry. Chains, model calls, and tools traced automatically — often with a single line.
+      </Translate>
     ),
   },
   {
-    title: 'Self-Hosted',
+    title: <Translate id="features.selfhosted.title">Self-Hosted</Translate>,
     icon: Server,
     description: (
-      <>
-        Full data ownership with FastAPI backend and SQLite/PostgreSQL support.
-        No external telemetry, no cloud dependency. Your data stays with you.
-      </>
+      <Translate id="features.selfhosted.desc">
+        Full data ownership with FastAPI backend and SQLite/PostgreSQL support. No external telemetry, no cloud dependency. Your data stays with you.
+      </Translate>
     ),
   },
 ];

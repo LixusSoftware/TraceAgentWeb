@@ -1,0 +1,46 @@
+{
+  "title": {
+    "message": "TraceAgent",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "Logotipo de TraceAgent",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.Docs": {
+    "message": "Documentación",
+    "description": "Navbar item with label Docs"
+  },
+  "item.label.SDK": {
+    "message": "SDK",
+    "description": "Navbar item with label SDK"
+  },
+  "item.label.Integrations": {
+    "message": "Integraciones",
+    "description": "Navbar item with label Integrations"
+  },
+  "item.label.Examples": {
+    "message": "Ejemplos",
+    "description": "Navbar item with label Examples"
+  },
+  "item.label.Blog": {
+    "message": "Blog",
+    "description": "Navbar item with label Blog"
+  },
+  "item.label.LangChain": {
+    "message": "LangChain",
+    "description": "Navbar item with label LangChain"
+  },
+  "item.label.Pydantic AI": {
+    "message": "Pydantic AI",
+    "description": "Navbar item with label Pydantic AI"
+  },
+  "item.label.OpenTelemetry": {
+    "message": "OpenTelemetry",
+    "description": "Navbar item with label OpenTelemetry"
+  },
+  "item.label.Hooks or OpenTelemetry?": {
+    "message": "¿Hooks u OpenTelemetry?",
+    "description": "Navbar item with label Hooks or OpenTelemetry?"
+  }
+}

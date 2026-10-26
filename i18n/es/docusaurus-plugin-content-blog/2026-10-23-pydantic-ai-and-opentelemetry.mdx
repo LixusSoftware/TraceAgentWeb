@@ -1,0 +1,70 @@
+---
+title: "Traza agentes de Pydantic AI con TraceAgent: hooks u OpenTelemetry"
+description: "TraceAgent ahora es compatible con Pydantic AI mediante una capacidad de una línea y recibe trazas OpenTelemetry GenAI por OTLP/HTTP. Descubre cómo elegir la vía adecuada para tu agente."
+image: img/social-card.jpg
+slug: pydantic-ai-and-opentelemetry
+authors: [traceagent]
+tags: [release, tutorial]
+keywords: [observabilidad pydantic ai, opentelemetry agentes de ia, otlp genai, lanzamiento traceagent]
+---
+
+TraceAgent ahora traza agentes de **Pydantic AI**, y el servidor puede recibir trazas de **OpenTelemetry** directamente. Dos vías, un mismo resultado: una ejecución con cada llamada al modelo, herramienta, recuento de tokens y decisión.
+
+{/* truncate */}
+
+## Vía 1: la capacidad de Pydantic AI
+
+Añade una línea a tu agente y TraceAgent registra sus llamadas al modelo y sus herramientas, sin bloquear nunca al agente:
+
+```python
+from pydantic_ai import Agent
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://127.0.0.1:8000")
+run = client.start_run("weather-agent", "What is the weather in Madrid?")
+
+agent = Agent(
+    "openai:gpt-4o",
+    capabilities=[run.as_pydantic_ai_capability()],  # la línea de TraceAgent
+)
+
+result = agent.run_sync("What is the weather in Madrid?")
+run.finish(result.output)
+```
+
+Tú eliges el nombre y el objetivo de la ejecución, y puedes ocultar los campos sensibles. Lee la [guía de integración con Pydantic AI](/es/docs/instrumentation/pydantic-ai).
+
+## Vía 2: OpenTelemetry, sin código de TraceAgent en el agente
+
+El servidor de TraceAgent es un receptor OTLP/HTTP en `POST /v1/traces`. Si tu agente ya emite trazas OpenTelemetry que siguen las convenciones GenAI, apunta el exportador al servidor:
+
+```python
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+provider = TracerProvider()
+provider.add_span_processor(
+    BatchSpanProcessor(OTLPSpanExporter(endpoint="http://127.0.0.1:8000/v1/traces"))
+)
+```
+
+El servidor convierte cada traza en una ejecución. Lee la [guía de ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry) y recuerda llamar a `provider.shutdown()` en los scripts cortos para que no se pierda ningún span.
+
+## ¿Cuál debería usar?
+
+Usa **una sola vía por agente**: si usas las dos, la ejecución se registra dos veces.
+
+- ¿Ya usas OpenTelemetry, o no puedes tocar el código del agente? Usa OpenTelemetry.
+- ¿Quieres un control fino de lo que se registra, o no tienes OpenTelemetry en tu stack? Usa la capacidad.
+
+La comparación completa está en [¿Hooks u OpenTelemetry?](/es/docs/instrumentation/hooks-vs-opentelemetry).
+
+## También en esta versión
+
+- Las ejecuciones muestran su proveedor, su modelo y los totales de tokens en cada integración con frameworks, y la vista de comparación también cuenta esos tokens.
+- La línea de tiempo es jerárquica: las llamadas al modelo y las herramientas aparecen bajo el paso del agente que las ejecutó.
+- Un inspector legible para eventos y decisiones, con los detalles técnicos plegados.
+- LangChain: cada herramienta se registra ahora una sola vez, con su nombre real.
+
+Consulta el [registro de cambios](/es/docs/changelog) para ver la lista completa, y [empieza aquí](/es/docs/getting-started/installation) para probarlo.

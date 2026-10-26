@@ -1,0 +1,91 @@
+---
+sidebar_position: 4
+title: Pydantic AI Quickstart
+description: "Runnable Pydantic AI example traced with the TraceAgent capability. A complete agent with a tool, no API key needed."
+image: img/social-card.jpg
+keywords: [example, pydantic ai, capability, hooks, quickstart, pydantic ai tracing example]
+---
+
+# Pydantic AI Quickstart
+
+import PackageInstall from '@site/src/components/PackageInstall';
+
+A complete Pydantic AI agent traced with one line. It uses a fake model instead of a real LLM, so it **runs without an API key**.
+
+## Run
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-pydantic-ai']} />
+
+Start the TraceAgent server at `http://127.0.0.1:8000`, save the script below as `hooks_quickstart.py` and run:
+
+```bash
+python hooks_quickstart.py
+```
+
+## The Script
+
+```python
+from pydantic_ai import Agent
+from pydantic_ai.messages import ModelResponse, TextPart, ToolCallPart
+from pydantic_ai.models.function import FunctionModel
+from trace_agent_sdk import TraceAgentClient
+
+
+def fake_model(messages, info):
+    """Stands in for an LLM: asks for the tool first, then answers."""
+    if len(messages) == 1:
+        return ModelResponse(parts=[ToolCallPart("weather", {"city": "Madrid"})])
+    return ModelResponse(parts=[TextPart("It is sunny in Madrid, 23 degrees.")])
+
+
+# 1. Create the run in TraceAgent.
+client = TraceAgentClient("http://127.0.0.1:8000")
+run = client.start_run("hooks-quickstart", "What is the weather in Madrid?")
+
+# 2. Your usual agent, plus one line: capabilities=[...]
+agent = Agent(
+    FunctionModel(fake_model),  # use a real model string, e.g. "openai:gpt-4o", in your own agent
+    capabilities=[run.as_pydantic_ai_capability()],  # <-- the TraceAgent line
+)
+
+
+@agent.tool_plain
+def weather(city: str) -> str:
+    """Return the weather of a city."""
+    return f"Sunny, 23 degrees in {city}."
+
+
+# 3. Use it as always.
+result = agent.run_sync("What is the weather in Madrid?")
+print(result.output)
+
+# 4. Close the run.
+run.finish(result.output)
+print(f"Run: {run.run_id}")
+```
+
+Output:
+
+```text
+It is sunny in Madrid, 23 degrees.
+Run: b34d5d79-198d-4f67-bf66-6815131465bc
+```
+
+## What It Does
+
+1. Starts a run in the TraceAgent server
+2. Builds a Pydantic AI agent with the TraceAgent capability
+3. The fake model asks for the `weather` tool, then answers
+4. Finishes the run
+
+Open the run in the UI and you will see these events, in order:
+
+```text
+run.started → chain.started → llm.started → llm.completed →
+tool.started → tool.succeeded → llm.started → llm.completed →
+chain.completed → run.completed
+```
+
+## Learn More
+
+- **[Pydantic AI Integration](/docs/instrumentation/pydantic-ai)** — Options, error handling and reusing an agent

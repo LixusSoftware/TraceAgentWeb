@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {translate} from '@docusaurus/Translate';
 
 const COLOR_STATES = [
   {
@@ -113,8 +114,8 @@ export default function GhostEasterEgg() {
       type="button"
       className={`ghost-easter-egg${isDead ? ' ghost-easter-egg--dead' : ''}${isHurting ? ' ghost-easter-egg--hurt' : ''}`}
       onClick={handleClick}
-      aria-label={isDead ? 'El fantasma ha muerto' : 'Haz clic en el fantasma para cambiar su color'}
-      title={isDead ? 'El fantasma ya ha muerto' : 'Haz clic en el fantasma'}
+      aria-label={isDead ? translate({id: 'ghost.deadAria', message: 'The ghost has died'}) : translate({id: 'ghost.aria', message: 'Click the ghost to change its color'})}
+      title={isDead ? translate({id: 'ghost.deadTitle', message: 'The ghost is already dead'}) : translate({id: 'ghost.title', message: 'Click the ghost'})}
       aria-pressed={isHurting}
       style={style}
     >

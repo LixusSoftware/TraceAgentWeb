@@ -1,9 +1,9 @@
 ---
 sidebar_position: 2
 title: LangChain Integration
-description: Automatically trace LangChain agents with the TraceAgent callback handler.
-image: img/logo.png
-keywords: [langchain, callback, integration, automatic tracing]
+description: "Trace LangChain agents automatically with the TraceAgent callback handler. Chains, LLM calls, tools and retrievers recorded in a single run."
+image: img/social-card.jpg
+keywords: [langchain, langchain tracing, langchain observability, callback handler, automatic tracing]
 ---
 
 # LangChain Integration
@@ -41,13 +41,21 @@ run.finish({"status": "success"})
 | **Retriever query** | Query, retrieved documents |
 | **Error** | Error type, message, traceback |
 
-## With Local Models (LM Studio)
+## How Tools and Models Are Recorded
+
+The callback reports each tool through a single call to the server, so a tool run appears once in the timeline with its real name and duration, and it is counted once in the run's tool and error totals. A failed tool counts as one error.
+
+For every model call, the callback also remembers the provider and model, so the run shows them (and their token usage when the model reports it).
+
+The callback never slows down or breaks your chain: if the TraceAgent server is down, the chain keeps running.
+
+## With Local Models
 
 ```python
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    base_url="http://localhost:1234/v1",
+    base_url="http://localhost:5000/v1",
     api_key="not-needed",
     model="local-model"
 )
@@ -71,4 +79,6 @@ Set `OPENAI_BASE_URL` environment variable to avoid hardcoding the endpoint.
 ## What's Next?
 
 - **[LangChain Example](/docs/examples/langchain-agent)** — Full walkthrough
+- **[Pydantic AI Integration](/docs/instrumentation/pydantic-ai)** — The equivalent one-line integration for Pydantic AI agents
+- **[OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry)** — Trace without TraceAgent code in your agent
 - **[SDK Reference](/docs/instrumentation/sdk)** — Manual instrumentation

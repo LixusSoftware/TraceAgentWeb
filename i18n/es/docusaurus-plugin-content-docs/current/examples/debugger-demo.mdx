@@ -1,0 +1,32 @@
+---
+sidebar_position: 6
+title: Demo del depurador
+description: "Demo sintética del depurador para probar la detección de divergencias y la visualización de trazas."
+image: img/social-card.jpg
+keywords: [ejemplo, depurador, sintético, divergencia, visualización]
+---
+
+# Demo del depurador
+
+**Archivo:** `examples/coding_agent_debugger_demo.py`
+
+Demo sintética del depurador y de la UI. Registra ejecuciones de comandos, lecturas y escrituras de archivos, parches y estados de fallo **sin necesitar un modelo real**, lo que resulta útil para probar la detección de divergencias y la visualización de trazas.
+
+## Ejecutar
+
+```bash
+uv run examples/coding_agent_debugger_demo.py --scenario correct_edit
+```
+
+## Escenarios
+
+| Escenario | Descripción |
+|----------|-------------|
+| `correct_edit` | Una ejecución correcta del agente con las ediciones de archivo esperadas |
+| `wrong_file` | El agente modifica el archivo equivocado y no logra recuperarse |
+| `retry_without_adaptation` | El agente reintenta la misma acción fallida sin cambiar de estrategia |
+| `same_tools_different_artifact` | La secuencia de herramientas es la misma, pero el artefacto final cambia |
+
+## Cuándo usarlo
+
+Úsalo cuando quieras una traza densa para inspeccionar el panel, la línea de tiempo y las vistas de artefactos, sin necesitar una conexión con un LLM real.

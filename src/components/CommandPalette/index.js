@@ -1,5 +1,7 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {useHistory} from '@docusaurus/router';
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import {translate} from '@docusaurus/Translate';
 import { 
   Book, 
   Download, 
@@ -20,25 +22,32 @@ import {
   Newspaper
 } from 'lucide-react';
 
-const PAGES = [
-  {label: 'Introduction', path: '/docs/getting-started/introduction', section: 'Getting Started', icon: Book},
-  {label: 'Installation', path: '/docs/getting-started/installation', section: 'Getting Started', icon: Download},
-  {label: 'Quick Start', path: '/docs/getting-started/quick-start', section: 'Getting Started', icon: Zap},
-  {label: 'Architecture', path: '/docs/core-concepts/architecture', section: 'Core Concepts', icon: Layers},
-  {label: 'SDK Reference', path: '/docs/instrumentation/sdk', section: 'Instrumentation', icon: Package},
-  {label: 'LangChain Integration', path: '/docs/instrumentation/langchain', section: 'Instrumentation', icon: LinkIcon},
-  {label: 'Environment Variables', path: '/docs/configuration/environment-variables', section: 'Configuration', icon: Settings},
-  {label: 'Docker Deployment', path: '/docs/configuration/docker', section: 'Configuration', icon: Box},
-  {label: 'Examples', path: '/docs/examples/', section: 'Examples', icon: Lightbulb},
-  {label: 'Sample Agent', path: '/docs/examples/sample-agent', section: 'Examples', icon: FlaskConical},
-  {label: 'LangChain Agent', path: '/docs/examples/langchain-agent', section: 'Examples', icon: LinkIcon},
-  {label: 'LM Studio Agent', path: '/docs/examples/lm-studio-agent', section: 'Examples', icon: Box},
-  {label: 'Planner Agent', path: '/docs/examples/planner-agent', section: 'Examples', icon: ClipboardList},
-  {label: 'Debugger Demo', path: '/docs/examples/debugger-demo', section: 'Examples', icon: Bug},
-  {label: 'Rich Demo', path: '/docs/examples/rich-demo', section: 'Examples', icon: Target},
-  {label: 'FAQ', path: '/docs/faq', section: 'Help', icon: HelpCircle},
-  {label: 'Changelog', path: '/docs/changelog', section: 'More', icon: FileText},
-  {label: 'Blog', path: '/blog', section: 'More', icon: Newspaper},
+const getPages = () => [
+  {label: translate({id: 'palette.page.introduction', message: 'Introduction'}), path: '/docs/getting-started/introduction', section: translate({id: 'palette.section.gettingstarted', message: 'Getting Started'}), icon: Book},
+  {label: translate({id: 'palette.page.installation', message: 'Installation'}), path: '/docs/getting-started/installation', section: translate({id: 'palette.section.gettingstarted', message: 'Getting Started'}), icon: Download},
+  {label: translate({id: 'palette.page.quickstart', message: 'Quick Start'}), path: '/docs/getting-started/quick-start', section: translate({id: 'palette.section.gettingstarted', message: 'Getting Started'}), icon: Zap},
+  {label: translate({id: 'palette.page.architecture', message: 'Architecture'}), path: '/docs/core-concepts/architecture', section: translate({id: 'palette.section.coreconcepts', message: 'Core Concepts'}), icon: Layers},
+  {label: translate({id: 'palette.page.sdkreference', message: 'SDK Reference'}), path: '/docs/instrumentation/sdk', section: translate({id: 'palette.section.instrumentation', message: 'Instrumentation'}), icon: Package},
+  {label: translate({id: 'palette.page.langchainintegration', message: 'LangChain Integration'}), path: '/docs/instrumentation/langchain', section: translate({id: 'palette.section.instrumentation', message: 'Instrumentation'}), icon: LinkIcon},
+  {label: translate({id: 'palette.page.pydanticaiintegration', message: 'Pydantic AI Integration'}), path: '/docs/instrumentation/pydantic-ai', section: translate({id: 'palette.section.instrumentation', message: 'Instrumentation'}), icon: Package},
+  {label: translate({id: 'palette.page.opentelemetryingestion', message: 'OpenTelemetry Ingestion'}), path: '/docs/instrumentation/opentelemetry', section: translate({id: 'palette.section.instrumentation', message: 'Instrumentation'}), icon: Package},
+  {label: translate({id: 'palette.page.hooksoropentelemetry', message: 'Hooks or OpenTelemetry?'}), path: '/docs/instrumentation/hooks-vs-opentelemetry', section: translate({id: 'palette.section.instrumentation', message: 'Instrumentation'}), icon: Package},
+  {label: translate({id: 'palette.page.apireference', message: 'API Reference'}), path: '/docs/reference/api', section: translate({id: 'palette.section.reference', message: 'Reference'}), icon: FileText},
+  {label: translate({id: 'palette.page.environmentvariables', message: 'Environment Variables'}), path: '/docs/configuration/environment-variables', section: translate({id: 'palette.section.configuration', message: 'Configuration'}), icon: Settings},
+  {label: translate({id: 'palette.page.dockerdeployment', message: 'Docker Deployment'}), path: '/docs/configuration/docker', section: translate({id: 'palette.section.configuration', message: 'Configuration'}), icon: Box},
+  {label: translate({id: 'palette.page.examples', message: 'Examples'}), path: '/docs/examples/', section: translate({id: 'palette.section.examples', message: 'Examples'}), icon: Lightbulb},
+  {label: translate({id: 'palette.page.sampleagent', message: 'Sample Agent'}), path: '/docs/examples/sample-agent', section: translate({id: 'palette.section.examples', message: 'Examples'}), icon: FlaskConical},
+  {label: translate({id: 'palette.page.langchainagent', message: 'LangChain Agent'}), path: '/docs/examples/langchain-agent', section: translate({id: 'palette.section.examples', message: 'Examples'}), icon: LinkIcon},
+  {label: translate({id: 'palette.page.pydanticaiquickstart', message: 'Pydantic AI Quickstart'}), path: '/docs/examples/pydantic-ai-hooks', section: translate({id: 'palette.section.examples', message: 'Examples'}), icon: FlaskConical},
+  {label: translate({id: 'palette.page.pydanticaiviaopentelemetry', message: 'Pydantic AI via OpenTelemetry'}), path: '/docs/examples/pydantic-ai-otel', section: translate({id: 'palette.section.examples', message: 'Examples'}), icon: FlaskConical},
+  {label: translate({id: 'palette.page.localmodelagent', message: 'Local Model Agent'}), path: '/docs/examples/local-model-agent', section: translate({id: 'palette.section.examples', message: 'Examples'}), icon: Box},
+  {label: translate({id: 'palette.page.planneragent', message: 'Planner Agent'}), path: '/docs/examples/planner-agent', section: translate({id: 'palette.section.examples', message: 'Examples'}), icon: ClipboardList},
+  {label: translate({id: 'palette.page.debuggerdemo', message: 'Debugger Demo'}), path: '/docs/examples/debugger-demo', section: translate({id: 'palette.section.examples', message: 'Examples'}), icon: Bug},
+  {label: translate({id: 'palette.page.richdemo', message: 'Rich Demo'}), path: '/docs/examples/rich-demo', section: translate({id: 'palette.section.examples', message: 'Examples'}), icon: Target},
+  {label: translate({id: 'palette.page.troubleshooting', message: 'Troubleshooting'}), path: '/docs/troubleshooting', section: translate({id: 'palette.section.help', message: 'Help'}), icon: Bug},
+  {label: translate({id: 'palette.page.faq', message: 'FAQ'}), path: '/docs/faq', section: translate({id: 'palette.section.help', message: 'Help'}), icon: HelpCircle},
+  {label: translate({id: 'palette.page.changelog', message: 'Changelog'}), path: '/docs/changelog', section: translate({id: 'palette.section.more', message: 'More'}), icon: FileText},
+  {label: translate({id: 'palette.page.blog', message: 'Blog'}), path: '/blog', section: translate({id: 'palette.section.more', message: 'More'}), icon: Newspaper},
 ];
 
 export default function CommandPalette() {
@@ -47,6 +56,8 @@ export default function CommandPalette() {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef(null);
   const history = useHistory();
+  const baseUrl = useBaseUrl('/');
+  const PAGES = getPages();
 
   const filtered = query.length === 0
     ? PAGES
@@ -68,8 +79,8 @@ export default function CommandPalette() {
 
   const navigate = useCallback((path) => {
     close();
-    history.push(path);
-  }, [close, history]);
+    history.push(baseUrl.replace(/\/$/, '') + path);
+  }, [close, history, baseUrl]);
 
   // Ctrl/Cmd + K shortcut
   useEffect(() => {
@@ -109,16 +120,16 @@ export default function CommandPalette() {
   if (!isOpen) return null;
 
   return (
-    <div className="command-palette-overlay" onClick={close} role="dialog" aria-modal="true" aria-label="Command Palette">
+    <div className="command-palette-overlay" onClick={close} role="dialog" aria-modal="true" aria-label={translate({id: 'palette.aria', message: 'Command Palette'})}>
       <div className="command-palette" onClick={e => e.stopPropagation()}>
         <input
           ref={inputRef}
           className="command-palette-input"
-          placeholder="Search docs, navigate..."
+          placeholder={translate({id: 'palette.placeholder', message: 'Search docs, navigate...'})}
           value={query}
           onChange={e => { setQuery(e.target.value); setActiveIndex(0); }}
           onKeyDown={handleKeyDown}
-          aria-label="Search input"
+          aria-label={translate({id: 'palette.inputAria', message: 'Search input'})}
           role="combobox"
           aria-expanded="true"
           aria-controls="command-palette-list"
@@ -126,7 +137,7 @@ export default function CommandPalette() {
         />
         <div className="command-palette-results" role="listbox" id="command-palette-list">
           {filtered.length === 0 ? (
-            <div className="command-palette-empty">No results found</div>
+            <div className="command-palette-empty">{translate({id: 'palette.empty', message: 'No results found'})}</div>
           ) : (
             filtered.map((page, idx) => (
               <div
@@ -148,9 +159,9 @@ export default function CommandPalette() {
           )}
         </div>
         <div className="command-palette-footer">
-          <span><kbd>↑</kbd> <kbd>↓</kbd> navigate</span>
-          <span><kbd>↵</kbd> open</span>
-          <span><kbd>esc</kbd> close</span>
+          <span><kbd>↑</kbd> <kbd>↓</kbd> {translate({id: 'palette.navigate', message: 'navigate'})}</span>
+          <span><kbd>↵</kbd> {translate({id: 'palette.open', message: 'open'})}</span>
+          <span><kbd>esc</kbd> {translate({id: 'palette.close', message: 'close'})}</span>
         </div>
       </div>
     </div>

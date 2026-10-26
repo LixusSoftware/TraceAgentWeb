@@ -1,0 +1,246 @@
+---
+sidebar_position: 1
+title: API Reference
+description: "TraceAgent HTTP API reference: runs, tool results, timeline, graph, compare, live SSE stream and the OpenTelemetry OTLP receiver at POST /v1/traces."
+image: img/social-card.jpg
+keywords: [api, api reference, otlp, v1/traces, tool results, sse, endpoints, rest api]
+---
+
+# API Reference
+
+The TraceAgent server exposes an HTTP API. This page lists the endpoints and details the ones used to send data and to follow a run live. The examples use the default address `http://127.0.0.1:8000`.
+
+## Endpoints
+
+| Method | Path | What it does |
+|--------|------|--------------|
+| `POST` | `/api/runs` | Create a run (agent name, goal, optional metadata) |
+| `GET` | `/api/runs` | List runs, newest first |
+| `GET` | `/api/runs/{id}` | One run: status, counters, provider, model, token usage, flags |
+| `POST` | `/api/runs/{id}/tool-results` | Record tool executions (also counts tools and errors) |
+| `POST` | `/api/runs/{id}/observations` | Record other events: model calls, commands, file changes, framework events |
+| `POST` | `/api/runs/{id}/finish` | Mark the run as completed with its final output |
+| `POST` | `/api/runs/{id}/fail` | Mark the run as failed with an error code and message |
+| `GET` | `/api/runs/{id}/events` | Raw events of the run, in order |
+| `GET` | `/api/runs/{id}/events/stream` | Live events as Server-Sent Events |
+| `GET` | `/api/runs/{id}/timeline` | Events grouped by step (agent run, model call, tool), with durations |
+| `GET` | `/api/runs/{id}/graph?view=execution\|decisions` | Nodes and edges ready for a graph viewer |
+| `GET` | `/api/runs/{id}/explanation` | Plain-language narrative, the decisions taken and flags such as retries or loops |
+| `GET` | `/api/runs/{id}/analytics` | Tool metrics, tool graph and similar runs |
+| `GET` | `/api/runs/compare?left_run_id=…&right_run_id=…` | Difference between two runs, with the likely root cause |
+| `GET` | `/api/dashboard?period=24h\|7d\|30d` | Totals, trends, top tools and top errors |
+| `POST` | `/v1/traces` | OpenTelemetry receiver (OTLP/HTTP, protobuf or JSON, gzip). Root path, not under `/api` |
+| `GET` | `/health` | Health check |
+
+## Run States
+
+A run is in one of these states: `running`, `completed` or `failed`. A finished run is `completed` (not "finished").
+
+Decisions (tool choice, retry, recovery) and flags are derived when a run **ends** or fails, not while it runs. A running run shows none yet.
+
+## POST /v1/traces
+
+OTLP/HTTP receiver for OpenTelemetry traces. See [OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry) for how to set it up.
+
+**Content types:** `application/x-protobuf` (what exporters send by default) and `application/json`. `Content-Encoding: gzip` and `deflate` are accepted.
+
+**Response:** `200 OK` with an empty `ExportTraceServiceResponse` (`{}` in JSON). If some spans could not be understood, a protobuf response reports them in `partial_success.rejected_spans`.
+
+### Example (JSON)
+
+```http
+POST /v1/traces
+Content-Type: application/json
+```
+
+```json
+{
+  "resourceSpans": [{
+    "resource": {"attributes": [{"key": "service.name", "value": {"stringValue": "weather-service"}}]},
+    "scopeSpans": [{
+      "scope": {"name": "pydantic-ai"},
+      "spans": [
+        {"traceId": "5b8efff798038103d269b633813fc60c", "spanId": "eee19b7ec3c1b174", "name": "invoke_agent weather",
+         "startTimeUnixNano": "1792764785544708352", "endTimeUnixNano": "1792764788544708352",
+         "attributes": [
+           {"key": "gen_ai.operation.name", "value": {"stringValue": "invoke_agent"}},
+           {"key": "gen_ai.agent.name", "value": {"stringValue": "weather"}},
+           {"key": "gen_ai.agent.call.id", "value": {"stringValue": "call-1"}},
+           {"key": "final_result", "value": {"stringValue": "It is sunny in Madrid."}}]},
+        {"traceId": "5b8efff798038103d269b633813fc60c", "spanId": "eee19b7ec3c1b175", "parentSpanId": "eee19b7ec3c1b174",
+         "name": "chat gpt-4o", "startTimeUnixNano": "1792764785644708352", "endTimeUnixNano": "1792764787044708352",
+         "attributes": [
+           {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+           {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+           {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4o"}},
+           {"key": "gen_ai.usage.input_tokens", "value": {"intValue": "120"}},
+           {"key": "gen_ai.usage.output_tokens", "value": {"intValue": "24"}},
+           {"key": "gen_ai.agent.call.id", "value": {"stringValue": "call-1"}}]}
+      ]
+    }]
+  }]
+}
+```
+
+The server creates the run `5b8efff7-9803-8103-d269-b633813fc60c` (the trace id written as a UUID) with agent `weather`, status `completed`, provider `openai`, model `gpt-4o`, 120 prompt tokens and 24 completion tokens.
+
+:::note[OTLP/JSON encoding]
+In OTLP/JSON, ids are **hexadecimal** strings and 64-bit integers are **strings** (`"intValue": "120"`).
+:::
+
+### Errors
+
+| Case | Response |
+|------|----------|
+| Body that is not OTLP | `400` `{"detail":"Invalid OTLP protobuf body: ..."}` |
+| Unsupported content type | `400` `{"detail":"Unsupported Content-Type 'text/plain'."}` |
+| Corrupt gzip or unknown `Content-Encoding` | `400` `{"detail":"Invalid gzip body: ..."}` / `{"detail":"Unsupported Content-Encoding 'br'."}` |
+| Body over `TRACE_AGENT_OTLP_MAX_BODY_BYTES` | `413` |
+| Receiver turned off (`TRACE_AGENT_OTLP_ENABLED=false`) | `404` `{"detail":"The OTLP receiver is disabled."}` |
+
+### Span attributes read
+
+Only spans whose `gen_ai.operation.name` is `invoke_agent`, `chat` or `execute_tool` are used. The span id becomes the step id, the parent span id becomes the parent step, and times and durations come from the span start and end. A span status of `UNSET` or `OK` is a success; only `ERROR` is a failure, with the exception class name as error code and the exception message as error message.
+
+**`invoke_agent`** → `chain.started`, `chain.completed` / `chain.failed`
+
+| Attribute | Used for |
+|-----------|----------|
+| `gen_ai.agent.name` | Agent name. Names the run when it is created |
+| `gen_ai.agent.call.id` | Identifies the agent call. The run ends when no call is left open |
+| `gen_ai.conversation.id` | Stored in the event metadata |
+| `gen_ai.aggregated_usage.input_tokens` / `output_tokens` | Event metadata |
+| `final_result` | Final output of the run (summarized) |
+
+**`chat`** → `llm.started`, `llm.completed` / `llm.failed`
+
+| Attribute | Used for |
+|-----------|----------|
+| `gen_ai.provider.name` (fallback `gen_ai.system`) | Provider of the event and of the run |
+| `gen_ai.response.model` (preferred) / `gen_ai.request.model` | Model of the event and of the run |
+| `gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens` | Prompt and completion tokens, added to the run totals |
+| `gen_ai.response.finish_reasons` | Event metadata |
+| `gen_ai.input.messages` | Goal of the run (first user text, when the run is created) |
+| `gen_ai.output.messages` | Names of the requested tools |
+
+**`execute_tool`** → `tool.started`, `tool.succeeded` / `tool.failed`
+
+| Attribute | Used for |
+|-----------|----------|
+| `gen_ai.tool.name` | Tool name |
+| `gen_ai.tool.call.id` | Call id |
+| `gen_ai.tool.call.arguments` | Arguments (long values are truncated) |
+| `gen_ai.tool.call.result` | Output summary |
+
+**Attributes that configure TraceAgent**
+
+| Attribute | Used for |
+|-----------|----------|
+| `service.name` (resource) | Fallback agent name |
+| `trace_agent.run_id` (resource, or on every span) | Attach the spans to an existing run |
+
+## POST /api/runs/\{id\}/tool-results
+
+Reports tool executions of a run. Each result records both `tool.started` and `tool.succeeded` / `tool.failed`, and updates the run's counters.
+
+```json
+{
+  "results": [{
+    "call_id": "c1",
+    "name": "weather",
+    "step_id": "tool-1",
+    "parent_step_id": "llm-1",
+    "status": "succeeded",
+    "args": {"city": "Madrid"},
+    "output_summary": "Sunny",
+    "duration_ms": 12
+  }]
+}
+```
+
+`parent_step_id` is optional. It hangs the tool from its parent step in the timeline.
+
+:::warning[Report a tool once]
+Report a tool through this endpoint **or** through a `tool_call` observation, never both. Doing both duplicates the events and counts errors twice.
+:::
+
+## GET /api/runs/\{id\}/events/stream
+
+Server-Sent Events stream to follow a run live. The response is `200` with `content-type: text/event-stream`.
+
+```text
+data: {"type": "connected", "run_id": "ad76681d-6a6a-4666-be32-377ae8544420"}
+
+data: {"id": 29, "seq": 3, "type": "tool.started", "actor": "sdk", "summary": "Started weather.", "status": "running", "step_id": "tool-1", "tool_name": "weather", "timestamp": "2026-10-23T14:13:12.435113+00:00"}
+
+data: {"id": 30, "seq": 4, "type": "tool.succeeded", "actor": "sdk", "summary": "Sunny", "status": "succeeded", "step_id": "tool-1", "tool_name": "weather", "timestamp": "2026-10-23T14:13:12.439109+00:00"}
+
+data: {"id": 31, "seq": 5, "type": "run.completed", "actor": "proxy", "summary": "It is sunny in Madrid.", "status": "completed", "step_id": null, "tool_name": null, "timestamp": "2026-10-23T14:13:12.487165+00:00"}
+```
+
+- The first message is `{"type": "connected"}`.
+- A `{"type": "heartbeat"}` message is sent after every 15 seconds without events.
+- Every other message is one recorded event, and its `type` is the event type itself (`tool.succeeded`, `run.completed`...).
+
+## GET /api/runs/\{id\}/timeline
+
+Returns the events of a run grouped by step. This is what the UI timeline is built from.
+
+```json
+{
+  "run_id": "ce67fce7-8cbe-4df8-b3c0-deef2070afad",
+  "groups": [
+    {
+      "step_id": "run-08b5ddf944d3",
+      "label": "chain.completed",
+      "status": "succeeded",
+      "parent_step_id": null,
+      "event_count": 2,
+      "duration_ms": 21,
+      "events": [
+        { "seq": 2,  "type": "chain.started",   "summary": "Pydantic AI run 'support-agent' started",   "status": "running" },
+        { "seq": 13, "type": "chain.completed", "summary": "Pydantic AI run 'support-agent' completed", "status": "succeeded", "duration_ms": 21 }
+      ]
+    },
+    {
+      "step_id": "tool-a61c92ca8864",
+      "label": "lookup_order",
+      "status": "failed",
+      "tool_name": "lookup_order",
+      "parent_step_id": "run-08b5ddf944d3",
+      "event_count": 2,
+      "duration_ms": 0,
+      "events": [
+        { "seq": 5, "type": "tool.started", "summary": "Started lookup_order." },
+        { "seq": 6, "type": "tool.failed",  "summary": "The orders service timed out, try again", "status": "failed" }
+      ]
+    }
+  ]
+}
+```
+
+`parent_step_id` is what nests each step under its parent: model calls and tools hang from the agent step. Single events such as `run.started` and `run.completed` have no parent.
+
+:::note[API labels vs UI labels]
+The UI shows readable names ("Agent run", "Model call"). In the API, `label` stays the technical event type (`chain.completed`, `llm.completed`) or the tool name.
+:::
+
+## GET /api/runs/compare
+
+Compares two runs: `GET /api/runs/compare?left_run_id=<id>&right_run_id=<id>`. The UI shows the same data in its Compare view, here with the token and duration difference between two runs:
+
+![Compare view showing the token and duration difference between two runs](/img/trace-agent/compare-token-diff.png)
+
+The response has these top-level keys:
+
+| Key | Content |
+|-----|---------|
+| `left_run`, `right_run` | The overview of each run, in the same format as `GET /api/runs/{id}` |
+| `overview_diff` | Differences between the two runs as signed numbers (right minus left): tool, command, error, retry and artifact counts, total tokens and duration in milliseconds. A positive number means the right run has more. `duration_ms_delta` is `null` if either run has not finished |
+| `divergence` | The first point where the two runs stop doing the same thing: the kind of step that differs, the event ids on each side and a one-line summary. It is `null` when the runs never diverge |
+| `aligned_timeline` | The steps of both runs paired up in order (see the pair format below) |
+| `tool_diff`, `command_diff`, `file_diff`, `artifact_diff`, `decision_diff` | The same pair format, limited to tools, commands, file changes, artifacts or decisions |
+| `root_cause` | The most likely reason the runs differ: a label, a summary, the first event on each side that caused the difference, the events that support it (`supporting_event_ids`), the impact and a confidence of `high`, `medium` or `low`. If the runs don't diverge, the label is `no_observable_root_cause` |
+| `evidence` | The full events of both runs, keyed by event id under `left` and `right`, so every event id mentioned above can be looked up |
+
+Each pair in `aligned_timeline` and in the `*_diff` lists has a `relation` (`shared`, `left_only`, `right_only` or `different`), a `kind`, a `summary`, and a `left` and `right` side. Each side has its `label`, `status`, `summary`, `event_ids`, `step_id`, `duration_ms` and `metadata`.

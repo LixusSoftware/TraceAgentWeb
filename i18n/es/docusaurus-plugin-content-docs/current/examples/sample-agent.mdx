@@ -1,0 +1,31 @@
+---
+sidebar_position: 2
+title: Agente de muestra
+description: "Prueba mínima del SDK: inicia una ejecución, registra una llamada a una herramienta y finaliza."
+image: img/social-card.jpg
+keywords: [ejemplo, muestra, prueba de humo, sdk]
+---
+
+# Agente de muestra
+
+**Archivo:** `examples/sample_agent.py`
+
+Prueba mínima del SDK. Inicia una ejecución, registra una herramienta simulada `get_weather`, hace un único turno con el modelo y cierra la ejecución con la respuesta del asistente.
+
+## Ejecutar
+
+```bash
+uv run examples/sample_agent.py
+```
+
+## Qué hace
+
+1. Crea un `TraceAgentClient` conectado al servidor
+2. Inicia una ejecución llamada `"my-agent"`
+3. Registra una llamada simulada a la herramienta `get_weather`
+4. Hace un único turno con el modelo
+5. Cierra la ejecución con la respuesta del asistente
+
+## Cuándo usarlo
+
+Úsalo cuando quieras confirmar que el SDK puede crear ejecuciones, registrar llamadas a herramientas y finalizar sin problemas. Es la prueba de integración más sencilla posible.

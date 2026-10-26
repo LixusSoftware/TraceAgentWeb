@@ -1,0 +1,131 @@
+---
+sidebar_position: 3
+title: Integración con Pydantic AI
+description: "Traza agentes de Pydantic AI con una sola línea usando la capacidad de TraceAgent. Registra llamadas al modelo, herramientas, tokens y errores en Pydantic AI 2.x sin ralentizar al agente."
+image: img/social-card.jpg
+keywords: [pydantic ai, observabilidad pydantic ai, trazabilidad pydantic ai, capacidad, hooks, monitorización de agentes]
+---
+
+# Integración con Pydantic AI
+
+import PackageInstall from '@site/src/components/PackageInstall';
+
+TraceAgent se conecta a [Pydantic AI](https://ai.pydantic.dev) como una **capacidad** (*capability*): una línea más en tu agente registra en una ejecución cada llamada al modelo y cada llamada a herramientas.
+
+## Instalación
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-pydantic-ai']} />
+
+Requisitos: **Pydantic AI 2.x** (`>=2,<3`) y Python 3.11+.
+
+Funciona con el modelo que ya use tu agente: nada de la integración depende del proveedor. Los ejemplos usan `"openai:gpt-4o"` solo como cadena de modelo de ejemplo.
+
+## Uso básico
+
+Arranca primero el servidor de TraceAgent (escucha en `http://127.0.0.1:8000`, consulta el [Inicio rápido](/es/docs/getting-started/quick-start)) y después:
+
+```python
+from pydantic_ai import Agent
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://127.0.0.1:8000")
+run = client.start_run("weather-agent", "What is the weather in Madrid?")
+
+agent = Agent(
+    "openai:gpt-4o",
+    capabilities=[run.as_pydantic_ai_capability()],  # la línea de TraceAgent
+)
+
+try:
+    result = agent.run_sync("What is the weather in Madrid?")
+    run.finish(result.output)
+except Exception as exc:
+    run.fail(type(exc).__name__, str(exc))
+    raise
+```
+
+Crea la ejecución, añade `capabilities=[run.as_pydantic_ai_capability()]` a tu `Agent` y cierra la ejecución al final. No cambia nada más en tu agente.
+
+:::warning[Tú abres y cierras la ejecución]
+Si el agente lanza una excepción, la capacidad registra el fallo del agente, pero la ejecución sigue en estado `running` hasta que llames a `run.fail(...)`. Para eso sirve el `try/except` de arriba.
+:::
+
+Funciona con `run_sync`, `run` y `run_stream`, con herramientas en paralelo y con agentes anidados. Para una versión que se ejecuta sin clave de API, consulta el [inicio rápido de Pydantic AI](/es/docs/examples/pydantic-ai-hooks).
+
+## Una capacidad, una ejecución
+
+Una capacidad pertenece a una ejecución. Si reutilizas el mismo `Agent` para muchas peticiones (un servidor web, por ejemplo), no pongas la capacidad en el constructor. Pásala en cada llamada. Pydantic AI acepta `capabilities=` en `run`, `run_sync`, `run_stream` e `iter`:
+
+```python
+agent = Agent("openai:gpt-4o")  # un solo agente, reutilizado
+
+run = client.start_run("weather-agent", "Request 1")
+result = agent.run_sync(
+    "What is the weather in Madrid?",
+    capabilities=[run.as_pydantic_ai_capability()],
+)
+run.finish(result.output)
+```
+
+Así cada petición tiene su propia ejecución y los eventos nunca se mezclan entre ellas.
+
+## Qué se registra
+
+Para el primer ejemplo, la ejecución contiene estos eventos, en orden:
+
+```text
+run.started → chain.started → llm.started → llm.completed →
+tool.started → tool.succeeded → llm.started → llm.completed →
+chain.completed → run.completed
+```
+
+La ejecución también recibe su proveedor, su modelo, los totales de tokens y la duración real de cada herramienta. Las llamadas al modelo y las herramientas aparecen anidadas bajo la ejecución del agente, en el orden en que ocurrieron.
+
+El proveedor se toma de la cadena del modelo (por ejemplo `openai:gpt-4o`). Un objeto de modelo personalizado puede mostrarlo como `unknown`.
+
+## Opciones
+
+Pásalas a `run.as_pydantic_ai_capability(...)`:
+
+| Opción | Por defecto | Descripción |
+|--------|---------|-------------|
+| `record_model_events` | `True` | Registra cada petición al modelo como una llamada LLM (modelo, proveedor, tokens, herramientas solicitadas) |
+| `record_tool_events` | `True` | Registra cada ejecución de herramienta (argumentos, resumen de la salida, duración, errores) |
+| `record_node_events` | `False` | Registra cada nodo del grafo del agente como un `agent_action` |
+| `redact_fields` | `[]` | Claves de argumentos y salidas cuyo valor se sustituye por `[redacted]` |
+| `failure_cooldown` | `30.0` | Segundos que se deja de enviar tras un fallo de entrega; los eventos que se producen mientras tanto se descartan. `0` reintenta con cada evento |
+| `flush_timeout` | `5.0` | Segundos máximos que el final de la ejecución del agente espera a los eventos pendientes |
+
+```python
+capability = run.as_pydantic_ai_capability(
+    redact_fields=["api_key", "password"],
+    record_node_events=True,
+)
+```
+
+`redact_fields` es una lista de **nombres de clave**. Una clave se detecta por su nombre exacto, a cualquier profundidad, dentro de los argumentos y los resultados de tus herramientas, y su valor se sustituye por `[redacted]`. No detecta patrones ni valores. Con independencia de esta opción, los valores largos siempre se acortan: el texto dentro de los argumentos de herramientas a 160 caracteres, y los resúmenes de prompts y salidas a 220.
+
+## Nunca estorba al agente
+
+La trazabilidad no debe romper ni ralentizar tu agente, por eso:
+
+- Los eventos se encolan y los envía un hilo en segundo plano.
+- Si el servidor de TraceAgent está caído, el agente sigue funcionando. Imprime una sola línea (`[trace-agent] could not deliver trace data ... The agent is not affected.`) y pausa el envío durante `failure_cooldown` segundos.
+- Cuando termina la ejecución del agente más externo, espera hasta `flush_timeout` segundos a los eventos pendientes, de modo que `run.finish()` normalmente llega al servidor después de ellos. Si el servidor se cuelga durante más tiempo, esa garantía no existe.
+
+## Conviene saber
+
+:::info[Silenciar el banner de Logfire]
+Pydantic AI imprime al arrancar un banner que sugiere Logfire. No tiene relación con TraceAgent. Define `PYDANTIC_AI_NO_BANNER=1` para ocultarlo.
+:::
+
+- Solo se registran las herramientas normales del agente. Si la salida del agente pasa por una *función* de salida (`output_type=my_function`), esa función no se registra como herramienta. Es una diferencia conocida con la vía OpenTelemetry; consulta [¿Hooks u OpenTelemetry?](/es/docs/instrumentation/hooks-vs-opentelemetry).
+- Usa **o bien** esta capacidad **o bien** [OpenTelemetry](/es/docs/instrumentation/opentelemetry) para un mismo agente. Si usas las dos, la ejecución se registra dos veces.
+- Probado con agentes reales a través de APIs compatibles con OpenAI y con Anthropic.
+
+## ¿Y ahora qué?
+
+- **[Inicio rápido de Pydantic AI](/es/docs/examples/pydantic-ai-hooks)**: ejemplo ejecutable, sin clave de API
+- **[Ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry)**: traza Pydantic AI sin código de TraceAgent en el agente
+- **[¿Hooks u OpenTelemetry?](/es/docs/instrumentation/hooks-vs-opentelemetry)**: qué vía elegir
+- **[Referencia del SDK](/es/docs/instrumentation/sdk)**: instrumentación manual

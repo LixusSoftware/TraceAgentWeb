@@ -1,0 +1,134 @@
+---
+sidebar_position: 3
+title: Inicio rápido
+description: "Consigue tu primera traza de TraceAgent en menos de 5 minutos. Inicia una ejecución, registra acciones y mira los resultados."
+image: img/social-card.jpg
+keywords: [inicio rápido, primera traza, primeros pasos, tutorial]
+---
+
+# Inicio rápido
+
+Consigue tu primera traza en **menos de 5 minutos**.
+
+## Requisitos previos
+
+- Python 3.11+
+- SDK de TraceAgent instalado (`pip install trace-agent-sdk` o `uv add trace-agent-sdk`)
+- Servidor de TraceAgent en ejecución en `http://localhost:8000`
+
+:::tip[Cómo arrancar el servidor]
+
+Si usas Docker:
+```bash
+docker run -p 8000:8000 ghcr.io/lixussoftware/trace-agent-server:latest
+```
+:::
+
+## Paso 1: crear un cliente
+
+```python title="my_first_trace.py"
+from trace_agent_sdk import TraceAgentClient
+
+# Conéctate a tu servidor de TraceAgent
+client = TraceAgentClient("http://localhost:8000")
+```
+
+## Paso 2: iniciar una ejecución
+
+Una **ejecución** (*run*) representa una sesión de ejecución de un agente. Todo lo que hace tu agente se registra dentro de una ejecución.
+
+```python title="my_first_trace.py"
+# Inicia una ejecución con seguimiento
+run = client.start_run("my-agent", "Perform a system task")
+print("Run started:", run)
+```
+
+## Paso 3: registrar acciones
+
+Ahora registra los efectos secundarios que provoca tu agente:
+
+```python title="my_first_trace.py"
+# Registra la escritura de un archivo
+file_result = run.record_file_write(
+    "app.py",
+    before_content="",
+    after_content="print('Hello World')"
+)
+print("File recorded:", file_result)
+
+# Registra la ejecución de un comando
+command_result = run.record_command(
+    ["python", "app.py"],
+    exit_code=0
+)
+print("Command recorded:", command_result)
+```
+
+## Paso 4: finalizar la ejecución
+
+```python title="my_first_trace.py"
+# Cierra la sesión con los metadatos finales
+finish_result = run.finish({"status": "success"})
+print("Run finished:", finish_result)
+```
+
+## Script completo
+
+Aquí tienes el script entero de una pieza:
+
+```python title="my_first_trace.py"
+from trace_agent_sdk import TraceAgentClient
+
+client = TraceAgentClient("http://localhost:8000")
+
+# Inicia una ejecución con seguimiento
+run = client.start_run("my-agent", "Perform a system task")
+
+# Registra los efectos secundarios
+run.record_file_write(
+    "app.py",
+    before_content="",
+    after_content="print('Hello World')"
+)
+
+run.record_command(
+    ["python", "app.py"],
+    exit_code=0
+)
+
+# Cierra la sesión
+run.finish({"status": "success"})
+
+print("✓ First trace complete!")
+```
+
+Ejecútalo:
+
+```bash
+python my_first_trace.py
+```
+
+## ¿Qué acaba de pasar?
+
+Acabas de:
+
+1. **Conectarte** al servidor de TraceAgent
+2. **Iniciar** una ejecución con nombre y descripción
+3. **Registrar** la escritura de un archivo y la ejecución de un comando
+4. **Finalizar** la ejecución con metadatos de éxito
+
+Todo esto ya se ve en la **UI de TraceAgent**, en `http://localhost:8080`.
+
+:::info
+Abre la UI de TraceAgent para ver tu traza en la línea de tiempo interactiva. Verás la escritura del archivo y la ejecución del comando como eventos en la línea de tiempo.
+:::
+
+## ¿Y ahora qué?
+
+- **[Arquitectura](/es/docs/core-concepts/architecture)**: entiende el diseño del sistema
+- **[Referencia del SDK](/es/docs/instrumentation/sdk)**: documentación completa de la API
+- **[Integración con LangChain](/es/docs/instrumentation/langchain)**: traza agentes LangChain automáticamente
+- **[Integración con Pydantic AI](/es/docs/instrumentation/pydantic-ai)**: traza agentes Pydantic AI con una sola línea
+- **[Ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry)**: envía trazas OpenTelemetry sin código de TraceAgent en tu agente
+- **[¿Hooks u OpenTelemetry?](/es/docs/instrumentation/hooks-vs-opentelemetry)**: elige cómo trazar un agente Pydantic AI
+- **[Ejemplos](/es/docs/examples/)**: patrones de uso reales

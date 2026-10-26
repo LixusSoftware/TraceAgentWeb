@@ -1,21 +1,21 @@
 ---
 sidebar_position: 5
 title: Planner Agent
-description: Multi-tool planning demo with built-in scenarios for weather, budget, venue, and travel.
-image: img/logo.png
+description: "Multi-tool planning demo with built-in scenarios for weather, budget, venue, and travel."
+image: img/social-card.jpg
 keywords: [example, planner, scenarios, multi-tool]
 ---
 
 # Planner Agent
 
-**File:** `examples/lm_studio_planner_agent.py`
-
 A richer planning demo that exposes multiple tools for weather, budget policy, venue selection, travel time, and venue cost estimation. The model chooses the minimum set of calls needed.
 
 ## Run
 
+Find the planner script in the `examples/` folder of the repository and run it with `uv run`, choosing a scenario with `--scenario`:
+
 ```bash
-uv run examples/lm_studio_planner_agent.py --scenario meetup_plan
+uv run <planner-script> --scenario meetup_plan
 ```
 
 ## Scenarios
@@ -32,5 +32,5 @@ uv run examples/lm_studio_planner_agent.py --scenario meetup_plan
 You can override the scenario prompt:
 
 ```bash
-uv run examples/lm_studio_planner_agent.py --scenario meetup_plan --prompt "Plan an offsite in Berlin"
+uv run <planner-script> --scenario meetup_plan --prompt "Plan an offsite in Berlin"
 ```

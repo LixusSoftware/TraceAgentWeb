@@ -1,0 +1,36 @@
+---
+sidebar_position: 5
+title: Agente planificador
+description: "Demo de planificación con varias herramientas y escenarios integrados de tiempo, presupuesto, lugar y desplazamientos."
+image: img/social-card.jpg
+keywords: [ejemplo, planificador, escenarios, varias herramientas]
+---
+
+# Agente planificador
+
+Una demo de planificación más completa que expone varias herramientas para el tiempo, la política de presupuesto, la elección del lugar, el tiempo de desplazamiento y la estimación del coste del lugar. El modelo elige el conjunto mínimo de llamadas necesario.
+
+## Ejecutar
+
+Busca el script del planificador en la carpeta `examples/` del repositorio y ejecútalo con `uv run`, eligiendo un escenario con `--scenario`:
+
+```bash
+uv run <planner-script> --scenario meetup_plan
+```
+
+## Escenarios
+
+| Escenario | Descripción |
+|----------|-------------|
+| `meetup_plan` | Planifica un encuentro de equipo realista en Madrid con restricciones de tiempo, presupuesto, lugar y desplazamientos |
+| `weather_gate` | Comprueba si un encuentro al aire libre es viable sin trabajo extra de lugar ni de presupuesto |
+| `budget_only` | Verifica un lugar elegido frente al presupuesto y evita llamadas a herramientas no relacionadas |
+| `barcelona_shortlist` | Elabora una lista corta de lugares de Barcelona priorizando la logística y el desplazamiento desde Sants |
+
+## Prompts personalizados
+
+Puedes sustituir el prompt del escenario:
+
+```bash
+uv run <planner-script> --scenario meetup_plan --prompt "Plan an offsite in Berlin"
+```

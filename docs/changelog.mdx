@@ -1,8 +1,8 @@
 ---
 sidebar_position: 98
 title: Changelog
-description: TraceAgent release history and notable changes.
-image: img/logo.png
+description: "TraceAgent release history and notable changes."
+image: img/social-card.jpg
 keywords: [changelog, releases, what's new, updates]
 ---
 
@@ -19,13 +19,28 @@ For the most up-to-date release information, see the [GitHub Releases](https://g
 ## Unreleased
 
 ### Added
+- Pydantic AI integration (`trace-agent-pydantic-ai`): a capability that records model calls and tools of Pydantic AI 2.x agents without blocking them, available as `run.as_pydantic_ai_capability()`
+- OpenTelemetry ingestion: OTLP/HTTP receiver at `POST /v1/traces` (protobuf or JSON, gzip). One run per trace; attach to an SDK run with the `trace_agent.run_id` resource attribute. Settings `TRACE_AGENT_OTLP_ENABLED` and `TRACE_AGENT_OTLP_MAX_BODY_BYTES`
+- Examples for both routes (`pydantic_ai_agent.py`, `pydantic_ai_otel_agent.py`)
+- Plain-language names in the timeline and graphs, and a readable inspector for events and decisions. A decision shows the events it is based on
+- `parent_step_id` in `POST /api/runs/{id}/tool-results`, to hang a tool from its parent step
 - Documentation site with full SDK reference, LangChain guide, and examples
 - Local search integration
 - Command palette for quick navigation (Ctrl/Cmd + K)
 - Showcase page for community use cases
 
 ### Changed
+- Runs show provider, model and token totals for framework integrations (previously only for runs created through the server's own model proxy). The Compare view counts those tokens too
+- The timeline nests model calls and tools under the agent step that ran them
+- The inspector hides identifiers, coordinates and raw JSON under "Technical details"
+- The server now accepts `openai>=1.52,<4` (it was `<2`), so it installs next to `pydantic-ai-slim[openai]`, and depends on `opentelemetry-proto`
 - Updated branding with new detective cat logo
+
+### Fixed
+- LangChain: a tool call was recorded twice and counted twice as an error. It now appears once, with its real name, provider and model
+- Live updates (SSE) did not reach the UI because of an event type mismatch
+- Events of nested steps were hidden in the timeline
+- Inspecting an event or graph node of one run no longer shows it when you switch to another run
 
 ---
 
@@ -55,8 +70,8 @@ For the most up-to-date release information, see the [GitHub Releases](https://g
 - Example scripts:
   - `sample_agent.py` — Minimal SDK smoke test
   - `langchain_agent.py` — LangChain callback integration
-  - `lm_studio_agent.py` — Local model with SDK
-  - `lm_studio_planner_agent.py` — Multi-tool planning
+  - Local model agent — Any OpenAI-compatible model with the SDK
+  - Planner agent — Multi-tool planning
   - `coding_agent_debugger_demo.py` — Synthetic debug scenarios
   - `rich_demo_agent.py` — Full-fidelity trace demo
 

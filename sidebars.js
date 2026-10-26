@@ -26,6 +26,9 @@ const sidebars = {
       items: [
         'instrumentation/sdk',
         'instrumentation/langchain',
+        'instrumentation/pydantic-ai',
+        'instrumentation/opentelemetry',
+        'instrumentation/hooks-vs-opentelemetry',
       ],
     },
     {
@@ -38,6 +41,13 @@ const sidebars = {
     },
     {
       type: 'category',
+      label: 'Reference',
+      items: [
+        'reference/api',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Examples',
       link: {
         type: 'doc',
@@ -46,12 +56,15 @@ const sidebars = {
       items: [
         'examples/sample-agent',
         'examples/langchain-agent',
-        'examples/lm-studio-agent',
+        'examples/pydantic-ai-hooks',
+        'examples/pydantic-ai-otel',
+        'examples/local-model-agent',
         'examples/planner-agent',
         'examples/debugger-demo',
         'examples/rich-demo',
       ],
     },
+    'troubleshooting',
     'faq',
     'changelog',
   ],

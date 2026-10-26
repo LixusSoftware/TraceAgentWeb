@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import {translate} from '@docusaurus/Translate';
 // Use a picture/img with explicit intrinsic dimensions to avoid layout shift
 import styles from './styles.module.css';
 
@@ -23,16 +24,17 @@ const STATE_IMAGES = {
   },
 };
 
-const ALT_TEXTS = {
-  investigating: 'TraceAgent: Investigating trace data',
-  path: 'TraceAgent: Following execution path',
-  error: 'TraceAgent: System error detected',
-  inactive: 'TraceAgent: System inactive or waiting',
-};
+const getAltTexts = () => ({
+  investigating: translate({id: 'cat.alt.investigating', message: 'TraceAgent: Investigating trace data'}),
+  path: translate({id: 'cat.alt.path', message: 'TraceAgent: Following execution path'}),
+  error: translate({id: 'cat.alt.error', message: 'TraceAgent: System error detected'}),
+  inactive: translate({id: 'cat.alt.inactive', message: 'TraceAgent: System inactive or waiting'}),
+});
 
 export default function CatIllustration({ state = 'investigating', size = 'level2', caption, className }) {
   const imageSources = STATE_IMAGES[state] || STATE_IMAGES.investigating;
-  const altText = ALT_TEXTS[state] || 'TraceAgent Illustration';
+  const altTexts = getAltTexts();
+  const altText = altTexts[state] || translate({id: 'cat.alt.default', message: 'TraceAgent Illustration'});
 
   const SIZE_DIMS = {
     level1: { width: 64, height: 64 },

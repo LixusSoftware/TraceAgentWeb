@@ -1,0 +1,14 @@
+{
+  "title": {
+    "message": "Blog de TraceAgent",
+    "description": "The title for the blog used in SEO"
+  },
+  "description": {
+    "message": "Novedades, tutoriales y análisis en profundidad del equipo de TraceAgent.",
+    "description": "The description for the blog used in SEO"
+  },
+  "sidebar.title": {
+    "message": "Entradas recientes",
+    "description": "The label for the left sidebar"
+  }
+}

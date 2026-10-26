@@ -1,0 +1,103 @@
+---
+sidebar_position: 2
+title: Instalación
+description: "Instala TraceAgent con pip, Docker o desde el código fuente: SDK, servidor, UI y las integraciones con LangChain y Pydantic AI. Python 3.11, 3.12 y 3.13."
+image: img/social-card.jpg
+keywords: [instalar, pip install, docker, configuración, python, trace-agent-sdk, trace-agent-pydantic-ai]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PackageInstall from '@site/src/components/PackageInstall';
+
+# Instalación
+
+TraceAgent requiere **Python 3.11+** (probado en 3.11, 3.12 y 3.13) y se puede instalar con pip o uv, con Docker o desde el código fuente.
+
+## Instalar con pip o uv
+
+Cada paquete se puede instalar de forma independiente, con `pip` o con [uv](https://docs.astral.sh/uv/):
+
+<Tabs>
+  <TabItem value="all" label="Todos los paquetes" default>
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain', 'trace-agent-pydantic-ai', 'trace-agent-server', 'trace-agent-ui']} />
+
+  </TabItem>
+  <TabItem value="sdk" label="Solo el SDK">
+
+<PackageInstall packages={['trace-agent-sdk']} />
+
+  </TabItem>
+  <TabItem value="langchain" label="SDK + LangChain">
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain']} />
+
+  </TabItem>
+  <TabItem value="pydantic-ai" label="SDK + Pydantic AI">
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-pydantic-ai']} />
+
+  </TabItem>
+</Tabs>
+
+TraceAgent se compone de cinco paquetes: `trace-agent-sdk`, `trace-agent-server`, `trace-agent-langchain`, `trace-agent-pydantic-ai` y `trace-agent-ui`. El paquete de Pydantic AI requiere Pydantic AI 2.x. Si trazas mediante [OpenTelemetry](/es/docs/instrumentation/opentelemetry), no necesitas ningún paquete de TraceAgent en el agente, solo en el servidor.
+
+:::note[uv add frente a uv pip install]
+`uv add` añade los paquetes al `pyproject.toml` de tu proyecto y los instala. Si solo quieres instalar en un entorno existente sin proyecto, usa `uv pip install`.
+:::
+
+:::tip
+Si solo necesitas **instrumentar** tu agente (y el servidor se ejecuta en otro sitio), instala únicamente el SDK. El servidor y la UI solo hacen falta para el backend autoalojado.
+:::
+
+## Docker
+
+Hay imágenes ya construidas para el backend y el frontend:
+
+| Componente | Imagen |
+|-----------|-------|
+| TraceAgent Server | `ghcr.io/lixussoftware/trace-agent-server:latest` |
+| TraceAgent UI | `ghcr.io/lixussoftware/trace-agent-ui:latest` |
+
+```bash
+# Descarga las imágenes
+docker pull ghcr.io/lixussoftware/trace-agent-server:latest
+docker pull ghcr.io/lixussoftware/trace-agent-ui:latest
+```
+
+Para una configuración completa con Docker Compose, consulta la **[guía de despliegue con Docker](/es/docs/configuration/docker)**.
+
+## Desde el código fuente
+
+```bash
+git clone https://github.com/LixusSoftware/TraceAgent.git
+cd TraceAgent
+```
+
+<Tabs>
+  <TabItem value="uv" label="uv (recomendado)" default>
+
+```bash
+uv sync --extra dev --extra providers --extra langchain --extra pydantic-ai
+```
+
+  </TabItem>
+  <TabItem value="pip" label="pip">
+
+```bash
+pip install -e ".[dev,providers,langchain]"
+```
+
+  </TabItem>
+</Tabs>
+
+## Verificar la instalación
+
+```bash
+python -c "from trace_agent_sdk import TraceAgentClient; print('TraceAgent SDK ready ✓')"
+```
+
+## ¿Y ahora qué?
+
+Ve al **[Inicio rápido](/es/docs/getting-started/quick-start)** para crear tu primera traza en menos de 5 minutos.

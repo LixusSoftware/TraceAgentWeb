@@ -1,0 +1,57 @@
+---
+sidebar_position: 1
+title: Introducción
+description: "TraceAgent es una plataforma de observabilidad de código abierto para agentes de IA: llamadas a herramientas, llamadas al modelo y decisiones, con soporte para LangChain, Pydantic AI y OpenTelemetry."
+image: img/social-card.jpg
+keywords: [traceagent, observabilidad, agentes de IA, trazabilidad, monitorización, langchain, pydantic ai, opentelemetry]
+---
+
+# Introducción
+
+> **TraceAgent** te da visibilidad completa de lo que hacen realmente tus agentes autónomos: cada llamada a herramientas, operación con archivos, comando de terminal y ruta de decisión, registrados y visualizados en tiempo real.
+
+## ¿Por qué TraceAgent?
+
+Las herramientas de observabilidad tradicionales se diseñaron para microservicios: no entienden qué significa que un agente "llame a una herramienta", "escriba un archivo" o "reintente un comando fallido".
+
+TraceAgent cubre ese hueco con una **especificación de trazabilidad pensada para agentes** y una interfaz de auditoría hecha a medida, con control total de tus datos gracias a un despliegue autoalojado.
+
+:::info[¿Qué lo hace diferente?]
+
+Con soporte de primera clase para ecosistemas de orquestación como **LangChain** y **Pydantic AI**, y un receptor OpenTelemetry para agentes que ya emiten trazas, TraceAgent captura y reconstruye la ejecución completa a través de cadenas, agentes, herramientas, prompts y callbacks. Esto permite reproducibilidad, depuración, auditoría de cumplimiento y análisis de rendimiento en sistemas de IA de nivel productivo.
+
+:::
+
+## Características principales
+
+| Característica | Descripción |
+|---------|-------------|
+| **Trazabilidad en tiempo real** | Captura llamadas a herramientas, operaciones con archivos, comandos de shell y artefactos mientras ocurren |
+| **Línea de tiempo de ejecución** | Visualiza el comportamiento del agente con líneas de tiempo y grafos de ejecución interactivos |
+| **Integración con LangChain** | Callback nativo para agentes y cadenas de LangChain, sin código repetitivo |
+| **Integración con Pydantic AI** | Capacidad de una línea para agentes Pydantic AI, o sin código alguno mediante OpenTelemetry |
+| **Autoalojado** | Control total de tus datos con un backend FastAPI y soporte para SQLite/PostgreSQL |
+
+## Paquetes
+
+TraceAgent se organiza en cinco paquetes que funcionan juntos:
+
+| Paquete | Propósito |
+|---------|---------|
+| **[TraceAgent SDK](/es/docs/instrumentation/sdk)** | Cliente Python para registrar las acciones del agente |
+| **[TraceAgent LangChain](/es/docs/instrumentation/langchain)** | Callback para la trazabilidad automática de LangChain |
+| **[TraceAgent Pydantic AI](/es/docs/instrumentation/pydantic-ai)** | Capacidad para la trazabilidad automática de Pydantic AI |
+| **TraceAgent Server** | Backend FastAPI con almacenamiento en SQLite/PostgreSQL |
+| **TraceAgent UI** | Panel interactivo para visualizar trazas |
+
+## ¿Y ahora qué?
+
+¿Listo para empezar? Sigue estos pasos:
+
+1. **[Instala TraceAgent](/es/docs/getting-started/installation)**: deja los paquetes preparados
+2. **[Inicio rápido](/es/docs/getting-started/quick-start)**: tu primera traza en menos de 5 minutos
+3. **[Arquitectura](/es/docs/core-concepts/architecture)**: entiende cómo encajan las piezas
+
+:::tip
+Si ya conoces los conceptos de trazabilidad de agentes, ve directo a la guía de **[Inicio rápido](/es/docs/getting-started/quick-start)**.
+:::

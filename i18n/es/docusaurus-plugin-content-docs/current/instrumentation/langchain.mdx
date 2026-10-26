@@ -1,0 +1,84 @@
+---
+sidebar_position: 2
+title: Integración con LangChain
+description: "Traza agentes de LangChain automáticamente con el callback de TraceAgent. Cadenas, llamadas al LLM, herramientas y recuperadores registrados en una sola ejecución."
+image: img/social-card.jpg
+keywords: [langchain, trazabilidad langchain, observabilidad langchain, callback, trazabilidad automática]
+---
+
+# Integración con LangChain
+
+import PackageInstall from '@site/src/components/PackageInstall';
+
+TraceAgent ofrece un **callback** nativo para LangChain que captura automáticamente los pasos de las cadenas, las llamadas al LLM, el uso de herramientas y la actividad de los recuperadores.
+
+## Instalación
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain']} />
+
+## Uso básico
+
+```python
+from trace_agent_sdk import TraceAgentClient
+from trace_agent_langchain import TraceAgentLangChainCallback
+
+client = TraceAgentClient("http://localhost:8000")
+run = client.start_run("langchain-agent", "Answer user question")
+
+callback = TraceAgentLangChainCallback(run)
+agent.invoke({"input": "What's the weather?"}, callbacks=[callback])
+
+run.finish({"status": "success"})
+```
+
+## Eventos capturados
+
+| Evento | Datos capturados |
+|-------|---------------|
+| **Inicio/fin de cadena** | Tipo de cadena, entrada, salida, duración |
+| **Llamada/respuesta del LLM** | Prompt, respuesta, recuento de tokens |
+| **Uso/resultado de herramienta** | Nombre de la herramienta, parámetros, salida |
+| **Consulta del recuperador** | Consulta, documentos recuperados |
+| **Error** | Tipo de error, mensaje, traza de pila |
+
+## Cómo se registran las herramientas y los modelos
+
+El callback informa de cada herramienta con una sola llamada al servidor, así que una ejecución de herramienta aparece una vez en la línea de tiempo con su nombre y duración reales, y se cuenta una vez en los totales de herramientas y errores de la ejecución. Una herramienta que falla cuenta como un solo error.
+
+En cada llamada al modelo, el callback también recuerda el proveedor y el modelo, de modo que la ejecución los muestra (junto con su uso de tokens cuando el modelo lo informa).
+
+El callback nunca ralentiza ni rompe tu cadena: si el servidor de TraceAgent está caído, la cadena sigue ejecutándose.
+
+## Con modelos locales
+
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    base_url="http://localhost:5000/v1",
+    api_key="not-needed",
+    model="local-model"
+)
+
+callback = TraceAgentLangChainCallback(run)
+agent.invoke({"input": "..."}, callbacks=[callback])
+```
+
+:::tip
+Define la variable de entorno `OPENAI_BASE_URL` para no dejar el endpoint fijo en el código.
+:::
+
+## Variables de entorno
+
+| Variable | Descripción |
+|----------|-------------|
+| `TRACE_AGENT_BASE_URL` | URL del servidor para el callback |
+| `OPENAI_BASE_URL` | Endpoint compatible con OpenAI para modelos locales |
+| `OPENAI_API_KEY` | Clave de API (usa cualquier valor con modelos locales) |
+
+## ¿Y ahora qué?
+
+- **[Ejemplo de LangChain](/es/docs/examples/langchain-agent)**: recorrido completo
+- **[Integración con Pydantic AI](/es/docs/instrumentation/pydantic-ai)**: la integración equivalente de una línea para agentes Pydantic AI
+- **[Ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry)**: traza sin código de TraceAgent en tu agente
+- **[Referencia del SDK](/es/docs/instrumentation/sdk)**: instrumentación manual

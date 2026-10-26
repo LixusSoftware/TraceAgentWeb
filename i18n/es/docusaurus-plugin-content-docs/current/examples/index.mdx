@@ -1,0 +1,51 @@
+---
+sidebar_position: 1
+title: Ejemplos
+description: "Ejemplos ejecutables de TraceAgent para el SDK, LangChain, Pydantic AI y OpenTelemetry, desde una prueba mínima hasta trazas de máxima fidelidad."
+image: img/social-card.jpg
+keywords: [ejemplos, demos, código de ejemplo, ejemplo pydantic ai, ejemplo langchain, ejemplo opentelemetry]
+slug: /examples/
+---
+
+# Ejemplos
+
+TraceAgent incluye varios ejemplos ejecutables. Asegúrate de que el servidor está en marcha en `http://127.0.0.1:8000` antes de ejecutar cualquiera de ellos.
+
+
+:::info
+
+La mayoría de los scripts cargan la configuración desde un archivo `.env` local, así que es el lugar más cómodo para definir la URL del backend y los ajustes del modelo.
+
+:::
+
+
+## Resumen
+
+| Ejemplo | Qué demuestra |
+|---------|---------------------|
+| **[Agente de muestra](/es/docs/examples/sample-agent)** | Prueba mínima del SDK |
+| **[Agente LangChain](/es/docs/examples/langchain-agent)** | Integración con el callback de LangChain |
+| **[Inicio rápido con Pydantic AI](/es/docs/examples/pydantic-ai-hooks)** | Capacidad de Pydantic AI, sin clave de API |
+| **[Pydantic AI vía OpenTelemetry](/es/docs/examples/pydantic-ai-otel)** | Ingesta OTLP sin código de TraceAgent en el agente |
+| **[Agente con modelo local](/es/docs/examples/local-model-agent)** | Modelo local con el SDK |
+| **[Agente planificador](/es/docs/examples/planner-agent)** | Planificación con varias herramientas y escenarios |
+| **[Demo del depurador](/es/docs/examples/debugger-demo)** | Escenarios de depuración sintéticos |
+| **[Demo completa](/es/docs/examples/rich-demo)** | Traza de máxima fidelidad con todos los tipos de evento |
+
+## Requisitos previos
+
+Instala desde el código fuente con los extras de desarrollo:
+
+```bash
+uv sync --extra dev --extra providers --extra langchain
+```
+
+## Ejecutar los ejemplos
+
+Todos los ejemplos siguen el mismo patrón:
+
+```bash
+uv run examples/<script_name>.py
+```
+
+Algunos ejemplos aceptan opciones de línea de comandos como `--scenario` o `--prompt`. Consulta la página de cada ejemplo para ver los detalles.

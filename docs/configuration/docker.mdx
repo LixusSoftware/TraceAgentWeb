@@ -1,8 +1,8 @@
 ---
 sidebar_position: 2
 title: Docker Deployment
-description: Deploy TraceAgent with Docker and Docker Compose.
-image: img/logo.png
+description: "Deploy TraceAgent with Docker and Docker Compose."
+image: img/social-card.jpg
 keywords: [docker, deployment, containers, docker-compose]
 ---
 
@@ -53,6 +53,18 @@ docker compose up -d
 ```
 
 The UI will be available at `http://localhost:8080` and the server API at `http://localhost:8000`.
+
+## OpenTelemetry Receiver
+
+The server container also receives OpenTelemetry traces on the same port, at `http://localhost:8000/v1/traces`. No extra port or service is needed: point your agent's OTLP exporter at that URL. See [OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry).
+
+To tune or turn off the receiver, add these to the `environment` of the `server` service:
+
+```yaml
+    environment:
+      - TRACE_AGENT_OTLP_ENABLED=true
+      - TRACE_AGENT_OTLP_MAX_BODY_BYTES=10000000
+```
 
 ## With PostgreSQL
 

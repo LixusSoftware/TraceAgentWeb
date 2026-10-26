@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/docs/examples/lm-studio-agent",
+      "destination": "/docs/examples/local-model-agent",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/img/(.*)",

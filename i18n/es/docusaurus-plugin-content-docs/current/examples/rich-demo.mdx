@@ -1,0 +1,33 @@
+---
+sidebar_position: 7
+title: Demo completa
+description: "Demo de traza de máxima fidelidad que combina todos los tipos de evento en una sola ejecución densa."
+image: img/social-card.jpg
+keywords: [ejemplo, demo completa, traza completa, todos los eventos]
+---
+
+# Demo completa
+
+**Archivo:** `examples/rich_demo_agent.py`
+
+Demo de traza de máxima fidelidad. Combina un turno del modelo, reintentos de herramientas, comandos de shell, lecturas y escrituras de archivos, parches, artefactos y decisiones derivadas en una sola ejecución.
+
+## Ejecutar
+
+```bash
+uv run examples/rich_demo_agent.py
+```
+
+## Qué demuestra
+
+- Turnos del modelo con selección de herramientas
+- Reintentos de herramientas y gestión de errores
+- Ejecución de comandos de shell con códigos de salida
+- Operaciones de lectura y escritura de archivos
+- Aplicación de parches
+- Generación de artefactos
+- Decisiones derivadas de los resultados de las herramientas
+
+## Cuándo usarlo
+
+Usa este ejemplo cuando quieras la **ejecución más densa posible** para inspeccionar el panel, la línea de tiempo y las vistas de artefactos. Ejercita todos los tipos de evento que admite TraceAgent.

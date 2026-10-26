@@ -1,0 +1,149 @@
+---
+sidebar_position: 99
+title: Preguntas frecuentes
+description: "Respuestas sobre TraceAgent: trazabilidad con Pydantic AI y OpenTelemetry, privacidad de los prompts, instalación, bases de datos y solución de problemas."
+image: img/social-card.jpg
+keywords: [faq, preguntas frecuentes, solución de problemas, ayuda, problemas comunes, pydantic ai, opentelemetry, privacidad]
+---
+
+import CatIllustration from '@site/src/components/CatIllustration';
+import FaqSchema from '@site/src/components/FaqSchema';
+
+<FaqSchema
+  items={[
+    {
+      question: '¿Qué es TraceAgent?',
+      answer: 'TraceAgent es una plataforma de observabilidad y trazabilidad para agentes de IA. Captura llamadas a herramientas, operaciones con archivos, comandos de shell y rutas de decisión, y te da visibilidad completa de lo que hacen tus agentes.',
+    },
+    {
+      question: '¿TraceAgent es de código abierto?',
+      answer: 'Sí. TraceAgent se publica bajo la licencia MIT. Puedes encontrar el código fuente en GitHub.',
+    },
+    {
+      question: '¿Qué versiones de Python son compatibles?',
+      answer: 'TraceAgent requiere Python 3.11+.',
+    },
+    {
+      question: '¿Puedo usar la capacidad y OpenTelemetry en el mismo agente?',
+      answer: 'No, elige una por agente. Las dos registran cada llamada al modelo y cada herramienta y no se conocen entre sí, así que la ejecución aparecería duplicada. La única combinación válida es crear la ejecución con el SDK y dejar que OpenTelemetry aporte los spans.',
+    },
+    {
+      question: '¿TraceAgent ralentiza o rompe mi agente si el servidor está caído?',
+      answer: 'No. Los eventos se encolan y los envía un hilo en segundo plano. Tras un fallo de entrega, la integración se pausa durante failure_cooldown segundos, imprime una línea de aviso y mantiene el agente en marcha. Con OpenTelemetry, el exportador envía los spans en segundo plano y solo registra un aviso si no llega al servidor.',
+    },
+    {
+      question: '¿Se guardan mis prompts y salidas?',
+      answer: 'El servidor guarda un resumen de cada prompt y de cada salida. Con TRACE_AGENT_CAPTURE_FULL_PAYLOADS activo (el valor por defecto) también guarda el contenido completo; ponlo a false para conservar solo los resúmenes. Con OpenTelemetry, además, puedes impedir que el contenido salga del agente con include_content=False. Con la capacidad, usa redact_fields para las claves sensibles.',
+    },
+    {
+      question: '¿Qué versiones de Pydantic AI son compatibles?',
+      answer: 'Pydantic AI 2.x (>=2,<3). Para OpenTelemetry, se admite la versión de instrumentación por defecto de Pydantic AI 2.x. Las versiones de instrumentación anteriores (2 a 4) usan nombres de span distintos y no se traducen.',
+    },
+    {
+      question: '¿Por qué mi script corto no muestra ninguna ejecución con OpenTelemetry?',
+      answer: 'El exportador envía los spans en segundo plano. Llama a provider.shutdown() (o a force_flush()) antes de que el script termine.',
+    },
+  ]}
+/>
+
+# Preguntas frecuentes
+
+## General
+
+### ¿Qué es TraceAgent?
+
+TraceAgent es una plataforma de observabilidad y trazabilidad para agentes de IA. Captura llamadas a herramientas, operaciones con archivos, comandos de shell y rutas de decisión, y te da visibilidad completa de lo que hacen tus agentes.
+
+### ¿TraceAgent es de código abierto?
+
+Sí. TraceAgent se publica bajo la **licencia MIT**. Puedes encontrar el código fuente en [GitHub](https://github.com/LixusSoftware/TraceAgent).
+
+### ¿Qué versiones de Python son compatibles?
+
+TraceAgent requiere **Python 3.11+**.
+
+## Pydantic AI y OpenTelemetry
+
+### ¿Puedo usar la capacidad y OpenTelemetry en el mismo agente?
+
+No, elige una por agente. Las dos registran cada llamada al modelo y cada herramienta y no se conocen entre sí, así que la ejecución aparecería duplicada. La única combinación válida es crear la ejecución con el SDK y dejar que OpenTelemetry aporte los spans. Consulta [¿Hooks u OpenTelemetry?](/es/docs/instrumentation/hooks-vs-opentelemetry).
+
+### ¿TraceAgent ralentiza o rompe mi agente si el servidor está caído?
+
+No. Los eventos se encolan y los envía un hilo en segundo plano. Tras un fallo de entrega, la integración se pausa durante `failure_cooldown` segundos, imprime una línea de aviso y mantiene el agente en marcha. Con OpenTelemetry, el exportador envía los spans en segundo plano y solo registra un aviso si no llega al servidor.
+
+### ¿Se guardan mis prompts y salidas?
+
+El servidor guarda un resumen de cada prompt y de cada salida. Con `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` activo (el valor por defecto) también guarda el contenido completo; ponlo a `false` para conservar solo los resúmenes. Con OpenTelemetry, además, puedes impedir que el contenido salga del agente con `include_content=False`. Con la capacidad, usa `redact_fields` para las claves sensibles.
+
+### ¿Qué versiones de Pydantic AI son compatibles?
+
+Pydantic AI 2.x (`>=2,<3`). Para OpenTelemetry, se admite la versión de instrumentación por defecto de Pydantic AI 2.x. Las versiones de instrumentación anteriores (2 a 4) usan nombres de span distintos y no se traducen.
+
+### ¿Por qué mi script corto no muestra ninguna ejecución con OpenTelemetry?
+
+El exportador envía los spans en segundo plano. Llama a `provider.shutdown()` (o a `force_flush()`) antes de que el script termine. Consulta [Solución de problemas](/es/docs/troubleshooting).
+
+## Instalación
+
+### ¿Puedo instalar solo el SDK sin el servidor?
+
+Sí. Cada paquete es independiente:
+
+```bash
+pip install trace-agent-sdk
+# o, con uv
+uv add trace-agent-sdk
+```
+
+El SDK envía los eventos a cualquier servidor de TraceAgent en ejecución: no necesitas instalar el servidor en la misma máquina.
+
+### ¿Funciona con entornos virtuales?
+
+Sí. Recomendamos usar `venv`, `conda` o `uv` para gestionar tu entorno de Python.
+
+## Servidor
+
+### ¿Qué bases de datos son compatibles?
+
+- **SQLite** (por defecto): sin configuración, ideal para desarrollo
+- **PostgreSQL**: recomendada para despliegues en producción
+
+### ¿Cómo cambio la base de datos?
+
+Define la variable de entorno `TRACE_AGENT_DATABASE_URL`:
+
+```bash
+# PostgreSQL
+TRACE_AGENT_DATABASE_URL=postgresql://user:password@localhost:5432/traceagent
+
+# SQLite (por defecto)
+TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
+```
+
+## Solución de problemas
+
+<CatIllustration state="error" size="level2" caption="¿El sistema se porta mal? Vamos a depurarlo." />
+
+### La UI no se conecta al servidor
+
+1. Comprueba que el servidor está en marcha: `curl http://localhost:8000/health`
+2. Verifica que `TRACE_AGENT_SERVER_URL` apunta al host correcto
+3. Si usas Docker, asegúrate de que los servicios están en la misma red
+
+### Veo errores de «connection refused»
+
+El servidor no está en marcha o está en otro puerto. Comprueba:
+- ¿Está en ejecución el proceso del servidor?
+- ¿Está libre el puerto 8000?
+- ¿Estás detrás de un cortafuegos o de un proxy?
+
+### Los eventos no aparecen en la UI
+
+1. Verifica que el SDK apunta a la URL correcta del servidor
+2. Comprueba que se llamó a `run.finish()`
+3. Actualiza la UI: algunas vistas necesitan recargar la página
+
+:::tip[Cómo pedir ayuda]
+¿No encuentras lo que buscas? [Abre una incidencia en GitHub](https://github.com/LixusSoftware/TraceAgent/issues).
+:::

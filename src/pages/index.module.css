@@ -129,6 +129,13 @@
   background-clip: text;
 }
 
+[data-theme='dark'] .heroGradient {
+  background: linear-gradient(135deg, #9fb4e0, #cbbd94, #e8b963);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .heroSubtitle {
   font-size: 1.15rem;
   line-height: 1.7;
@@ -291,7 +298,7 @@
 
 .packageGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.25rem;
   margin-top: 3rem;
 }
@@ -430,4 +437,100 @@
   .packageGrid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Integrations ("Works with") */
+.heroIntegrations {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.4rem;
+}
+
+.heroTopRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.heroTopRow .heroBadge {
+  margin-bottom: 0;
+}
+
+.heroTopRow .heroIntegrations {
+  flex-basis: 100%;
+}
+
+.heroIntegrationsLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-text-muted);
+}
+
+.integrationPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: inherit !important;
+  background: var(--ta-surface-1);
+  border: 1px solid var(--ta-border);
+  text-decoration: none !important;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.integrationPill:hover {
+  border-color: var(--ta-accent-amber);
+  transform: translateY(-1px);
+}
+
+.integrationNew {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 100px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-accent-amber);
+  background: rgba(201, 148, 62, 0.12);
+  border: 1px solid rgba(201, 148, 62, 0.3);
+}
+
+.integrationPill .integrationNew {
+  margin-left: 0;
+}
+
+.codeTabs {
+  padding: 0.5rem 1rem 0;
+  background: var(--ta-surface-1);
+}
+
+@media (max-width: 768px) {
+  .heroTopRow,
+  .heroIntegrations {
+    justify-content: center;
+  }
+}
+
+.packageInstallGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: auto;
+  max-width: 100%;
+}
+
+.packageInstallGroup .packageInstall {
+  margin-top: 0;
 }
