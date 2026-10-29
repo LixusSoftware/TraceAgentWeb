@@ -16,6 +16,36 @@ Para la información de versiones más actualizada, consulta la página de [GitH
 
 ---
 
+## v0.8.0
+
+### Corregido
+- Ya no hay falsos avisos de bucle cuando el agente se corrige a sí mismo: las llamadas se comparan por sus argumentos (`args_hash`)
+- Un bucle se señala una sola vez, con su recuento: `X was called N times with the same arguments.`
+- El aviso de comando fallido dice `Command failed (exit code N): <primer comentario>`
+- Los tracebacks se muestran con saltos de línea reales
+- Steps cuenta solo las acciones de primer nivel
+
+---
+
+## v0.7.0
+
+### Cambiado
+- Las filas de modelo indican el modelo real (`Model call · <modelo>`)
+- Las salidas de tipo objeto se muestran como JSON, y se conserva el orden de los resultados
+
+---
+
+## v0.6.0
+
+### Añadido
+- Captura de contenido: los prompts, las respuestas, las salidas de herramientas y la salida final se guardan completos. Opción `capture_content` en la capacidad de Pydantic AI y ajuste `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` en el servidor
+
+### Corregido
+- Los eventos se numeran de forma atómica: ya no hay un error 500 al llamar a `run.record_command` dentro de una herramienta
+- El grafo de ejecución tiene un nodo por paso
+
+---
+
 ## v0.5.0 — 2026-10-29
 
 ### Añadido

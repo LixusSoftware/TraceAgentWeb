@@ -82,13 +82,25 @@ Las herramientas aparecen bajo el paso del agente que las usó, así que la lín
 
 El primer nivel se abre solo, y **Expand all** y **Collapse all** abren o cierran todos los pasos. La fila de una herramienta muestra sus argumentos, y un paso de comando se titula con el primer comentario de su script.
 
-![Línea de tiempo jerárquica de una ejecución con llamadas al modelo, herramientas y un agente anidado, junto al inspector de eventos](/img/trace-agent/timeline-nested.jpg)
+![Línea de tiempo jerárquica de una ejecución: llamadas al modelo, herramientas con sus argumentos, el comando que ejecutó una de ellas y la salida final](/img/trace-agent/timeline-nested.jpg)
 
 Cuando una ejecución termina o falla, TraceAgent deduce sus **decisiones** (qué herramienta se eligió, reintentos, recuperaciones) y señala patrones como los bucles. No se muestran mientras la ejecución sigue en marcha. Cada decisión lista los eventos en los que se basa.
 
 ![Grafo de decisiones de una ejecución en la que una herramienta falló, se reintentó y se recuperó, con los eventos que hay detrás del reintento](/img/trace-agent/decisions-retry.jpg)
 
 La UI se actualiza en directo mientras el agente se ejecuta.
+
+Una **llamada al modelo** se titula con el modelo real (`Model call · <modelo>`). Selecciónala para ver su prompt, con las instrucciones primero como SYSTEM, y su respuesta. Las salidas de tipo objeto se muestran como JSON.
+
+![Inspector de una llamada al modelo con su prompt y su respuesta](/img/trace-agent/model-call-inspector.jpg)
+
+El **grafo de ejecución** tiene un nodo por paso:
+
+![Grafo de ejecución de una ejecución con un nodo por paso](/img/trace-agent/execution-graph.jpg)
+
+Las señales evitan las falsas alarmas. Un bucle solo se señala cuando una herramienta se llama varias veces con los mismos argumentos (comparados por su hash), así que un agente que se corrige a sí mismo no se marca. Se señala una sola vez, con su recuento: `X was called N times with the same arguments.` Un comando fallido dice `Command failed (exit code N): <primer comentario>`, y los tracebacks conservan sus saltos de línea. **Steps** cuenta solo las acciones de primer nivel.
+
+Los eventos se ordenan por llegada, no por la hora real. Un comando registrado dentro de una herramienta puede aparecer antes que la fila de su herramienta, pero queda anidado bajo ella.
 
 :::info[Autoalojado]
 Todos los datos se quedan en tu infraestructura. No hay telemetría externa ni dependencia de la nube. Todo es tuyo.

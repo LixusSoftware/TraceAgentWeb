@@ -19,6 +19,7 @@ There is no built-in list of sensitive keys (`password`, `token`, `api_key`...).
 | Control | Where | What it does |
 |---------|-------|--------------|
 | `redact_fields` | Pydantic AI capability and `@run.tool` | Replaces the value of the listed keys with `[redacted]` in everything TraceAgent stores |
+| `capture_content=False` | Pydantic AI capability | Stores only summaries, not the full content |
 | `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` | Server | Stores only summaries, not the full content |
 | `include_content=False` | OpenTelemetry, on the agent | The content never leaves the agent |
 
@@ -49,7 +50,13 @@ The manual methods (`record_command`, file and patch recording, `commands.run`) 
 
 ## Keep full content out of the server
 
-By default the server also keeps the full content of prompts and outputs, not just the summaries. To store only summaries, set this on the server:
+By default (`capture_content` on the capability and `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` on the server are both on), the full content is stored, not just summaries: prompts and responses (the instructions first, as SYSTEM), tool outputs and the final output are kept whole.
+
+:::warning[Full content can contain sensitive data]
+Prompts, responses and tool outputs are stored as they are, so they can contain personal data or secrets. Redact the keys you know about, or keep only summaries.
+:::
+
+To store only summaries, turn off `capture_content` on the capability, or set this on the server:
 
 ```bash
 TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false

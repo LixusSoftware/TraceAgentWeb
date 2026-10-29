@@ -19,6 +19,7 @@ No hay una lista integrada de claves sensibles (`password`, `token`, `api_key`..
 | Control | Dónde | Qué hace |
 |---------|-------|--------------|
 | `redact_fields` | Capacidad de Pydantic AI y `@run.tool` | Sustituye por `[redacted]` el valor de las claves indicadas en todo lo que guarda TraceAgent |
+| `capture_content=False` | Capacidad de Pydantic AI | Guarda solo resúmenes, no el contenido completo |
 | `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` | Servidor | Guarda solo resúmenes, no el contenido completo |
 | `include_content=False` | OpenTelemetry, en el agente | El contenido nunca sale del agente |
 
@@ -49,7 +50,13 @@ Los métodos manuales (`record_command`, el registro de archivos y parches, `com
 
 ## Mantén el contenido completo fuera del servidor
 
-Por defecto el servidor también guarda el contenido completo de prompts y salidas, no solo los resúmenes. Para guardar solo resúmenes, define esto en el servidor:
+Por defecto (`capture_content` en la capacidad y `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` en el servidor están activos), se guarda el contenido completo, no solo resúmenes: los prompts y las respuestas (con las instrucciones primero, como SYSTEM), las salidas de las herramientas y la salida final se conservan enteros.
+
+:::warning[El contenido completo puede contener datos sensibles]
+Los prompts, las respuestas y las salidas de herramientas se guardan tal cual, así que pueden contener datos personales o secretos. Redacta las claves que conozcas, o conserva solo resúmenes.
+:::
+
+Para guardar solo resúmenes, desactiva `capture_content` en la capacidad, o define esto en el servidor:
 
 ```bash
 TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false

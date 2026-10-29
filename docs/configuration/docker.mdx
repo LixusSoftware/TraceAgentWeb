@@ -14,15 +14,15 @@ TraceAgent provides pre-built Docker images for the server and UI.
 
 | Component | Image |
 |-----------|-------|
-| Server | `ghcr.io/lixussoftware/trace-agent-server:0.5.0` |
-| UI | `ghcr.io/lixussoftware/trace-agent-ui:0.5.0` |
+| Server | `ghcr.io/lixussoftware/trace-agent-server:0.8.0` |
+| UI | `ghcr.io/lixussoftware/trace-agent-ui:0.8.0` |
 
 | Port | Component |
 |------|-----------|
 | `8000` | Server API (and the OpenTelemetry receiver) |
 | `8080` | UI |
 
-The images are published with the tags `0.5.0` (exact release), `0.5` (patch updates) and `latest`. Use the **same version** for the server and the UI, and pin `0.5.0` in production. `latest` is not downloaded again by itself: `docker compose up` reuses your local copy, so run `docker compose pull` (or set `pull_policy: always`) to update. See [Running in Production](/docs/configuration/production).
+The images are published with the tags `0.8.0` (exact release), `0.8` (patch updates) and `latest`. Use the **same version** for the server and the UI, and pin `0.8.0` in production. `latest` is not downloaded again by itself: `docker compose up` reuses your local copy, so run `docker compose pull` (or set `pull_policy: always`) to update. See [Running in Production](/docs/configuration/production).
 
 ## Docker Compose
 
@@ -33,7 +33,7 @@ version: "3.8"
 
 services:
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:0.5.0
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
     ports:
       - "8000:8000"
     environment:
@@ -43,7 +43,7 @@ services:
       - trace-data:/app/data
 
   ui:
-    image: ghcr.io/lixussoftware/trace-agent-ui:0.5.0
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.8.0
     ports:
       - "8080:8080"
     environment:
@@ -91,7 +91,7 @@ services:
       - pg-data:/var/lib/postgresql/data
 
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:0.5.0
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
     ports:
       - "8000:8000"
     environment:
@@ -100,7 +100,7 @@ services:
       - db
 
   ui:
-    image: ghcr.io/lixussoftware/trace-agent-ui:0.5.0
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.8.0
     ports:
       - "8080:8080"
     environment:

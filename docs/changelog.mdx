@@ -16,6 +16,36 @@ For the most up-to-date release information, see the [GitHub Releases](https://g
 
 ---
 
+## v0.8.0
+
+### Fixed
+- No false loop flags when the agent corrects itself: calls are compared by their arguments (`args_hash`)
+- A loop is flagged once, with its count: `X was called N times with the same arguments.`
+- The failed command flag reads `Command failed (exit code N): <first comment>`
+- Tracebacks are shown with real line breaks
+- Steps counts only top-level actions
+
+---
+
+## v0.7.0
+
+### Changed
+- Model rows name the real model (`Model call · <model>`)
+- Object outputs are shown as JSON, and the order of results is kept
+
+---
+
+## v0.6.0
+
+### Added
+- Content capture: prompts, responses, tool outputs and the final output are stored whole. Option `capture_content` on the Pydantic AI capability and setting `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` on the server
+
+### Fixed
+- Events are numbered atomically: no more 500 error when `run.record_command` is called inside a tool
+- The execution graph has one node per step
+
+---
+
 ## v0.5.0 — 2026-10-29
 
 ### Added

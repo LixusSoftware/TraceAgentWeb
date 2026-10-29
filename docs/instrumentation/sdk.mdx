@@ -128,6 +128,8 @@ run.record_command(
 
 Or let `run.commands.run(["python", "generated.py"])` do the running and the recording in one call.
 
+Inside a Pydantic AI tool, pass `parent_step_id=current_step_id()` so the command hangs from the tool in the timeline. See [Record a Command Inside a Tool](/docs/instrumentation/pydantic-ai#record-a-command-inside-a-tool).
+
 ### Tools
 
 `run.record_tool_call` does not exist. How you record tools depends on how your agent calls the model:

@@ -47,6 +47,10 @@ TraceAgent is made of five packages: `trace-agent-sdk`, `trace-agent-server`, `t
 `uv add` adds the packages to your project's `pyproject.toml` and installs them. If you just want to install into an existing environment without a project, use `uv pip install` instead.
 :::
 
+:::tip[uv does not see the new version?]
+Right after a release, uv may not see the new version yet. Add `--no-cache`: `uv add --no-cache trace-agent-sdk` or `uv pip install --no-cache trace-agent-sdk`.
+:::
+
 :::tip
 If you only need to **instrument** your agent (and the server runs elsewhere), install just the SDK. The server and UI are only needed for the self-hosted backend.
 :::
@@ -57,13 +61,13 @@ Pre-built images are available for the backend and frontend:
 
 | Component | Image |
 |-----------|-------|
-| TraceAgent Server | `ghcr.io/lixussoftware/trace-agent-server:0.5.0` |
-| TraceAgent UI | `ghcr.io/lixussoftware/trace-agent-ui:0.5.0` |
+| TraceAgent Server | `ghcr.io/lixussoftware/trace-agent-server:0.8.0` |
+| TraceAgent UI | `ghcr.io/lixussoftware/trace-agent-ui:0.8.0` |
 
 ```bash
 # Pull the images
-docker pull ghcr.io/lixussoftware/trace-agent-server:0.5.0
-docker pull ghcr.io/lixussoftware/trace-agent-ui:0.5.0
+docker pull ghcr.io/lixussoftware/trace-agent-server:0.8.0
+docker pull ghcr.io/lixussoftware/trace-agent-ui:0.8.0
 ```
 
 For a full Docker Compose setup, see the **[Docker deployment guide](/docs/configuration/docker)**.

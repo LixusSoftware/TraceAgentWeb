@@ -25,16 +25,16 @@ Cada versión publica tres tags para las dos imágenes:
 
 | Tag | ¿Se mueve? | Úsalo para |
 |-----|--------|------------|
-| `0.5.0` | Nunca | **Producción.** La versión exacta |
-| `0.5` | Con las versiones de parche | Recibir correcciones automáticamente |
+| `0.8.0` | Nunca | **Producción.** La versión exacta |
+| `0.8` | Con las versiones de parche | Recibir correcciones automáticamente |
 | `latest` | Con cada versión | Probar cosas |
 
 ```yaml
 services:
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:0.5.0
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
   ui:
-    image: ghcr.io/lixussoftware/trace-agent-ui:0.5.0
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.8.0
 ```
 
 Usa la **misma versión** para el servidor y la UI.
@@ -50,7 +50,7 @@ Por defecto el servidor guarda los datos en un archivo SQLite, `./trace_agent.db
 ```yaml
 services:
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:0.5.0
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
     environment:
       - TRACE_AGENT_DATABASE_URL=sqlite:////data/trace_agent.db
     volumes:

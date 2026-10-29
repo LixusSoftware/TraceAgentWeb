@@ -96,6 +96,7 @@ Pass them to `run.as_pydantic_ai_capability(...)`:
 | `record_model_events` | `True` | Record each model request as an LLM call (model, provider, tokens, requested tools) |
 | `record_tool_events` | `True` | Record each tool execution (arguments, output summary, duration, errors) |
 | `record_node_events` | `False` | Record every node of the agent graph as an `agent_action` |
+| `capture_content` | `True` | Store prompts, responses, tool outputs and the final output whole. Turn it off to keep only summaries (see [Privacy and Redaction](/docs/instrumentation/privacy)) |
 | `redact_fields` | `[]` | Argument and output keys whose value is replaced with `[redacted]` |
 | `failure_cooldown` | `30.0` | Seconds to stop sending after a failed delivery; events produced meanwhile are dropped. `0` retries every event |
 | `flush_timeout` | `5.0` | Maximum seconds the end of the agent run waits for pending events |
@@ -108,6 +109,31 @@ capability = run.as_pydantic_ai_capability(
 ```
 
 `redact_fields` is a list of **key names**. A key is matched by its exact name, at any depth, inside the arguments and results of your tools, and its value is replaced with `[redacted]` before it is sent. Nothing is redacted by default, and it does not detect patterns or values. See [Privacy and Redaction](/docs/instrumentation/privacy). Independently of this option, long values are always shortened: text inside tool arguments at 160 characters, and the summaries of prompts and outputs at 220.
+
+## Record a Command Inside a Tool
+
+If a tool runs a command, record it with `run.record_command` and pass `parent_step_id=current_step_id()`. The command then hangs from the tool in the timeline:
+
+```python
+import json
+import subprocess
+
+from trace_agent_pydantic_ai import current_step_id
+
+@agent.tool_plain
+def get_forecast(city: str) -> dict:
+    cmd = ["python", "forecast.py", "--city", city]
+    done = subprocess.run(cmd, capture_output=True, text=True)
+    run.record_command(
+        cmd,
+        status="succeeded" if done.returncode == 0 else "failed",
+        exit_code=done.returncode,
+        parent_step_id=current_step_id(),
+    )
+    return json.loads(done.stdout)
+```
+
+Events are ordered by arrival, not by wall-clock time, so the command can appear before its tool row, but it is nested under the tool.
 
 ## It Never Gets in the Agent's Way
 

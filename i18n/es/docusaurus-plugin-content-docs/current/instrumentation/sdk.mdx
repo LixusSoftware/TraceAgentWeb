@@ -128,6 +128,8 @@ run.record_command(
 
 O deja que `run.commands.run(["python", "generated.py"])` ejecute y registre en una sola llamada.
 
+Dentro de una herramienta de Pydantic AI, pasa `parent_step_id=current_step_id()` para que el comando cuelgue de la herramienta en la línea de tiempo. Consulta [Registrar un comando dentro de una herramienta](/es/docs/instrumentation/pydantic-ai#record-a-command-inside-a-tool).
+
 ### Herramientas
 
 `run.record_tool_call` no existe. Cómo registras las herramientas depende de cómo llama tu agente al modelo:
