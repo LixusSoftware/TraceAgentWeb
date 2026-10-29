@@ -16,7 +16,7 @@ Para la información de versiones más actualizada, consulta la página de [GitH
 
 ---
 
-## v0.8.0
+## v0.8.0 — 2026-10-29
 
 ### Corregido
 - Ya no hay falsos avisos de bucle cuando el agente se corrige a sí mismo: las llamadas se comparan por sus argumentos (`args_hash`)
@@ -27,7 +27,7 @@ Para la información de versiones más actualizada, consulta la página de [GitH
 
 ---
 
-## v0.7.0
+## v0.7.0 — 2026-10-29
 
 ### Cambiado
 - Las filas de modelo indican el modelo real (`Model call · <modelo>`)
@@ -35,9 +35,10 @@ Para la información de versiones más actualizada, consulta la página de [GitH
 
 ---
 
-## v0.6.0
+## v0.6.0 — 2026-10-29
 
 ### Añadido
+- `current_step_id()` en `trace_agent_pydantic_ai`, para colgar un comando registrado con `run.record_command` de la herramienta que lo ejecuta
 - Captura de contenido: los prompts, las respuestas, las salidas de herramientas y la salida final se guardan completos. Opción `capture_content` en la capacidad de Pydantic AI y ajuste `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` en el servidor
 
 ### Corregido

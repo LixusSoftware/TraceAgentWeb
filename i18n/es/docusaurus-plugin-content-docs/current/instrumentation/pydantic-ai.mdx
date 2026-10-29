@@ -96,7 +96,7 @@ Pásalas a `run.as_pydantic_ai_capability(...)`:
 | `record_model_events` | `True` | Registra cada petición al modelo como una llamada LLM (modelo, proveedor, tokens, herramientas solicitadas) |
 | `record_tool_events` | `True` | Registra cada ejecución de herramienta (argumentos, resumen de la salida, duración, errores) |
 | `record_node_events` | `False` | Registra cada nodo del grafo del agente como un `agent_action` |
-| `capture_content` | `True` | Guarda completos los prompts, las respuestas, las salidas de herramientas y la salida final. Desactívala para conservar solo resúmenes (consulta [Privacidad y redacción](/es/docs/instrumentation/privacy)) |
+| `capture_content` | `True` | Envía el contenido de las llamadas al modelo y las salidas completas de las herramientas. Desactívala para dejarlos fuera de lo que se envía; los argumentos de las herramientas y los resúmenes se siguen enviando (consulta [Privacidad y redacción](/es/docs/instrumentation/privacy)) |
 | `redact_fields` | `[]` | Claves de argumentos y salidas cuyo valor se sustituye por `[redacted]` |
 | `failure_cooldown` | `30.0` | Segundos que se deja de enviar tras un fallo de entrega; los eventos que se producen mientras tanto se descartan. `0` reintenta con cada evento |
 | `flush_timeout` | `5.0` | Segundos máximos que el final de la ejecución del agente espera a los eventos pendientes |

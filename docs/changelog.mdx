@@ -16,7 +16,7 @@ For the most up-to-date release information, see the [GitHub Releases](https://g
 
 ---
 
-## v0.8.0
+## v0.8.0 — 2026-10-29
 
 ### Fixed
 - No false loop flags when the agent corrects itself: calls are compared by their arguments (`args_hash`)
@@ -27,7 +27,7 @@ For the most up-to-date release information, see the [GitHub Releases](https://g
 
 ---
 
-## v0.7.0
+## v0.7.0 — 2026-10-29
 
 ### Changed
 - Model rows name the real model (`Model call · <model>`)
@@ -35,9 +35,10 @@ For the most up-to-date release information, see the [GitHub Releases](https://g
 
 ---
 
-## v0.6.0
+## v0.6.0 — 2026-10-29
 
 ### Added
+- `current_step_id()` in `trace_agent_pydantic_ai`, to hang a command recorded with `run.record_command` from the tool that runs it
 - Content capture: prompts, responses, tool outputs and the final output are stored whole. Option `capture_content` on the Pydantic AI capability and setting `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` on the server
 
 ### Fixed

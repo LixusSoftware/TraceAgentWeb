@@ -96,7 +96,7 @@ Pass them to `run.as_pydantic_ai_capability(...)`:
 | `record_model_events` | `True` | Record each model request as an LLM call (model, provider, tokens, requested tools) |
 | `record_tool_events` | `True` | Record each tool execution (arguments, output summary, duration, errors) |
 | `record_node_events` | `False` | Record every node of the agent graph as an `agent_action` |
-| `capture_content` | `True` | Store prompts, responses, tool outputs and the final output whole. Turn it off to keep only summaries (see [Privacy and Redaction](/docs/instrumentation/privacy)) |
+| `capture_content` | `True` | Send the content of model calls and the full tool outputs. Turn it off to keep them out of what is sent; tool arguments and summaries are still sent (see [Privacy and Redaction](/docs/instrumentation/privacy)) |
 | `redact_fields` | `[]` | Argument and output keys whose value is replaced with `[redacted]` |
 | `failure_cooldown` | `30.0` | Seconds to stop sending after a failed delivery; events produced meanwhile are dropped. `0` retries every event |
 | `flush_timeout` | `5.0` | Maximum seconds the end of the agent run waits for pending events |

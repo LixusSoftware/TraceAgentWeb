@@ -19,8 +19,8 @@ There is no built-in list of sensitive keys (`password`, `token`, `api_key`...).
 | Control | Where | What it does |
 |---------|-------|--------------|
 | `redact_fields` | Pydantic AI capability and `@run.tool` | Replaces the value of the listed keys with `[redacted]` in everything TraceAgent stores |
-| `capture_content=False` | Pydantic AI capability | Stores only summaries, not the full content |
-| `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` | Server | Stores only summaries, not the full content |
+| `capture_content=False` | Pydantic AI capability | Does not send the content of model calls or the full tool outputs. Tool arguments (redacted and shortened) and summaries are still sent |
+| `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` | Server | Stores no full payloads (content, arguments, final output or commands), whatever it receives |
 | `include_content=False` | OpenTelemetry, on the agent | The content never leaves the agent |
 
 ## Always applied
@@ -56,7 +56,12 @@ By default (`capture_content` on the capability and `TRACE_AGENT_CAPTURE_FULL_PA
 Prompts, responses and tool outputs are stored as they are, so they can contain personal data or secrets. Redact the keys you know about, or keep only summaries.
 :::
 
-To store only summaries, turn off `capture_content` on the capability, or set this on the server:
+The two settings are not equivalent:
+
+- `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` (server): the server stores no full payloads (content, arguments, final output or commands), whatever it receives.
+- `capture_content=False` (capability): the content of model calls (prompts and responses) and the full tool outputs are not sent, but tool arguments (redacted and shortened) and summaries still are.
+
+To avoid storing full content, the server setting is enough. `capture_content=False` also keeps that content from leaving the agent process. The strictest option is to use both. The server setting:
 
 ```bash
 TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false
