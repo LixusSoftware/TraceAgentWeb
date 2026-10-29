@@ -18,6 +18,10 @@ TraceAgent plugs into [Pydantic AI](https://ai.pydantic.dev) as a **capability**
 
 Requirements: **Pydantic AI 2.x** (`>=2,<3`) and Python 3.11+.
 
+:::note[`ModuleNotFoundError: trace_agent_pydantic_ai`]
+`trace-agent-sdk` alone does not include the integration. Without `trace-agent-pydantic-ai`, `run.as_pydantic_ai_capability()` fails with `ModuleNotFoundError: No module named 'trace_agent_pydantic_ai'`. Install both packages as shown above.
+:::
+
 It works with whichever model your agent already uses: nothing in the integration depends on the provider. The examples use `"openai:gpt-4o"` only as an example model string.
 
 ## Basic Usage
@@ -47,7 +51,7 @@ except Exception as exc:
 Create the run, add `capabilities=[run.as_pydantic_ai_capability()]` to your `Agent`, and close the run at the end. Nothing else in your agent changes.
 
 :::warning[You open and close the run]
-If the agent raises, the capability records the agent's failure, but the run stays `running` until you call `run.fail(...)`. That is what the `try/except` above is for.
+If the agent raises, the capability records the agent's failure, but the run stays `running` until you call `run.fail(...)`. That is what the `try/except` above is for. If the process dies before closing it, the server closes the run by itself after one hour without activity (see [Running in Production](/docs/configuration/production#abandoned-runs)).
 :::
 
 Works with `run_sync`, `run` and `run_stream`, with parallel tools, and with nested agents. For a version that runs without an API key, see the [Pydantic AI quickstart](/docs/examples/pydantic-ai-hooks).
@@ -92,6 +96,7 @@ Pass them to `run.as_pydantic_ai_capability(...)`:
 | `record_model_events` | `True` | Record each model request as an LLM call (model, provider, tokens, requested tools) |
 | `record_tool_events` | `True` | Record each tool execution (arguments, output summary, duration, errors) |
 | `record_node_events` | `False` | Record every node of the agent graph as an `agent_action` |
+| `capture_content` | `True` | Send the content of model calls and the full tool outputs. Turn it off to keep them out of what is sent; tool arguments and summaries are still sent (see [Privacy and Redaction](/docs/instrumentation/privacy)) |
 | `redact_fields` | `[]` | Argument and output keys whose value is replaced with `[redacted]` |
 | `failure_cooldown` | `30.0` | Seconds to stop sending after a failed delivery; events produced meanwhile are dropped. `0` retries every event |
 | `flush_timeout` | `5.0` | Maximum seconds the end of the agent run waits for pending events |
@@ -103,7 +108,32 @@ capability = run.as_pydantic_ai_capability(
 )
 ```
 
-`redact_fields` is a list of **key names**. A key is matched by its exact name, at any depth, inside the arguments and results of your tools, and its value is replaced with `[redacted]`. It does not detect patterns or values. Independently of this option, long values are always shortened: text inside tool arguments at 160 characters, and the summaries of prompts and outputs at 220.
+`redact_fields` is a list of **key names**. A key is matched by its exact name, at any depth, inside the arguments and results of your tools, and its value is replaced with `[redacted]` before it is sent. Nothing is redacted by default, and it does not detect patterns or values. See [Privacy and Redaction](/docs/instrumentation/privacy). Independently of this option, long values are always shortened: text inside tool arguments at 160 characters, and the summaries of prompts and outputs at 220.
+
+## Record a Command Inside a Tool
+
+If a tool runs a command, record it with `run.record_command` and pass `parent_step_id=current_step_id()`. The command then hangs from the tool in the timeline:
+
+```python
+import json
+import subprocess
+
+from trace_agent_pydantic_ai import current_step_id
+
+@agent.tool_plain
+def get_forecast(city: str) -> dict:
+    cmd = ["python", "forecast.py", "--city", city]
+    done = subprocess.run(cmd, capture_output=True, text=True)
+    run.record_command(
+        cmd,
+        status="succeeded" if done.returncode == 0 else "failed",
+        exit_code=done.returncode,
+        parent_step_id=current_step_id(),
+    )
+    return json.loads(done.stdout)
+```
+
+Events are ordered by arrival, not by wall-clock time, so the command can appear before its tool row, but it is nested under the tool.
 
 ## It Never Gets in the Agent's Way
 
@@ -112,6 +142,11 @@ Tracing must not break or slow down your agent, so:
 - Events are queued and sent by a background thread.
 - If the TraceAgent server is down, the agent keeps working. It prints a single line (`[trace-agent] could not deliver trace data ... The agent is not affected.`) and pauses sending for `failure_cooldown` seconds.
 - When the outermost agent run ends, it waits up to `flush_timeout` seconds for pending events, so `run.finish()` normally reaches the server after them. If the server hangs for longer than that, there is no such guarantee.
+- The internal queue holds up to 1000 pending events. Any beyond that are dropped.
+
+:::warning[Your own calls can still fail]
+The capability isolates its events, but `client.start_run(...)`, `run.finish(...)` and `run.fail(...)` are **your** calls. With the server down they raise `httpx.ConnectError`. If the agent must not fail because of tracing, wrap them in `try/except httpx.HTTPError`. See [When the Server Is Down](/docs/instrumentation/sdk#when-the-server-is-down).
+:::
 
 ## Good to Know
 

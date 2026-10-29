@@ -16,6 +16,10 @@ TraceAgent ofrece un **callback** nativo para LangChain que captura automáticam
 
 <PackageInstall packages={['trace-agent-sdk', 'trace-agent-langchain']} />
 
+:::note[`ModuleNotFoundError: trace_agent_langchain`]
+El SDK no trae consigo el paquete de LangChain. Si ves este error, instala `trace-agent-langchain` como se muestra arriba.
+:::
+
 ## Uso básico
 
 ```python
@@ -72,9 +76,10 @@ Define la variable de entorno `OPENAI_BASE_URL` para no dejar el endpoint fijo e
 
 | Variable | Descripción |
 |----------|-------------|
-| `TRACE_AGENT_BASE_URL` | URL del servidor para el callback |
 | `OPENAI_BASE_URL` | Endpoint compatible con OpenAI para modelos locales |
 | `OPENAI_API_KEY` | Clave de API (usa cualquier valor con modelos locales) |
+
+La dirección del servidor de TraceAgent no es una variable de entorno: pásala a `TraceAgentClient("http://localhost:8000")`.
 
 ## ¿Y ahora qué?
 

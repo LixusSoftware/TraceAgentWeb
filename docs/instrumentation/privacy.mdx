@@ -1,0 +1,98 @@
+---
+sidebar_position: 6
+title: Privacy and Redaction
+description: "What TraceAgent stores and how to keep sensitive data out of traces: redact_fields, truncation, full payload capture and OpenTelemetry content settings."
+image: img/social-card.jpg
+keywords: [privacy, redaction, redact_fields, sensitive data, pii, secrets, capture full payloads, include_content]
+---
+
+# Privacy and Redaction
+
+TraceAgent records what your agent does: prompts, tool arguments, tool results and outputs. This page explains what is stored, what is cut automatically, and the controls you have to keep sensitive data out.
+
+:::warning[Nothing is redacted by default]
+There is no built-in list of sensitive keys (`password`, `token`, `api_key`...). TraceAgent only redacts the keys **you** list. If your tools handle secrets or personal data, configure redaction before you send real traffic.
+:::
+
+## What you control
+
+| Control | Where | What it does |
+|---------|-------|--------------|
+| `redact_fields` | Pydantic AI capability and `@run.tool` | Replaces the value of the listed keys with `[redacted]` in everything TraceAgent stores |
+| `capture_content=False` | Pydantic AI capability | Does not send the content of model calls or the full tool outputs. Tool arguments (redacted and shortened) and summaries are still sent |
+| `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` | Server | Stores no full payloads (content, arguments, final output or commands), whatever it receives |
+| `include_content=False` | OpenTelemetry, on the agent | The content never leaves the agent |
+
+## Always applied
+
+These limits apply without any configuration:
+
+- Text longer than 160 characters inside tool **arguments** is cut to 157 characters plus `...`.
+- **Summaries** of prompts and outputs are cut to 220 characters.
+
+## Redact fields
+
+`redact_fields` is a list of **key names**. A key is matched by its exact name, at any depth of dictionaries and lists, and its value is replaced with `[redacted]`. It does not look for patterns or values.
+
+```python
+capability = run.as_pydantic_ai_capability(
+    redact_fields=["api_key", "password", "authorization"],
+)
+```
+
+On the Pydantic AI capability and on `@run.tool`, the value of every listed key is replaced with `[redacted]` in everything TraceAgent stores: event payloads, turns, the conversation of later model requests and the summaries. The tool and the model still receive the real values. Only the listed keys are masked, matched by exact name at any depth. Nothing else is detected automatically.
+
+:::tip[Values that are not under a named key]
+If sensitive data is not under a key with a fixed name, don't send it as a tool argument: there is no pattern detection.
+:::
+
+The manual methods (`record_command`, file and patch recording, `commands.run`) do **not** accept `redact_fields`: they only shorten long values, and the stdout and stderr summaries of commands are never redacted.
+
+## Keep full content out of the server
+
+By default (`capture_content` on the capability and `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` on the server are both on), the full content is stored, not just summaries: prompts and responses (the instructions first, as SYSTEM), tool outputs and the final output are kept whole.
+
+:::warning[Full content can contain sensitive data]
+Prompts, responses and tool outputs are stored as they are, so they can contain personal data or secrets. Redact the keys you know about, or keep only summaries.
+:::
+
+The two settings are not equivalent:
+
+- `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` (server): the server stores no full payloads (content, arguments, final output or commands), whatever it receives.
+- `capture_content=False` (capability): the content of model calls (prompts and responses) and the full tool outputs are not sent, but tool arguments (redacted and shortened) and summaries still are.
+
+To avoid storing full content, the server setting is enough. `capture_content=False` also keeps that content from leaving the agent process. The strictest option is to use both. The server setting:
+
+```bash
+TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false
+```
+
+## OpenTelemetry
+
+With [OpenTelemetry ingestion](/docs/instrumentation/opentelemetry), tool arguments go through the same shortening, but **without any redacted keys**. To make sure prompts and outputs never leave your agent, turn the content off at the source:
+
+```python
+InstrumentationSettings(tracer_provider=provider, include_content=False)
+```
+
+## Recommendations
+
+- Redact at the source: the safest data is the data that is never sent.
+- Add every secret-like key your tools use to `redact_fields`, since names must match exactly.
+- Remember the server has no authentication and no way to delete traces yet. See [Running in Production](/docs/configuration/production).
+
+## Not available yet
+
+A server-wide redaction policy (for example a global list of sensitive keys) is not available. Redaction is configured per agent.
+
+:::info[Audit guardrails]
+The server has optional guardrails that detect personal data and prompt injection (`TRACE_AGENT_AUDIT_ENABLE_GUARDRAILS`, off by default). They only act on the server's model endpoint, not on the Pydantic AI capability, OpenTelemetry or other recorded events, so they are not a substitute for redaction.
+
+The Audit tab rates a run from 100 down: each blocked request, prompt-injection, secret or personal-data finding subtracts points. That Security Score only exists when guardrails are on. With them off, the tab says nothing was checked.
+:::
+
+## What's Next?
+
+- **[Pydantic AI Integration](/docs/instrumentation/pydantic-ai)** — All capability options
+- **[Environment Variables](/docs/configuration/environment-variables)** — Server settings
+- **[Running in Production](/docs/configuration/production)** — Security and data

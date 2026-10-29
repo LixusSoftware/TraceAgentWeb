@@ -87,6 +87,19 @@ The run gets its provider, model, token totals, tool count and real durations.
 
 Token counts are read from `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens`. The older `prompt_tokens` / `completion_tokens` names are not read, so tokens would show as 0.
 
+## Other Languages
+
+There is no JavaScript, TypeScript or other-language SDK for TraceAgent. This receiver is the way in for other languages: any OpenTelemetry SDK that can export OTLP over HTTP can send traces to `POST /v1/traces`, as protobuf or JSON, with optional gzip or deflate. The standard environment variables work:
+
+```bash
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://127.0.0.1:8000/v1/traces
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+```
+
+:::warning[Only GenAI spans are understood]
+The receiver only recognizes spans that follow the GenAI conventions (`gen_ai.operation.name` of `invoke_agent`, `chat` or `execute_tool`); everything else is ignored. It is verified with Pydantic AI only. Another SDK works only if it emits those spans with the attributes in the [API Reference](/docs/reference/api#span-attributes-read). Without an `invoke_agent` span, the run is created but never marked as finished. For a hand-written request, see the [JSON example](/docs/reference/api#example-json).
+:::
+
 ## Attach to a Run Created with the SDK
 
 This is the one case where the agent's environment needs `trace-agent-sdk`. If you create the run yourself with the SDK, put its id in the `trace_agent.run_id` **resource** attribute and every span is added to that run instead of creating a new one:

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Instalación
-description: "Instala TraceAgent con pip, Docker o desde el código fuente: SDK, servidor, UI y las integraciones con LangChain y Pydantic AI. Python 3.11, 3.12 y 3.13."
+description: "Instala TraceAgent con pip, Docker o desde el código fuente: SDK, servidor, UI y las integraciones con LangChain y Pydantic AI. Python 3.11 a 3.14."
 image: img/social-card.jpg
 keywords: [instalar, pip install, docker, configuración, python, trace-agent-sdk, trace-agent-pydantic-ai]
 ---
@@ -12,7 +12,7 @@ import PackageInstall from '@site/src/components/PackageInstall';
 
 # Instalación
 
-TraceAgent requiere **Python 3.11+** (probado en 3.11, 3.12 y 3.13) y se puede instalar con pip o uv, con Docker o desde el código fuente.
+TraceAgent requiere **Python 3.11+** (probado en 3.11 a 3.14) y se puede instalar con pip o uv, con Docker o desde el código fuente.
 
 ## Instalar con pip o uv
 
@@ -47,6 +47,10 @@ TraceAgent se compone de cinco paquetes: `trace-agent-sdk`, `trace-agent-server`
 `uv add` añade los paquetes al `pyproject.toml` de tu proyecto y los instala. Si solo quieres instalar en un entorno existente sin proyecto, usa `uv pip install`.
 :::
 
+:::tip[¿uv no ve la versión nueva?]
+Justo después de una versión, uv puede no ver todavía la nueva. Añade `--no-cache`: `uv add --no-cache trace-agent-sdk` o `uv pip install --no-cache trace-agent-sdk`.
+:::
+
 :::tip
 Si solo necesitas **instrumentar** tu agente (y el servidor se ejecuta en otro sitio), instala únicamente el SDK. El servidor y la UI solo hacen falta para el backend autoalojado.
 :::
@@ -57,13 +61,13 @@ Hay imágenes ya construidas para el backend y el frontend:
 
 | Componente | Imagen |
 |-----------|-------|
-| TraceAgent Server | `ghcr.io/lixussoftware/trace-agent-server:latest` |
-| TraceAgent UI | `ghcr.io/lixussoftware/trace-agent-ui:latest` |
+| TraceAgent Server | `ghcr.io/lixussoftware/trace-agent-server:0.8.0` |
+| TraceAgent UI | `ghcr.io/lixussoftware/trace-agent-ui:0.8.0` |
 
 ```bash
 # Descarga las imágenes
-docker pull ghcr.io/lixussoftware/trace-agent-server:latest
-docker pull ghcr.io/lixussoftware/trace-agent-ui:latest
+docker pull ghcr.io/lixussoftware/trace-agent-server:0.8.0
+docker pull ghcr.io/lixussoftware/trace-agent-ui:0.8.0
 ```
 
 Para una configuración completa con Docker Compose, consulta la **[guía de despliegue con Docker](/es/docs/configuration/docker)**.

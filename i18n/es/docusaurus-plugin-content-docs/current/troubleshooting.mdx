@@ -8,6 +8,18 @@ keywords: [solución de problemas, problemas, ejecuciones que faltan, ejecucione
 
 # Solución de problemas
 
+## `ModuleNotFoundError: No module named 'trace_agent_pydantic_ai'`
+
+`trace-agent-sdk` por sí solo no incluye las integraciones con frameworks. Instala `trace-agent-pydantic-ai` para la capacidad de Pydantic AI, o `trace-agent-langchain` (`No module named 'trace_agent_langchain'`) para el callback de LangChain. Consulta [Instalación](/es/docs/getting-started/installation).
+
+## `httpx.ConnectError` al iniciar una ejecución
+
+El servidor no está en marcha o la dirección es incorrecta. El SDK no captura estos errores: `start_run`, `finish` y `fail` lanzan `httpx.ConnectError`. Comprueba que el servidor responde en `http://localhost:8000/health`. Para que tu agente siga funcionando con el servidor caído, consulta [Cuando el servidor está caído](/es/docs/instrumentation/sdk#when-the-server-is-down).
+
+## Mis ejecuciones desaparecen al recrear el contenedor
+
+Por defecto el servidor guarda su archivo SQLite dentro del contenedor. Monta un volumen y apunta `TRACE_AGENT_DATABASE_URL` a él. Consulta [TraceAgent en producción](/es/docs/configuration/production#keep-your-data).
+
 ## No aparece ninguna ejecución tras un script corto (OpenTelemetry)
 
 El exportador envía los spans por lotes en segundo plano, y el script terminó antes de enviarlos. Llama a `provider.shutdown()` (o a `provider.force_flush()`) antes de que acabe el script. Consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry).
@@ -26,11 +38,20 @@ El mismo agente usa a la vez la capacidad de Pydantic AI y OpenTelemetry, así q
 ## La ejecución se queda en `running`
 
 - Con la capacidad de Pydantic AI, tú abres y cierras la ejecución. Si el agente lanzó una excepción, llama a `run.fail(...)`. Consulta la [integración con Pydantic AI](/es/docs/instrumentation/pydantic-ai).
+- Si el proceso del agente muere, el servidor cierra la ejecución por sí mismo como `failed` (código de error `RunAbandoned`) tras una hora sin actividad. Para cerrarla antes, llama a `POST /api/runs/{id}/fail`. El plazo es `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS`; un agente que permanezca en silencio más tiempo (por ejemplo, una única llamada de modelo muy lenta) también se cerraría, así que súbelo en ese caso.
 - Con OpenTelemetry, una ejecución termina cuando acaba su span `invoke_agent`. Si la librería solo emite spans `chat`, la ejecución se crea pero nunca se marca como finalizada.
 
-## Una ejecución en curso no muestra decisiones
+## Decisions está vacío mientras una ejecución está en curso
 
-Es normal. Las decisiones (elección de herramienta, reintento, recuperación) se deducen cuando la ejecución termina.
+Es normal. Las decisiones (elección de herramienta, reintento, recuperación) aparecen cuando la ejecución termina.
+
+## La UI no muestra ejecuciones, o responde 502
+
+La UI no consigue llegar al servidor. Comprueba que el servidor responde en la dirección que usa la UI (`TRACE_AGENT_SERVER_URL`, que en el archivo Compose es `http://server:8000`) y abre `/health` tanto en la UI (puerto 8080) como en el servidor (puerto 8000). Cuando el servidor no es alcanzable, `/api/*` en la UI responde `502` con un mensaje como `The TraceAgent server at <url> is not reachable (ConnectError).` Usa la misma versión para el servidor y la UI: la UI de la 0.2.x y anteriores no podía cargar ejecuciones.
+
+## Actualicé las imágenes pero la UI se ve antigua
+
+`docker compose up` reutiliza la copia local de una imagen. Ejecuta `docker compose pull` y luego `docker compose up -d` de nuevo.
 
 ## El servidor está caído y mi agente va lento o imprime un aviso
 

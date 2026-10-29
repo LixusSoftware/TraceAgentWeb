@@ -80,13 +80,27 @@ A run shows what the agent actually did, not just a list of events. Each run rec
 
 Tools appear under the agent step that used them, so the timeline is nested: the agent run contains its model calls and tools, in the order they happened, and nested agents appear inside the step that called them. The inspector shows what happened in plain terms (result, duration, tool, tokens, error) and keeps identifiers and raw data under "Technical details".
 
-![Nested timeline of an agent run with model calls, tools and a nested agent, and the event inspector](/img/trace-agent/timeline-nested.jpg)
+The first level opens by itself, and **Expand all** and **Collapse all** open or close every step. A tool row shows its arguments, and a command step is titled by the first comment of its script.
+
+![Nested timeline of an agent run: model calls, tools with their arguments, the command one of them ran, and the final output](/img/trace-agent/timeline-nested.jpg)
 
 When a run finishes or fails, TraceAgent derives its **decisions** (which tool was chosen, retries, recoveries) and flags such as loops. They are not shown while the run is still running. Each decision lists the events it is based on.
 
 ![Decision graph of a run where a tool failed, was retried and recovered, with the events behind the retry](/img/trace-agent/decisions-retry.jpg)
 
 The UI updates live while the agent is running.
+
+A **model call** is titled with the real model (`Model call · <model>`). Select it to see its prompt, with the instructions first as SYSTEM, and its response. Object outputs are shown as JSON.
+
+![Inspector of a model call showing its prompt and response](/img/trace-agent/model-call-inspector.jpg)
+
+The **execution graph** has one node per step:
+
+![Execution graph of a run with one node per step](/img/trace-agent/execution-graph.jpg)
+
+Flags avoid false alarms. A loop is flagged only when a tool is called several times with the same arguments (compared by their hash), so an agent that corrects itself is not flagged. It is flagged once, with its count: `X was called N times with the same arguments.` A failed command reads `Command failed (exit code N): <first comment>`, and tracebacks keep their line breaks. **Steps** counts only top-level actions.
+
+Events are ordered by arrival, not by wall-clock time. A command recorded inside a tool can appear before its tool row, but it is nested under it.
 
 :::info[Self-hosted]
 All data stays on your infrastructure. There's no external telemetry, no cloud dependency. You own everything.

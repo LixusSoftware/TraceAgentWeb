@@ -8,20 +8,35 @@ keywords: [quickstart, first trace, getting started, tutorial]
 
 # Quick Start
 
-Get your first trace running in **under 5 minutes**.
+import PackageInstall from '@site/src/components/PackageInstall';
+
+Get your first trace running in **under 5 minutes**: start the server and the UI, instrument a small script, and see the trace in the browser.
 
 ## Prerequisites
 
 - Python 3.11+
-- TraceAgent SDK installed (`pip install trace-agent-sdk` or `uv add trace-agent-sdk`)
-- TraceAgent Server running at `http://localhost:8000`
 
-:::tip[Starting the server]
+## Step 0 — Start the Server and the UI
 
-If you're using Docker:
+Install the SDK, the server and the UI:
+
+<PackageInstall packages={['trace-agent-sdk', 'trace-agent-server', 'trace-agent-ui']} />
+
+Start the server and the UI, each in its own terminal:
+
 ```bash
-docker run -p 8000:8000 ghcr.io/lixussoftware/trace-agent-server:latest
+trace-agent-server   # API on http://localhost:8000
+trace-agent-ui       # UI on http://localhost:8080
 ```
+
+The server listens on port **8000** and the UI on port **8080**. The UI looks for the server at `http://127.0.0.1:8000` unless you set `TRACE_AGENT_SERVER_URL`. The server stores its data in a `trace_agent.db` file in the folder where you start it.
+
+:::tip[Prefer Docker?]
+Follow the [Docker deployment guide](/docs/configuration/docker) to run both with `docker compose up`.
+:::
+
+:::note[Using a framework?]
+For Pydantic AI also install `trace-agent-pydantic-ai`, and for LangChain `trace-agent-langchain`. The SDK alone does not include them.
 :::
 
 ## Step 1 — Create a Client
@@ -120,7 +135,11 @@ You just:
 All of this is now visible in the **TraceAgent UI** at `http://localhost:8080`.
 
 :::info
-Open the TraceAgent UI to see your trace in the interactive timeline. You'll see the file write and command execution as events on the timeline.
+Open `http://localhost:8080` to see your trace in the interactive timeline. You'll see the file write and command execution as events on the timeline.
+:::
+
+:::warning[Server not running?]
+If the server is down, `client.start_run(...)` raises `httpx.ConnectError`. See [When the Server Is Down](/docs/instrumentation/sdk#when-the-server-is-down).
 :::
 
 ## What's Next?

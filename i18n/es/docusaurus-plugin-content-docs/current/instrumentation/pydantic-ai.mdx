@@ -18,6 +18,10 @@ TraceAgent se conecta a [Pydantic AI](https://ai.pydantic.dev) como una **capaci
 
 Requisitos: **Pydantic AI 2.x** (`>=2,<3`) y Python 3.11+.
 
+:::note[`ModuleNotFoundError: trace_agent_pydantic_ai`]
+`trace-agent-sdk` por sí solo no incluye la integración. Sin `trace-agent-pydantic-ai`, `run.as_pydantic_ai_capability()` falla con `ModuleNotFoundError: No module named 'trace_agent_pydantic_ai'`. Instala los dos paquetes como se muestra arriba.
+:::
+
 Funciona con el modelo que ya use tu agente: nada de la integración depende del proveedor. Los ejemplos usan `"openai:gpt-4o"` solo como cadena de modelo de ejemplo.
 
 ## Uso básico
@@ -47,7 +51,7 @@ except Exception as exc:
 Crea la ejecución, añade `capabilities=[run.as_pydantic_ai_capability()]` a tu `Agent` y cierra la ejecución al final. No cambia nada más en tu agente.
 
 :::warning[Tú abres y cierras la ejecución]
-Si el agente lanza una excepción, la capacidad registra el fallo del agente, pero la ejecución sigue en estado `running` hasta que llames a `run.fail(...)`. Para eso sirve el `try/except` de arriba.
+Si el agente lanza una excepción, la capacidad registra el fallo del agente, pero la ejecución sigue en estado `running` hasta que llames a `run.fail(...)`. Para eso sirve el `try/except` de arriba. Si el proceso muere antes de cerrarla, el servidor cierra la ejecución por sí mismo tras una hora sin actividad (consulta [TraceAgent en producción](/es/docs/configuration/production#abandoned-runs)).
 :::
 
 Funciona con `run_sync`, `run` y `run_stream`, con herramientas en paralelo y con agentes anidados. Para una versión que se ejecuta sin clave de API, consulta el [inicio rápido de Pydantic AI](/es/docs/examples/pydantic-ai-hooks).
@@ -92,6 +96,7 @@ Pásalas a `run.as_pydantic_ai_capability(...)`:
 | `record_model_events` | `True` | Registra cada petición al modelo como una llamada LLM (modelo, proveedor, tokens, herramientas solicitadas) |
 | `record_tool_events` | `True` | Registra cada ejecución de herramienta (argumentos, resumen de la salida, duración, errores) |
 | `record_node_events` | `False` | Registra cada nodo del grafo del agente como un `agent_action` |
+| `capture_content` | `True` | Envía el contenido de las llamadas al modelo y las salidas completas de las herramientas. Desactívala para dejarlos fuera de lo que se envía; los argumentos de las herramientas y los resúmenes se siguen enviando (consulta [Privacidad y redacción](/es/docs/instrumentation/privacy)) |
 | `redact_fields` | `[]` | Claves de argumentos y salidas cuyo valor se sustituye por `[redacted]` |
 | `failure_cooldown` | `30.0` | Segundos que se deja de enviar tras un fallo de entrega; los eventos que se producen mientras tanto se descartan. `0` reintenta con cada evento |
 | `flush_timeout` | `5.0` | Segundos máximos que el final de la ejecución del agente espera a los eventos pendientes |
@@ -103,7 +108,32 @@ capability = run.as_pydantic_ai_capability(
 )
 ```
 
-`redact_fields` es una lista de **nombres de clave**. Una clave se detecta por su nombre exacto, a cualquier profundidad, dentro de los argumentos y los resultados de tus herramientas, y su valor se sustituye por `[redacted]`. No detecta patrones ni valores. Con independencia de esta opción, los valores largos siempre se acortan: el texto dentro de los argumentos de herramientas a 160 caracteres, y los resúmenes de prompts y salidas a 220.
+`redact_fields` es una lista de **nombres de clave**. Una clave se detecta por su nombre exacto, a cualquier profundidad, dentro de los argumentos y los resultados de tus herramientas, y su valor se sustituye por `[redacted]` antes de enviarlo. Por defecto no se redacta nada, y no detecta patrones ni valores. Consulta [Privacidad y redacción](/es/docs/instrumentation/privacy). Con independencia de esta opción, los valores largos siempre se acortan: el texto dentro de los argumentos de herramientas a 160 caracteres, y los resúmenes de prompts y salidas a 220.
+
+## Registrar un comando dentro de una herramienta {/* #record-a-command-inside-a-tool */}
+
+Si una herramienta ejecuta un comando, regístralo con `run.record_command` y pasa `parent_step_id=current_step_id()`. El comando cuelga entonces de la herramienta en la línea de tiempo:
+
+```python
+import json
+import subprocess
+
+from trace_agent_pydantic_ai import current_step_id
+
+@agent.tool_plain
+def get_forecast(city: str) -> dict:
+    cmd = ["python", "forecast.py", "--city", city]
+    done = subprocess.run(cmd, capture_output=True, text=True)
+    run.record_command(
+        cmd,
+        status="succeeded" if done.returncode == 0 else "failed",
+        exit_code=done.returncode,
+        parent_step_id=current_step_id(),
+    )
+    return json.loads(done.stdout)
+```
+
+Los eventos se ordenan por llegada, no por la hora real, así que el comando puede aparecer antes que la fila de su herramienta, pero queda anidado bajo ella.
 
 ## Nunca estorba al agente
 
@@ -112,6 +142,11 @@ La trazabilidad no debe romper ni ralentizar tu agente, por eso:
 - Los eventos se encolan y los envía un hilo en segundo plano.
 - Si el servidor de TraceAgent está caído, el agente sigue funcionando. Imprime una sola línea (`[trace-agent] could not deliver trace data ... The agent is not affected.`) y pausa el envío durante `failure_cooldown` segundos.
 - Cuando termina la ejecución del agente más externo, espera hasta `flush_timeout` segundos a los eventos pendientes, de modo que `run.finish()` normalmente llega al servidor después de ellos. Si el servidor se cuelga durante más tiempo, esa garantía no existe.
+- La cola interna admite hasta 1000 eventos pendientes. Los que sobren se descartan.
+
+:::warning[Tus propias llamadas aún pueden fallar]
+La capacidad aísla sus eventos, pero `client.start_run(...)`, `run.finish(...)` y `run.fail(...)` son llamadas **tuyas**. Con el servidor caído lanzan `httpx.ConnectError`. Si el agente no debe fallar por culpa de la trazabilidad, envuélvelas en `try/except httpx.HTTPError`. Consulta [Cuando el servidor está caído](/es/docs/instrumentation/sdk#when-the-server-is-down).
+:::
 
 ## Conviene saber
 

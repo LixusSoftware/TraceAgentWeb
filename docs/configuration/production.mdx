@@ -1,0 +1,123 @@
+---
+sidebar_position: 3
+title: Running in Production
+description: "What to know before running TraceAgent in production: ports, image tags, data volumes, PostgreSQL, authentication, TLS, health checks and what is not available yet."
+image: img/social-card.jpg
+keywords: [production, deployment, security, authentication, tls, postgresql, backups, image tags, reverse proxy]
+---
+
+# Running in Production
+
+This page lists what is true today about running the TraceAgent server and UI for real use, including what is **not available yet**, so you can plan around it.
+
+## Ports and addresses
+
+| Component | Listens on | Notes |
+|-----------|------------|-------|
+| Server (`trace-agent-server`) | `0.0.0.0:8000` | In Docker the image exposes `8000`. Outside Docker, `--host` and `--port` change it |
+| UI (`trace-agent-ui`) | `0.0.0.0:8080` | Set with `TRACE_AGENT_UI_HOST` and `TRACE_AGENT_UI_PORT` |
+
+The UI image ships with `TRACE_AGENT_SERVER_URL=http://server:8000`, which works in Docker Compose with a service named `server`. Outside Docker, the UI points to `http://127.0.0.1:8000` unless you set `TRACE_AGENT_SERVER_URL`. Port `5173` only exists in development.
+
+## Pin the image tag
+
+Each release publishes three tags for both images:
+
+| Tag | Moves? | Use it for |
+|-----|--------|------------|
+| `0.8.0` | Never | **Production.** The exact release |
+| `0.8` | With patch releases | Getting fixes automatically |
+| `latest` | With every release | Trying things out |
+
+```yaml
+services:
+  server:
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
+  ui:
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.8.0
+```
+
+Use the **same version** for the server and the UI.
+
+:::warning[`latest` is not downloaded again]
+`docker compose up` reuses the copy of `latest` you already have. To get a newer image, run `docker compose pull` (or set `pull_policy: always` on the service). If you updated the images but the UI looks old, this is why.
+:::
+
+## Keep your data
+
+By default the server stores data in a SQLite file, `./trace_agent.db`, relative to its working directory. Inside a container that file lives in the container: **recreate the container and the data is gone** unless you mount a volume and point the database to it:
+
+```yaml
+services:
+  server:
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
+    environment:
+      - TRACE_AGENT_DATABASE_URL=sqlite:////data/trace_agent.db
+    volumes:
+      - trace-data:/data
+
+volumes:
+  trace-data:
+```
+
+**Backups:** there is no backup tool. Copy the SQLite file (with the server stopped, or from a snapshot of the volume), or use `pg_dump` with PostgreSQL.
+
+## PostgreSQL
+
+`TRACE_AGENT_DATABASE_URL` accepts any SQLAlchemy URL, and the tables are created when the server starts. Keep these in mind:
+
+- **No PostgreSQL driver is included.** Install the one you use (for example `psycopg`) in the image or environment.
+- **It is not covered by the project's tests,** which run on SQLite.
+- **There are no migrations.** A schema change in a newer version does not update an existing database.
+
+## Security
+
+:::warning[The server has no authentication]
+The server does not read or check any credentials: **anyone who can reach its API can read and write all runs.** `TraceAgentClient` accepts an `api_key` and sends it as an `Authorization: Bearer` header, but the server ignores it. Today it is only useful if a reverse proxy in front of the server requires that token.
+
+Run the server on a private network, or behind a reverse proxy that enforces authentication.
+:::
+
+**TLS:** the server and the UI serve plain HTTP and have no certificate options. For HTTPS, put a reverse proxy (nginx, Caddy or similar) in front.
+
+**CORS:** by default the server only allows `http://localhost:5173`. The UI image proxies `/api` to the server, so UI to server calls need no CORS. A browser app on another origin that calls the API directly needs `TRACE_AGENT_CORS_ORIGINS` (a JSON list).
+
+See also [Privacy and Redaction](/docs/instrumentation/privacy) for what gets stored.
+
+## Abandoned runs
+
+If an agent stops without finishing its run (for example, the process dies), the server closes the run by itself as `failed`, with the error code `RunAbandoned` and the message "No activity for N minutes: the agent stopped without finishing the run.", after one hour without any event. It checks every minute (or every quarter of the timeout if that is shorter) while the server is running.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS` | `3600` | Seconds without events before a `running` run is closed. `0` turns it off |
+
+An agent that goes longer than that without producing any event (for example, a single very slow model call) would be closed too: raise the value in that case. To close a run sooner, call `POST /api/runs/{id}/fail`.
+
+## Workers
+
+The server numbers the events of each run without locking, so concurrent writes to the **same run** from several workers can collide. Keep the default of one worker (the `--workers` flag exists, but don't raise it).
+
+## Health and metrics
+
+| Endpoint | What it is |
+|----------|------------|
+| `GET /health` | Health check, for load balancers and container checks |
+| `GET /metrics` | Prometheus metrics. On by default; turn off with `TRACE_AGENT_AUDIT_METRICS_ENABLED=false` |
+
+## Not available yet
+
+| Capability | Status |
+|------------|--------|
+| Authentication in the server | Not available. Use a reverse proxy or a private network |
+| Built-in TLS | Not available. Use a reverse proxy |
+| Retention or deleting traces | Not available. There is no delete endpoint, TTL or purge: traces are kept until you delete rows from the database yourself |
+| A server-wide redaction policy | Not available. Redaction is set per agent (see [Privacy and Redaction](/docs/instrumentation/privacy)) |
+| Sessions, projects and filtering by `metadata` | Not available (see [Runs, Metadata and Search](/docs/core-concepts/runs)) |
+| SDK for JavaScript or other languages | Not available. Use [OpenTelemetry ingestion](/docs/instrumentation/opentelemetry) |
+
+## What's Next?
+
+- **[Docker Deployment](/docs/configuration/docker)** — Compose files for the server and the UI
+- **[Environment Variables](/docs/configuration/environment-variables)** — Every setting in one place
+- **[Troubleshooting](/docs/troubleshooting)** — Fix common problems

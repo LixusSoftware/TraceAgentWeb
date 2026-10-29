@@ -26,6 +26,7 @@ The TraceAgent server exposes an HTTP API. This page lists the endpoints and det
 | `GET` | `/api/runs/{id}/timeline` | Events grouped by step (agent run, model call, tool), with durations |
 | `GET` | `/api/runs/{id}/graph?view=execution\|decisions` | Nodes and edges ready for a graph viewer |
 | `GET` | `/api/runs/{id}/explanation` | Plain-language narrative, the decisions taken and flags such as retries or loops |
+| `GET` | `/api/runs/{id}/audit` | Audit report of the run. Includes `guardrails_enabled` |
 | `GET` | `/api/runs/{id}/analytics` | Tool metrics, tool graph and similar runs |
 | `GET` | `/api/runs/compare?left_run_id=…&right_run_id=…` | Difference between two runs, with the likely root cause |
 | `GET` | `/api/dashboard?period=24h\|7d\|30d` | Totals, trends, top tools and top errors |
@@ -37,6 +38,36 @@ The TraceAgent server exposes an HTTP API. This page lists the endpoints and det
 A run is in one of these states: `running`, `completed` or `failed`. A finished run is `completed` (not "finished").
 
 Decisions (tool choice, retry, recovery) and flags are derived when a run **ends** or fails, not while it runs. A running run shows none yet.
+
+A run whose agent stopped without finishing is closed by the server after one hour without activity (`TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS`). Its `run.failed` event has `error_code` `RunAbandoned`.
+
+## GET /api/runs/\{id\}/audit
+
+Returns the audit report of a run. It includes `guardrails_enabled`, a boolean that is `false` when the server was started without `TRACE_AGENT_AUDIT_ENABLE_GUARDRAILS=true`: in that case nothing was checked, so don't read the absence of findings as a clean result.
+
+## The UI server
+
+The UI (port 8080) answers `GET /health` and forwards `/api/*` to the server, including the live event stream. If the server does not respond, `/api/*` answers `502` with `{"detail":"The TraceAgent server at <url> is not reachable (ConnectError)."}`.
+
+## GET /api/runs
+
+Lists runs, newest first. Filters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `limit` | Number of runs, from 1 to 200 (default 50) |
+| `offset` | Runs to skip |
+| `agent_name` | Exact match on the agent name |
+| `status` | `running`, `completed` or `failed` |
+| `provider`, `model` | Provider or model of the run |
+| `search` | Case-insensitive partial match on the goal or the id |
+| `started_after`, `started_before` | ISO date-time bounds |
+
+There is no filter by `metadata`. See [Runs, Metadata and Search](/docs/core-concepts/runs).
+
+:::warning[No authentication]
+The API has no authentication: anyone who can reach it can read and write runs. See [Running in Production](/docs/configuration/production).
+:::
 
 ## POST /v1/traces
 
