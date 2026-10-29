@@ -80,6 +80,8 @@ A run shows what the agent actually did, not just a list of events. Each run rec
 
 Tools appear under the agent step that used them, so the timeline is nested: the agent run contains its model calls and tools, in the order they happened, and nested agents appear inside the step that called them. The inspector shows what happened in plain terms (result, duration, tool, tokens, error) and keeps identifiers and raw data under "Technical details".
 
+The first level opens by itself, and **Expand all** and **Collapse all** open or close every step. A tool row shows its arguments, and a command step is titled by the first comment of its script.
+
 ![Nested timeline of an agent run with model calls, tools and a nested agent, and the event inspector](/img/trace-agent/timeline-nested.jpg)
 
 When a run finishes or fails, TraceAgent derives its **decisions** (which tool was chosen, retries, recoveries) and flags such as loops. They are not shown while the run is still running. Each decision lists the events it is based on.

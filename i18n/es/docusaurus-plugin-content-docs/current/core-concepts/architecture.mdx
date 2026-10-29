@@ -80,6 +80,8 @@ Una ejecución muestra lo que hizo realmente el agente, no solo una lista de eve
 
 Las herramientas aparecen bajo el paso del agente que las usó, así que la línea de tiempo es jerárquica: la ejecución del agente contiene sus llamadas al modelo y sus herramientas, en el orden en que ocurrieron, y los agentes anidados aparecen dentro del paso que los llamó. El inspector explica lo ocurrido en lenguaje claro (resultado, duración, herramienta, tokens, error) y deja los identificadores y los datos en bruto en «Technical details».
 
+El primer nivel se abre solo, y **Expand all** y **Collapse all** abren o cierran todos los pasos. La fila de una herramienta muestra sus argumentos, y un paso de comando se titula con el primer comentario de su script.
+
 ![Línea de tiempo jerárquica de una ejecución con llamadas al modelo, herramientas y un agente anidado, junto al inspector de eventos](/img/trace-agent/timeline-nested.jpg)
 
 Cuando una ejecución termina o falla, TraceAgent deduce sus **decisiones** (qué herramienta se eligió, reintentos, recuperaciones) y señala patrones como los bucles. No se muestran mientras la ejecución sigue en marcha. Cada decisión lista los eventos en los que se basa.
