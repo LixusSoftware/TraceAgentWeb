@@ -25,17 +25,23 @@ Cada versión publica tres tags para las dos imágenes:
 
 | Tag | ¿Se mueve? | Úsalo para |
 |-----|--------|------------|
-| `0.2.0` | Nunca | **Producción.** La versión exacta |
-| `0.2` | Con las versiones de parche | Recibir correcciones automáticamente |
+| `0.5.0` | Nunca | **Producción.** La versión exacta |
+| `0.5` | Con las versiones de parche | Recibir correcciones automáticamente |
 | `latest` | Con cada versión | Probar cosas |
 
 ```yaml
 services:
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:0.2.0
+    image: ghcr.io/lixussoftware/trace-agent-server:0.5.0
   ui:
-    image: ghcr.io/lixussoftware/trace-agent-ui:0.2.0
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.5.0
 ```
+
+Usa la **misma versión** para el servidor y la UI.
+
+:::warning[`latest` no se vuelve a descargar]
+`docker compose up` reutiliza la copia de `latest` que ya tienes. Para obtener una imagen más nueva, ejecuta `docker compose pull` (o pon `pull_policy: always` en el servicio). Si actualizaste las imágenes pero la UI se ve antigua, es por esto.
+:::
 
 ## Conserva tus datos {/* #keep-your-data */}
 
@@ -44,7 +50,7 @@ Por defecto el servidor guarda los datos en un archivo SQLite, `./trace_agent.db
 ```yaml
 services:
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:0.2.0
+    image: ghcr.io/lixussoftware/trace-agent-server:0.5.0
     environment:
       - TRACE_AGENT_DATABASE_URL=sqlite:////data/trace_agent.db
     volumes:
@@ -77,6 +83,16 @@ Ejecuta el servidor en una red privada, o detrás de un proxy inverso que apliqu
 **CORS:** por defecto el servidor solo permite `http://localhost:5173`. La imagen de la UI redirige `/api` al servidor, así que las llamadas de la UI al servidor no necesitan CORS. Una aplicación de navegador en otro origen que llame directamente a la API necesita `TRACE_AGENT_CORS_ORIGINS` (una lista JSON).
 
 Consulta también [Privacidad y redacción](/es/docs/instrumentation/privacy) para saber qué se guarda.
+
+## Ejecuciones abandonadas {/* #abandoned-runs */}
+
+Si un agente se detiene sin terminar su ejecución (por ejemplo, el proceso muere), el servidor la cierra por sí mismo como `failed`, con el código de error `RunAbandoned` y el mensaje «No activity for N minutes: the agent stopped without finishing the run.», tras una hora sin ningún evento. Lo comprueba cada minuto (o cada cuarto del plazo si es menor) mientras el servidor está en marcha.
+
+| Variable | Por defecto | Descripción |
+|----------|---------|-------------|
+| `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS` | `3600` | Segundos sin eventos antes de cerrar una ejecución `running`. `0` lo desactiva |
+
+Un agente que pase más tiempo que ese plazo sin generar ningún evento (por ejemplo, una única llamada de modelo muy lenta) también se cerraría: sube el valor en ese caso. Para cerrar una ejecución antes, llama a `POST /api/runs/{id}/fail`.
 
 ## Workers
 

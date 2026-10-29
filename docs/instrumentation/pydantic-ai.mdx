@@ -51,7 +51,7 @@ except Exception as exc:
 Create the run, add `capabilities=[run.as_pydantic_ai_capability()]` to your `Agent`, and close the run at the end. Nothing else in your agent changes.
 
 :::warning[You open and close the run]
-If the agent raises, the capability records the agent's failure, but the run stays `running` until you call `run.fail(...)`. That is what the `try/except` above is for.
+If the agent raises, the capability records the agent's failure, but the run stays `running` until you call `run.fail(...)`. That is what the `try/except` above is for. If the process dies before closing it, the server closes the run by itself after one hour without activity (see [Running in Production](/docs/configuration/production#abandoned-runs)).
 :::
 
 Works with `run_sync`, `run` and `run_stream`, with parallel tools, and with nested agents. For a version that runs without an API key, see the [Pydantic AI quickstart](/docs/examples/pydantic-ai-hooks).

@@ -152,8 +152,8 @@ print([(t["name"], t["status"]) for t in result.executed_tools])  # [('charge', 
 
 Esta vía necesita un proveedor de modelos configurado en el **servidor** (por ejemplo `TRACE_AGENT_OPENAI_API_KEY`). `@run.tool` solo registra la función; los argumentos se pasan como parámetros con nombre y el esquema de entrada sale de las anotaciones de tipo. Los eventos son `tool.requested`, `tool.started` y `tool.succeeded`; si la función lanza una excepción, se registra `tool.failed` con la clase de la excepción como `error_code` y su mensaje como `error_summary`, y el error vuelve al modelo en lugar de romper tu programa.
 
-:::warning[`redact_fields` en `@run.tool`]
-Solo oculta los resúmenes de la línea de tiempo. Consulta [Privacidad y redacción](/es/docs/instrumentation/privacy) antes de poner datos sensibles en los argumentos de una herramienta.
+:::tip[`redact_fields` en `@run.tool`]
+`@run.tool(..., redact_fields=[...])` mantiene las claves indicadas fuera de todo lo que se almacena; la herramienta y el modelo siguen recibiendo los valores reales. Consulta [Privacidad y redacción](/es/docs/instrumentation/privacy).
 :::
 
 ## Finalizar una ejecución

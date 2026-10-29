@@ -19,6 +19,7 @@ El comportamiento de TraceAgent se puede personalizar mediante variables de ento
 | `TRACE_AGENT_CORS_ORIGINS` | `["http://localhost:5173"]` | Orígenes permitidos por CORS, como lista JSON |
 | `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` | `true` | Conserva el contenido completo de los prompts y las salidas además de sus resúmenes. Ponlo a `false` para conservar solo los resúmenes |
 | `TRACE_AGENT_MODEL_PRICING` | `{}` | Precios por modelo en JSON, usados para calcular costes |
+| `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS` | `3600` | Segundos sin eventos tras los cuales una ejecución `running` se cierra como `failed` (`RunAbandoned`). `0` lo desactiva |
 
 ## Receptor OpenTelemetry
 

@@ -26,6 +26,7 @@ El servidor de TraceAgent expone una API HTTP. Esta página lista los endpoints 
 | `GET` | `/api/runs/{id}/timeline` | Eventos agrupados por paso (ejecución del agente, llamada al modelo, herramienta), con duraciones |
 | `GET` | `/api/runs/{id}/graph?view=execution\|decisions` | Nodos y aristas listos para un visor de grafos |
 | `GET` | `/api/runs/{id}/explanation` | Relato en lenguaje claro, las decisiones tomadas y señales como reintentos o bucles |
+| `GET` | `/api/runs/{id}/audit` | Informe de auditoría de la ejecución. Incluye `guardrails_enabled` |
 | `GET` | `/api/runs/{id}/analytics` | Métricas de herramientas, grafo de herramientas y ejecuciones similares |
 | `GET` | `/api/runs/compare?left_run_id=…&right_run_id=…` | Diferencia entre dos ejecuciones, con la causa raíz más probable |
 | `GET` | `/api/dashboard?period=24h\|7d\|30d` | Totales, tendencias, herramientas más usadas y errores más frecuentes |
@@ -37,6 +38,16 @@ El servidor de TraceAgent expone una API HTTP. Esta página lista los endpoints 
 Una ejecución está en uno de estos estados: `running`, `completed` o `failed`. Una ejecución terminada es `completed` (no «finished»).
 
 Las decisiones (elección de herramienta, reintento, recuperación) y las señales se deducen cuando una ejecución **termina** o falla, no mientras se ejecuta. Una ejecución en curso todavía no muestra ninguna.
+
+Una ejecución cuyo agente se detuvo sin terminar la cierra el servidor tras una hora sin actividad (`TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS`). Su evento `run.failed` tiene `error_code` igual a `RunAbandoned`.
+
+## GET /api/runs/\{id\}/audit
+
+Devuelve el informe de auditoría de una ejecución. Incluye `guardrails_enabled`, un booleano que es `false` cuando el servidor se arrancó sin `TRACE_AGENT_AUDIT_ENABLE_GUARDRAILS=true`: en ese caso no se comprobó nada, así que no interpretes la ausencia de hallazgos como un resultado limpio.
+
+## El servidor de la UI
+
+La UI (puerto 8080) responde a `GET /health` y reenvía `/api/*` al servidor, incluido el flujo de eventos en directo. Si el servidor no responde, `/api/*` responde `502` con `{"detail":"The TraceAgent server at <url> is not reachable (ConnectError)."}`.
 
 ## GET /api/runs
 

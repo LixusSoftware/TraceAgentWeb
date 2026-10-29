@@ -25,17 +25,23 @@ Each release publishes three tags for both images:
 
 | Tag | Moves? | Use it for |
 |-----|--------|------------|
-| `0.2.0` | Never | **Production.** The exact release |
-| `0.2` | With patch releases | Getting fixes automatically |
+| `0.5.0` | Never | **Production.** The exact release |
+| `0.5` | With patch releases | Getting fixes automatically |
 | `latest` | With every release | Trying things out |
 
 ```yaml
 services:
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:0.2.0
+    image: ghcr.io/lixussoftware/trace-agent-server:0.5.0
   ui:
-    image: ghcr.io/lixussoftware/trace-agent-ui:0.2.0
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.5.0
 ```
+
+Use the **same version** for the server and the UI.
+
+:::warning[`latest` is not downloaded again]
+`docker compose up` reuses the copy of `latest` you already have. To get a newer image, run `docker compose pull` (or set `pull_policy: always` on the service). If you updated the images but the UI looks old, this is why.
+:::
 
 ## Keep your data
 
@@ -44,7 +50,7 @@ By default the server stores data in a SQLite file, `./trace_agent.db`, relative
 ```yaml
 services:
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:0.2.0
+    image: ghcr.io/lixussoftware/trace-agent-server:0.5.0
     environment:
       - TRACE_AGENT_DATABASE_URL=sqlite:////data/trace_agent.db
     volumes:
@@ -77,6 +83,16 @@ Run the server on a private network, or behind a reverse proxy that enforces aut
 **CORS:** by default the server only allows `http://localhost:5173`. The UI image proxies `/api` to the server, so UI to server calls need no CORS. A browser app on another origin that calls the API directly needs `TRACE_AGENT_CORS_ORIGINS` (a JSON list).
 
 See also [Privacy and Redaction](/docs/instrumentation/privacy) for what gets stored.
+
+## Abandoned runs
+
+If an agent stops without finishing its run (for example, the process dies), the server closes the run by itself as `failed`, with the error code `RunAbandoned` and the message "No activity for N minutes: the agent stopped without finishing the run.", after one hour without any event. It checks every minute (or every quarter of the timeout if that is shorter) while the server is running.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS` | `3600` | Seconds without events before a `running` run is closed. `0` turns it off |
+
+An agent that goes longer than that without producing any event (for example, a single very slow model call) would be closed too: raise the value in that case. To close a run sooner, call `POST /api/runs/{id}/fail`.
 
 ## Workers
 

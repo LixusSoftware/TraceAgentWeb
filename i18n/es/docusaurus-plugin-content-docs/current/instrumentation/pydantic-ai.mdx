@@ -51,7 +51,7 @@ except Exception as exc:
 Crea la ejecución, añade `capabilities=[run.as_pydantic_ai_capability()]` a tu `Agent` y cierra la ejecución al final. No cambia nada más en tu agente.
 
 :::warning[Tú abres y cierras la ejecución]
-Si el agente lanza una excepción, la capacidad registra el fallo del agente, pero la ejecución sigue en estado `running` hasta que llames a `run.fail(...)`. Para eso sirve el `try/except` de arriba.
+Si el agente lanza una excepción, la capacidad registra el fallo del agente, pero la ejecución sigue en estado `running` hasta que llames a `run.fail(...)`. Para eso sirve el `try/except` de arriba. Si el proceso muere antes de cerrarla, el servidor cierra la ejecución por sí mismo tras una hora sin actividad (consulta [TraceAgent en producción](/es/docs/configuration/production#abandoned-runs)).
 :::
 
 Funciona con `run_sync`, `run` y `run_stream`, con herramientas en paralelo y con agentes anidados. Para una versión que se ejecuta sin clave de API, consulta el [inicio rápido de Pydantic AI](/es/docs/examples/pydantic-ai-hooks).

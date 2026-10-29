@@ -38,11 +38,20 @@ El mismo agente usa a la vez la capacidad de Pydantic AI y OpenTelemetry, así q
 ## La ejecución se queda en `running`
 
 - Con la capacidad de Pydantic AI, tú abres y cierras la ejecución. Si el agente lanzó una excepción, llama a `run.fail(...)`. Consulta la [integración con Pydantic AI](/es/docs/instrumentation/pydantic-ai).
+- Si el proceso del agente muere, el servidor cierra la ejecución por sí mismo como `failed` (código de error `RunAbandoned`) tras una hora sin actividad. Para cerrarla antes, llama a `POST /api/runs/{id}/fail`. El plazo es `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS`; un agente que permanezca en silencio más tiempo (por ejemplo, una única llamada de modelo muy lenta) también se cerraría, así que súbelo en ese caso.
 - Con OpenTelemetry, una ejecución termina cuando acaba su span `invoke_agent`. Si la librería solo emite spans `chat`, la ejecución se crea pero nunca se marca como finalizada.
 
-## Una ejecución en curso no muestra decisiones
+## Decisions está vacío mientras una ejecución está en curso
 
-Es normal. Las decisiones (elección de herramienta, reintento, recuperación) se deducen cuando la ejecución termina.
+Es normal. Las decisiones (elección de herramienta, reintento, recuperación) aparecen cuando la ejecución termina.
+
+## La UI no muestra ejecuciones, o responde 502
+
+La UI no consigue llegar al servidor. Comprueba que el servidor responde en la dirección que usa la UI (`TRACE_AGENT_SERVER_URL`, que en el archivo Compose es `http://server:8000`) y abre `/health` tanto en la UI (puerto 8080) como en el servidor (puerto 8000). Cuando el servidor no es alcanzable, `/api/*` en la UI responde `502` con un mensaje como `The TraceAgent server at <url> is not reachable (ConnectError).` Usa la misma versión para el servidor y la UI: la UI de la 0.2.x y anteriores no podía cargar ejecuciones.
+
+## Actualicé las imágenes pero la UI se ve antigua
+
+`docker compose up` reutiliza la copia local de una imagen. Ejecuta `docker compose pull` y luego `docker compose up -d` de nuevo.
 
 ## El servidor está caído y mi agente va lento o imprime un aviso
 

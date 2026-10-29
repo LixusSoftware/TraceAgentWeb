@@ -19,6 +19,7 @@ TraceAgent's behavior can be customized via environment variables. The server re
 | `TRACE_AGENT_CORS_ORIGINS` | `["http://localhost:5173"]` | Origins allowed by CORS, as a JSON list |
 | `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` | `true` | Keep the full content of prompts and outputs as well as their summaries. Set to `false` to keep only summaries |
 | `TRACE_AGENT_MODEL_PRICING` | `{}` | Pricing per model as JSON, used to compute costs |
+| `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS` | `3600` | Seconds without events after which a `running` run is closed as `failed` (`RunAbandoned`). `0` turns it off |
 
 ## OpenTelemetry Receiver
 

@@ -16,6 +16,42 @@ Para la información de versiones más actualizada, consulta la página de [GitH
 
 ---
 
+## v0.5.0 — 2026-10-29
+
+### Añadido
+- Las ejecuciones cuyo agente se detuvo sin terminar se cierran automáticamente como fallidas (código de error `RunAbandoned`) tras una hora sin actividad. Ajuste `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS` (por defecto 3600, `0` lo desactiva)
+- El informe de auditoría indica si los guardarraíles están activados (`guardrails_enabled`)
+- Línea de tiempo: el primer nivel se abre solo, con Expand all y Collapse all; una llamada a herramienta muestra sus argumentos en su fila; un paso de comando se titula con el primer comentario de su script
+- Nombres accesibles para la línea de tiempo, los filtros y la búsqueda; contraste de texto de al menos 4,5:1 en ambos temas
+
+### Corregido
+- `redact_fields` en `@run.tool` ahora mantiene las claves ocultas fuera de todo lo que se almacena (payloads de eventos, turnos y la conversación de las peticiones posteriores), no solo fuera de los resúmenes de la línea de tiempo. El modelo y la herramienta siguen recibiendo los datos reales
+- La pestaña Audit indica que los guardarraíles están apagados en lugar de mostrar una puntuación de 100 sin sentido
+- Decisions indica que aparecen cuando la ejecución termina mientras está en curso
+- El inspector ya no muestra la ejecución anterior mientras carga la siguiente
+- Los eventos de inicio y «Run started» ya no muestran una insignia de estado que contradice el resultado
+
+---
+
+## v0.4.0 — 2026-10-26
+
+### Corregido
+- Los acentos y otro texto no ASCII se mostraban escapados (por ejemplo `baj\u00f3` en lugar de `bajó`) en los resúmenes de prompts, argumentos y resultados de herramientas y salidas finales. El receptor OpenTelemetry también decodifica los resultados ya escapados por otro productor
+
+---
+
+## v0.3.0 — 2026-10-26
+
+### Añadido
+- Endpoint `/health` en el servidor de la UI
+- El listado de ejecuciones se actualiza cada 3 segundos, así que una ejecución nueva aparece mientras sigue en curso (antes: 30 segundos)
+- Pruebas para el paquete de la UI, ejecutadas en CI
+
+### Corregido
+- La UI no podía cargar ejecuciones: su servidor no reenviaba las peticiones `/api` al backend, así que el listado salía siempre vacío (`trace-agent-ui` y su imagen hasta la 0.2.0). El proxy ahora también transmite los eventos en directo y responde `502` con un mensaje claro cuando el servidor no es alcanzable
+
+---
+
 ## v0.2.0 — 2026-10-26
 
 ### Añadido

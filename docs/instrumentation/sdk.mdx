@@ -152,8 +152,8 @@ print([(t["name"], t["status"]) for t in result.executed_tools])  # [('charge', 
 
 This route needs a model provider configured on the **server** (for example `TRACE_AGENT_OPENAI_API_KEY`). `@run.tool` only registers the function; arguments are passed as named parameters and the input schema comes from the type annotations. The events are `tool.requested`, `tool.started` and `tool.succeeded`; if the function raises, `tool.failed` is recorded with the exception class as `error_code` and its message as `error_summary`, and the error goes back to the model instead of breaking your program.
 
-:::warning[`redact_fields` on `@run.tool`]
-It only masks the timeline summaries. See [Privacy and Redaction](/docs/instrumentation/privacy) before putting sensitive data in tool arguments.
+:::tip[`redact_fields` on `@run.tool`]
+`@run.tool(..., redact_fields=[...])` keeps the listed keys out of everything that is stored; the tool and the model still receive the real values. See [Privacy and Redaction](/docs/instrumentation/privacy).
 :::
 
 ## Finishing a Run

@@ -18,8 +18,7 @@ There is no built-in list of sensitive keys (`password`, `token`, `api_key`...).
 
 | Control | Where | What it does |
 |---------|-------|--------------|
-| `redact_fields` | Pydantic AI capability | Replaces the value of the listed keys with `[redacted]` in arguments and results, before they are sent |
-| `redact_fields` on `@run.tool` | SDK tools | Only masks the summaries shown in the timeline. **Does not keep full values out of the stored data** |
+| `redact_fields` | Pydantic AI capability and `@run.tool` | Replaces the value of the listed keys with `[redacted]` in everything TraceAgent stores |
 | `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` | Server | Stores only summaries, not the full content |
 | `include_content=False` | OpenTelemetry, on the agent | The content never leaves the agent |
 
@@ -40,12 +39,10 @@ capability = run.as_pydantic_ai_capability(
 )
 ```
 
-The Pydantic AI capability applies `redact_fields` to arguments and results **before they are sent**, so the values are not stored.
+On the Pydantic AI capability and on `@run.tool`, the value of every listed key is replaced with `[redacted]` in everything TraceAgent stores: event payloads, turns, the conversation of later model requests and the summaries. The tool and the model still receive the real values. Only the listed keys are masked, matched by exact name at any depth. Nothing else is detected automatically.
 
-:::warning[`@run.tool` does not redact stored data]
-On tools declared with `@run.tool(..., redact_fields=[...])`, `redact_fields` only masks the summaries shown in the timeline. The full arguments and results may still be stored: in the full payloads (while `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` is on, the default), in the argument summary of the tool event, and in the model messages that carry the tool output back to the model.
-
-To keep sensitive values out of the stored data, use the Pydantic AI capability, and avoid sending secrets as tool arguments. Setting `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` removes the full payloads but not the argument summary.
+:::tip[Values that are not under a named key]
+If sensitive data is not under a key with a fixed name, don't send it as a tool argument: there is no pattern detection.
 :::
 
 The manual methods (`record_command`, file and patch recording, `commands.run`) do **not** accept `redact_fields`: they only shorten long values, and the stdout and stderr summaries of commands are never redacted.
@@ -69,7 +66,7 @@ InstrumentationSettings(tracer_provider=provider, include_content=False)
 ## Recommendations
 
 - Redact at the source: the safest data is the data that is never sent.
-- Use the Pydantic AI capability when you need real redaction of stored data, and add every secret-like key your tools use to `redact_fields`, since names must match exactly.
+- Add every secret-like key your tools use to `redact_fields`, since names must match exactly.
 - Remember the server has no authentication and no way to delete traces yet. See [Running in Production](/docs/configuration/production).
 
 ## Not available yet
@@ -78,6 +75,8 @@ A server-wide redaction policy (for example a global list of sensitive keys) is 
 
 :::info[Audit guardrails]
 The server has optional guardrails that detect personal data and prompt injection (`TRACE_AGENT_AUDIT_ENABLE_GUARDRAILS`, off by default). They only act on the server's model endpoint, not on the Pydantic AI capability, OpenTelemetry or other recorded events, so they are not a substitute for redaction.
+
+The Audit tab rates a run from 100 down: each blocked request, prompt-injection, secret or personal-data finding subtracts points. That Security Score only exists when guardrails are on. With them off, the tab says nothing was checked.
 :::
 
 ## What's Next?

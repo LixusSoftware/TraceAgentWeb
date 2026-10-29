@@ -18,8 +18,7 @@ No hay una lista integrada de claves sensibles (`password`, `token`, `api_key`..
 
 | Control | Dónde | Qué hace |
 |---------|-------|--------------|
-| `redact_fields` | Capacidad de Pydantic AI | Sustituye por `[redacted]` el valor de las claves indicadas en argumentos y resultados, antes de enviarlos |
-| `redact_fields` en `@run.tool` | Herramientas del SDK | Solo oculta los resúmenes que se muestran en la línea de tiempo. **No mantiene fuera los valores completos de lo almacenado** |
+| `redact_fields` | Capacidad de Pydantic AI y `@run.tool` | Sustituye por `[redacted]` el valor de las claves indicadas en todo lo que guarda TraceAgent |
 | `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` | Servidor | Guarda solo resúmenes, no el contenido completo |
 | `include_content=False` | OpenTelemetry, en el agente | El contenido nunca sale del agente |
 
@@ -40,12 +39,10 @@ capability = run.as_pydantic_ai_capability(
 )
 ```
 
-La capacidad de Pydantic AI aplica `redact_fields` a argumentos y resultados **antes de enviarlos**, de modo que los valores no se almacenan.
+En la capacidad de Pydantic AI y en `@run.tool`, el valor de cada clave indicada se sustituye por `[redacted]` en todo lo que guarda TraceAgent: payloads de eventos, turnos, la conversación de las peticiones posteriores al modelo y los resúmenes. La herramienta y el modelo siguen recibiendo los valores reales. Solo se ocultan las claves indicadas, por nombre exacto y a cualquier profundidad. No se detecta nada más automáticamente.
 
-:::warning[`@run.tool` no redacta lo almacenado]
-En las herramientas declaradas con `@run.tool(..., redact_fields=[...])`, `redact_fields` solo oculta los resúmenes que se muestran en la línea de tiempo. Los argumentos y resultados completos aún pueden almacenarse: en los payloads completos (mientras `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` esté activo, que es el valor por defecto), en el resumen de argumentos del evento de la herramienta y en los mensajes del modelo que devuelven la salida de la herramienta al modelo.
-
-Para mantener los valores sensibles fuera de lo almacenado, usa la capacidad de Pydantic AI y evita enviar secretos como argumentos de herramientas. Poner `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` elimina los payloads completos pero no el resumen de argumentos.
+:::tip[Valores que no están bajo una clave con nombre]
+Si un dato sensible no está bajo una clave con un nombre fijo, no lo envíes como argumento de una herramienta: no hay detección de patrones.
 :::
 
 Los métodos manuales (`record_command`, el registro de archivos y parches, `commands.run`) **no** aceptan `redact_fields`: solo acortan los valores largos, y los resúmenes de stdout y stderr de los comandos nunca se redactan.
@@ -69,7 +66,7 @@ InstrumentationSettings(tracer_provider=provider, include_content=False)
 ## Recomendaciones
 
 - Redacta en origen: el dato más seguro es el que nunca se envía.
-- Usa la capacidad de Pydantic AI cuando necesites una redacción real de lo almacenado y añade a `redact_fields` toda clave con aspecto de secreto que usen tus herramientas, ya que los nombres deben coincidir exactamente.
+- Añade a `redact_fields` toda clave con aspecto de secreto que usen tus herramientas, ya que los nombres deben coincidir exactamente.
 - Recuerda que el servidor aún no tiene autenticación ni forma de borrar trazas. Consulta [TraceAgent en producción](/es/docs/configuration/production).
 
 ## Aún no disponible
@@ -78,6 +75,8 @@ No hay una política de redacción para todo el servidor (por ejemplo, una lista
 
 :::info[Guardarraíles de auditoría]
 El servidor tiene guardarraíles opcionales que detectan datos personales e inyección de prompts (`TRACE_AGENT_AUDIT_ENABLE_GUARDRAILS`, desactivados por defecto). Solo actúan sobre el endpoint de modelos del servidor, no sobre la capacidad de Pydantic AI, OpenTelemetry ni otros eventos registrados, así que no sustituyen a la redacción.
+
+La pestaña Audit puntúa una ejecución desde 100 hacia abajo: cada petición bloqueada, inyección de prompts, secreto o dato personal detectado resta puntos. Esa puntuación de seguridad solo existe cuando los guardarraíles están activos. Con ellos apagados, la pestaña indica que no se comprobó nada.
 :::
 
 ## ¿Y ahora qué?

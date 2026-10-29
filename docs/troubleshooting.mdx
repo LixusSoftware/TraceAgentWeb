@@ -38,11 +38,20 @@ The same agent uses both the Pydantic AI capability and OpenTelemetry, so every 
 ## The run stays `running`
 
 - With the Pydantic AI capability, you open and close the run. If the agent raised an exception, call `run.fail(...)`. See [Pydantic AI Integration](/docs/instrumentation/pydantic-ai).
+- If the agent process dies, the server closes the run by itself as `failed` (error code `RunAbandoned`) after one hour without activity. To close it sooner, call `POST /api/runs/{id}/fail`. The timeout is `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS`; an agent that stays silent for longer (for example, one very slow model call) would be closed too, so raise it in that case.
 - With OpenTelemetry, a run ends when its `invoke_agent` span ends. If the library emits only `chat` spans, the run is created but never marked as finished.
 
-## A running run shows no decisions
+## Decisions is empty while a run is running
 
-This is normal. Decisions (tool choice, retry, recovery) are derived when the run ends.
+This is normal. Decisions (tool choice, retry, recovery) appear when the run finishes.
+
+## The UI shows no runs, or answers 502
+
+The UI cannot reach the server. Check that the server answers at the address the UI uses (`TRACE_AGENT_SERVER_URL`, which is `http://server:8000` in the Compose file), and open `/health` on both the UI (port 8080) and the server (port 8000). When the server is unreachable, `/api/*` on the UI answers `502` with a message like `The TraceAgent server at <url> is not reachable (ConnectError).` Use the same version for the server and the UI: the UI of 0.2.x and earlier could not load runs.
+
+## I updated the images but the UI looks old
+
+`docker compose up` reuses the local copy of an image. Run `docker compose pull`, then `docker compose up -d` again.
 
 ## The server is down and my agent is slow or prints a warning
 
