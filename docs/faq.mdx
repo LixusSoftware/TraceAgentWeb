@@ -40,6 +40,22 @@ import FaqSchema from '@site/src/components/FaqSchema';
       answer: 'Pydantic AI 2.x (>=2,<3). For OpenTelemetry, the default instrumentation version of Pydantic AI 2.x is supported. Older instrumentation versions (2 to 4) use different span names and are not translated.',
     },
     {
+      question: 'Does the server have authentication?',
+      answer: 'No. The server does not check any credentials, so anyone who can reach its API can read and write runs. Run it on a private network or behind a reverse proxy that requires authentication.',
+    },
+    {
+      question: 'Can I group runs into sessions or projects?',
+      answer: "Not yet, and you can't filter by metadata either. A practical workaround is to put the session id in the agent name or at the start of the goal, then filter with agent_name or search.",
+    },
+    {
+      question: 'Is there an SDK for JavaScript?',
+      answer: 'No. The SDK is Python only. For other languages, export OpenTelemetry traces to POST /v1/traces, as long as they follow the GenAI conventions.',
+    },
+    {
+      question: 'Can I delete old traces?',
+      answer: 'Not yet. There is no delete endpoint or retention policy, so traces are kept until you remove rows from the database yourself.',
+    },
+    {
       question: 'Why does my short script show no run when I use OpenTelemetry?',
       answer: 'The exporter sends spans in the background. Call provider.shutdown() (or force_flush()) before the script exits.',
     },
@@ -80,6 +96,22 @@ The server keeps a summary of each prompt and output. With `TRACE_AGENT_CAPTURE_
 
 Pydantic AI 2.x (`>=2,<3`). For OpenTelemetry, the default instrumentation version of Pydantic AI 2.x is supported. Older instrumentation versions (2 to 4) use different span names and are not translated.
 
+### Does the server have authentication?
+
+No. The server does not check any credentials, so anyone who can reach its API can read and write runs. Run it on a private network or behind a reverse proxy that requires authentication. See [Running in Production](/docs/configuration/production).
+
+### Can I group runs into sessions or projects?
+
+Not yet, and you can't filter by `metadata` either. A practical workaround is to put the session id in the agent name or at the start of the goal, then filter with `agent_name` or `search`. See [Runs, Metadata and Search](/docs/core-concepts/runs).
+
+### Is there an SDK for JavaScript?
+
+No. The SDK is Python only. For other languages, export OpenTelemetry traces to `POST /v1/traces`, as long as they follow the GenAI conventions. See [OpenTelemetry Ingestion](/docs/instrumentation/opentelemetry#other-languages).
+
+### Can I delete old traces?
+
+Not yet. There is no delete endpoint or retention policy, so traces are kept until you remove rows from the database yourself.
+
 ### Why does my short script show no run when I use OpenTelemetry?
 
 The exporter sends spans in the background. Call `provider.shutdown()` (or `force_flush()`) before the script exits. See [Troubleshooting](/docs/troubleshooting).
@@ -118,7 +150,7 @@ Set the `TRACE_AGENT_DATABASE_URL` environment variable:
 TRACE_AGENT_DATABASE_URL=postgresql://user:password@localhost:5432/traceagent
 
 # SQLite (default)
-TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
+TRACE_AGENT_DATABASE_URL=sqlite:///./trace_agent.db
 ```
 
 ## Troubleshooting

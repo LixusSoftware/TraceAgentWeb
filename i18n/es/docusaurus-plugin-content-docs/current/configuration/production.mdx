@@ -1,0 +1,123 @@
+---
+sidebar_position: 3
+title: TraceAgent en producción
+description: "Lo que debes saber antes de usar TraceAgent en producción: puertos, tags de imagen, volúmenes de datos, PostgreSQL, autenticación, TLS, comprobaciones de estado y lo que aún no está disponible."
+image: img/social-card.jpg
+keywords: [producción, despliegue, seguridad, autenticación, tls, postgresql, copias de seguridad, tags de imagen, proxy inverso]
+---
+
+# TraceAgent en producción
+
+Esta página recoge lo que es cierto hoy al ejecutar el servidor y la UI de TraceAgent en un uso real, incluido lo que **aún no está disponible**, para que puedas planificar con ello.
+
+## Puertos y direcciones
+
+| Componente | Escucha en | Notas |
+|-----------|------------|-------|
+| Servidor (`trace-agent-server`) | `0.0.0.0:8000` | En Docker la imagen expone el `8000`. Fuera de Docker, `--host` y `--port` lo cambian |
+| UI (`trace-agent-ui`) | `0.0.0.0:8080` | Se cambia con `TRACE_AGENT_UI_HOST` y `TRACE_AGENT_UI_PORT` |
+
+La imagen de la UI incluye `TRACE_AGENT_SERVER_URL=http://server:8000`, que funciona en Docker Compose con un servicio llamado `server`. Fuera de Docker, la UI apunta a `http://127.0.0.1:8000` salvo que definas `TRACE_AGENT_SERVER_URL`. El puerto `5173` solo existe en desarrollo.
+
+## Fija el tag de la imagen
+
+Cada versión publica tres tags para las dos imágenes:
+
+| Tag | ¿Se mueve? | Úsalo para |
+|-----|--------|------------|
+| `0.8.0` | Nunca | **Producción.** La versión exacta |
+| `0.8` | Con las versiones de parche | Recibir correcciones automáticamente |
+| `latest` | Con cada versión | Probar cosas |
+
+```yaml
+services:
+  server:
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
+  ui:
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.8.0
+```
+
+Usa la **misma versión** para el servidor y la UI.
+
+:::warning[`latest` no se vuelve a descargar]
+`docker compose up` reutiliza la copia de `latest` que ya tienes. Para obtener una imagen más nueva, ejecuta `docker compose pull` (o pon `pull_policy: always` en el servicio). Si actualizaste las imágenes pero la UI se ve antigua, es por esto.
+:::
+
+## Conserva tus datos {/* #keep-your-data */}
+
+Por defecto el servidor guarda los datos en un archivo SQLite, `./trace_agent.db`, relativo a su directorio de trabajo. Dentro de un contenedor, ese archivo vive en el propio contenedor: **si recreas el contenedor, los datos se pierden** salvo que montes un volumen y apuntes la base de datos a él:
+
+```yaml
+services:
+  server:
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
+    environment:
+      - TRACE_AGENT_DATABASE_URL=sqlite:////data/trace_agent.db
+    volumes:
+      - trace-data:/data
+
+volumes:
+  trace-data:
+```
+
+**Copias de seguridad:** no hay ninguna herramienta propia. Copia el archivo SQLite (con el servidor parado, o desde una instantánea del volumen) o usa `pg_dump` con PostgreSQL.
+
+## PostgreSQL
+
+`TRACE_AGENT_DATABASE_URL` acepta cualquier URL de SQLAlchemy, y las tablas se crean al arrancar el servidor. Ten en cuenta lo siguiente:
+
+- **No se incluye ningún controlador de PostgreSQL.** Instala el que uses (por ejemplo `psycopg`) en la imagen o en el entorno.
+- **Las pruebas del proyecto no lo cubren:** se ejecutan sobre SQLite.
+- **No hay migraciones.** Un cambio de esquema en una versión nueva no actualiza una base de datos existente.
+
+## Seguridad
+
+:::warning[El servidor no tiene autenticación]
+El servidor no lee ni comprueba ninguna credencial: **cualquiera que pueda llegar a su API puede leer y escribir todas las ejecuciones.** `TraceAgentClient` acepta un `api_key` y lo envía como cabecera `Authorization: Bearer`, pero el servidor lo ignora. Hoy solo sirve si hay un proxy inverso delante del servidor que exija ese token.
+
+Ejecuta el servidor en una red privada, o detrás de un proxy inverso que aplique autenticación.
+:::
+
+**TLS:** el servidor y la UI sirven HTTP plano y no tienen opciones de certificado. Para HTTPS, pon delante un proxy inverso (nginx, Caddy u otro).
+
+**CORS:** por defecto el servidor solo permite `http://localhost:5173`. La imagen de la UI redirige `/api` al servidor, así que las llamadas de la UI al servidor no necesitan CORS. Una aplicación de navegador en otro origen que llame directamente a la API necesita `TRACE_AGENT_CORS_ORIGINS` (una lista JSON).
+
+Consulta también [Privacidad y redacción](/es/docs/instrumentation/privacy) para saber qué se guarda.
+
+## Ejecuciones abandonadas {/* #abandoned-runs */}
+
+Si un agente se detiene sin terminar su ejecución (por ejemplo, el proceso muere), el servidor la cierra por sí mismo como `failed`, con el código de error `RunAbandoned` y el mensaje «No activity for N minutes: the agent stopped without finishing the run.», tras una hora sin ningún evento. Lo comprueba cada minuto (o cada cuarto del plazo si es menor) mientras el servidor está en marcha.
+
+| Variable | Por defecto | Descripción |
+|----------|---------|-------------|
+| `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS` | `3600` | Segundos sin eventos antes de cerrar una ejecución `running`. `0` lo desactiva |
+
+Un agente que pase más tiempo que ese plazo sin generar ningún evento (por ejemplo, una única llamada de modelo muy lenta) también se cerraría: sube el valor en ese caso. Para cerrar una ejecución antes, llama a `POST /api/runs/{id}/fail`.
+
+## Workers
+
+El servidor numera los eventos de cada ejecución sin bloqueo, así que las escrituras concurrentes en la **misma ejecución** desde varios workers pueden chocar. Mantén el valor por defecto de un solo worker (el flag `--workers` existe, pero no lo subas).
+
+## Estado y métricas
+
+| Endpoint | Qué es |
+|----------|------------|
+| `GET /health` | Comprobación de estado, para balanceadores y comprobaciones de contenedor |
+| `GET /metrics` | Métricas de Prometheus. Activas por defecto; se desactivan con `TRACE_AGENT_AUDIT_METRICS_ENABLED=false` |
+
+## Aún no disponible
+
+| Capacidad | Estado |
+|------------|--------|
+| Autenticación en el servidor | No disponible. Usa un proxy inverso o una red privada |
+| TLS integrado | No disponible. Usa un proxy inverso |
+| Retención o borrado de trazas | No disponible. No hay endpoint de borrado, TTL ni purga: las trazas se conservan hasta que borres filas de la base de datos tú mismo |
+| Una política de redacción para todo el servidor | No disponible. La redacción se configura por agente (consulta [Privacidad y redacción](/es/docs/instrumentation/privacy)) |
+| Sesiones, proyectos y filtro por `metadata` | No disponible (consulta [Ejecuciones, metadatos y búsqueda](/es/docs/core-concepts/runs)) |
+| SDK para JavaScript u otros lenguajes | No disponible. Usa la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry) |
+
+## ¿Y ahora qué?
+
+- **[Despliegue con Docker](/es/docs/configuration/docker)**: archivos Compose para el servidor y la UI
+- **[Variables de entorno](/es/docs/configuration/environment-variables)**: todos los ajustes en un solo lugar
+- **[Solución de problemas](/es/docs/troubleshooting)**: soluciona los problemas habituales

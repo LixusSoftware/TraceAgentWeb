@@ -16,7 +16,74 @@ Para la información de versiones más actualizada, consulta la página de [GitH
 
 ---
 
-## Sin publicar
+## v0.8.0 — 2026-10-29
+
+### Corregido
+- Ya no hay falsos avisos de bucle cuando el agente se corrige a sí mismo: las llamadas se comparan por sus argumentos (`args_hash`)
+- Un bucle se señala una sola vez, con su recuento: `X was called N times with the same arguments.`
+- El aviso de comando fallido dice `Command failed (exit code N): <primer comentario>`
+- Los tracebacks se muestran con saltos de línea reales
+- Steps cuenta solo las acciones de primer nivel
+
+---
+
+## v0.7.0 — 2026-10-29
+
+### Cambiado
+- Las filas de modelo indican el modelo real (`Model call · <modelo>`)
+- Las salidas de tipo objeto se muestran como JSON, y se conserva el orden de los resultados
+
+---
+
+## v0.6.0 — 2026-10-29
+
+### Añadido
+- `current_step_id()` en `trace_agent_pydantic_ai`, para colgar un comando registrado con `run.record_command` de la herramienta que lo ejecuta
+- Captura de contenido: los prompts, las respuestas, las salidas de herramientas y la salida final se guardan completos. Opción `capture_content` en la capacidad de Pydantic AI y ajuste `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` en el servidor
+
+### Corregido
+- Los eventos se numeran de forma atómica: ya no hay un error 500 al llamar a `run.record_command` dentro de una herramienta
+- El grafo de ejecución tiene un nodo por paso
+
+---
+
+## v0.5.0 — 2026-10-29
+
+### Añadido
+- Las ejecuciones cuyo agente se detuvo sin terminar se cierran automáticamente como fallidas (código de error `RunAbandoned`) tras una hora sin actividad. Ajuste `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS` (por defecto 3600, `0` lo desactiva)
+- El informe de auditoría indica si los guardarraíles están activados (`guardrails_enabled`)
+- Línea de tiempo: el primer nivel se abre solo, con Expand all y Collapse all; una llamada a herramienta muestra sus argumentos en su fila; un paso de comando se titula con el primer comentario de su script
+- Nombres accesibles para la línea de tiempo, los filtros y la búsqueda; contraste de texto de al menos 4,5:1 en ambos temas
+
+### Corregido
+- `redact_fields` en `@run.tool` ahora mantiene las claves ocultas fuera de todo lo que se almacena (payloads de eventos, turnos y la conversación de las peticiones posteriores), no solo fuera de los resúmenes de la línea de tiempo. El modelo y la herramienta siguen recibiendo los datos reales
+- La pestaña Audit indica que los guardarraíles están apagados en lugar de mostrar una puntuación de 100 sin sentido
+- Decisions indica que aparecen cuando la ejecución termina mientras está en curso
+- El inspector ya no muestra la ejecución anterior mientras carga la siguiente
+- Los eventos de inicio y «Run started» ya no muestran una insignia de estado que contradice el resultado
+
+---
+
+## v0.4.0 — 2026-10-26
+
+### Corregido
+- Los acentos y otro texto no ASCII se mostraban escapados (por ejemplo `baj\u00f3` en lugar de `bajó`) en los resúmenes de prompts, argumentos y resultados de herramientas y salidas finales. El receptor OpenTelemetry también decodifica los resultados ya escapados por otro productor
+
+---
+
+## v0.3.0 — 2026-10-26
+
+### Añadido
+- Endpoint `/health` en el servidor de la UI
+- El listado de ejecuciones se actualiza cada 3 segundos, así que una ejecución nueva aparece mientras sigue en curso (antes: 30 segundos)
+- Pruebas para el paquete de la UI, ejecutadas en CI
+
+### Corregido
+- La UI no podía cargar ejecuciones: su servidor no reenviaba las peticiones `/api` al backend, así que el listado salía siempre vacío (`trace-agent-ui` y su imagen hasta la 0.2.0). El proxy ahora también transmite los eventos en directo y responde `502` con un mensaje claro cuando el servidor no es alcanzable
+
+---
+
+## v0.2.0 — 2026-10-26
 
 ### Añadido
 - Integración con Pydantic AI (`trace-agent-pydantic-ai`): una capacidad que registra las llamadas al modelo y las herramientas de agentes Pydantic AI 2.x sin bloquearlos, disponible como `run.as_pydantic_ai_capability()`
@@ -44,7 +111,7 @@ Para la información de versiones más actualizada, consulta la página de [GitH
 
 ---
 
-## v0.1.0 — Primera versión
+## v0.0.x — Primeras versiones
 
 ### Añadido
 - **TraceAgent SDK**: cliente Python para registrar las acciones del agente

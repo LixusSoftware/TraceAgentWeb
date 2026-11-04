@@ -40,6 +40,22 @@ import FaqSchema from '@site/src/components/FaqSchema';
       answer: 'Pydantic AI 2.x (>=2,<3). Para OpenTelemetry, se admite la versión de instrumentación por defecto de Pydantic AI 2.x. Las versiones de instrumentación anteriores (2 a 4) usan nombres de span distintos y no se traducen.',
     },
     {
+      question: '¿Tiene el servidor autenticación?',
+      answer: 'No. El servidor no comprueba ninguna credencial, así que cualquiera que pueda llegar a su API puede leer y escribir ejecuciones. Ejecútalo en una red privada o detrás de un proxy inverso que exija autenticación.',
+    },
+    {
+      question: '¿Puedo agrupar ejecuciones en sesiones o proyectos?',
+      answer: 'Todavía no, y tampoco puedes filtrar por metadata. Una solución práctica es poner el id de sesión en el nombre del agente o al principio del objetivo, y filtrar después con agent_name o search.',
+    },
+    {
+      question: '¿Hay un SDK para JavaScript?',
+      answer: 'No. El SDK es solo para Python. Para otros lenguajes, exporta trazas OpenTelemetry a POST /v1/traces, siempre que sigan las convenciones GenAI.',
+    },
+    {
+      question: '¿Puedo borrar trazas antiguas?',
+      answer: 'Todavía no. No hay endpoint de borrado ni política de retención, así que las trazas se conservan hasta que borres filas de la base de datos tú mismo.',
+    },
+    {
       question: '¿Por qué mi script corto no muestra ninguna ejecución con OpenTelemetry?',
       answer: 'El exportador envía los spans en segundo plano. Llama a provider.shutdown() (o a force_flush()) antes de que el script termine.',
     },
@@ -80,6 +96,22 @@ El servidor guarda un resumen de cada prompt y de cada salida. Con `TRACE_AGENT_
 
 Pydantic AI 2.x (`>=2,<3`). Para OpenTelemetry, se admite la versión de instrumentación por defecto de Pydantic AI 2.x. Las versiones de instrumentación anteriores (2 a 4) usan nombres de span distintos y no se traducen.
 
+### ¿Tiene el servidor autenticación?
+
+No. El servidor no comprueba ninguna credencial, así que cualquiera que pueda llegar a su API puede leer y escribir ejecuciones. Ejecútalo en una red privada o detrás de un proxy inverso que exija autenticación. Consulta [TraceAgent en producción](/es/docs/configuration/production).
+
+### ¿Puedo agrupar ejecuciones en sesiones o proyectos?
+
+Todavía no, y tampoco puedes filtrar por `metadata`. Una solución práctica es poner el id de sesión en el nombre del agente o al principio del objetivo, y filtrar después con `agent_name` o `search`. Consulta [Ejecuciones, metadatos y búsqueda](/es/docs/core-concepts/runs).
+
+### ¿Hay un SDK para JavaScript?
+
+No. El SDK es solo para Python. Para otros lenguajes, exporta trazas OpenTelemetry a `POST /v1/traces`, siempre que sigan las convenciones GenAI. Consulta la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry#other-languages).
+
+### ¿Puedo borrar trazas antiguas?
+
+Todavía no. No hay endpoint de borrado ni política de retención, así que las trazas se conservan hasta que borres filas de la base de datos tú mismo.
+
 ### ¿Por qué mi script corto no muestra ninguna ejecución con OpenTelemetry?
 
 El exportador envía los spans en segundo plano. Llama a `provider.shutdown()` (o a `force_flush()`) antes de que el script termine. Consulta [Solución de problemas](/es/docs/troubleshooting).
@@ -118,7 +150,7 @@ Define la variable de entorno `TRACE_AGENT_DATABASE_URL`:
 TRACE_AGENT_DATABASE_URL=postgresql://user:password@localhost:5432/traceagent
 
 # SQLite (por defecto)
-TRACE_AGENT_DATABASE_URL=sqlite:///./data/trace_agent.db
+TRACE_AGENT_DATABASE_URL=sqlite:///./trace_agent.db
 ```
 
 ## Solución de problemas

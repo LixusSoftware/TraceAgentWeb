@@ -14,8 +14,15 @@ TraceAgent provides pre-built Docker images for the server and UI.
 
 | Component | Image |
 |-----------|-------|
-| Server | `ghcr.io/lixussoftware/trace-agent-server:latest` |
-| UI | `ghcr.io/lixussoftware/trace-agent-ui:latest` |
+| Server | `ghcr.io/lixussoftware/trace-agent-server:0.8.0` |
+| UI | `ghcr.io/lixussoftware/trace-agent-ui:0.8.0` |
+
+| Port | Component |
+|------|-----------|
+| `8000` | Server API (and the OpenTelemetry receiver) |
+| `8080` | UI |
+
+The images are published with the tags `0.8.0` (exact release), `0.8` (patch updates) and `latest`. Use the **same version** for the server and the UI, and pin `0.8.0` in production. `latest` is not downloaded again by itself: `docker compose up` reuses your local copy, so run `docker compose pull` (or set `pull_policy: always`) to update. See [Running in Production](/docs/configuration/production).
 
 ## Docker Compose
 
@@ -26,7 +33,7 @@ version: "3.8"
 
 services:
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:latest
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
     ports:
       - "8000:8000"
     environment:
@@ -36,7 +43,7 @@ services:
       - trace-data:/app/data
 
   ui:
-    image: ghcr.io/lixussoftware/trace-agent-ui:latest
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.8.0
     ports:
       - "8080:8080"
     environment:
@@ -84,7 +91,7 @@ services:
       - pg-data:/var/lib/postgresql/data
 
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:latest
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
     ports:
       - "8000:8000"
     environment:
@@ -93,7 +100,7 @@ services:
       - db
 
   ui:
-    image: ghcr.io/lixussoftware/trace-agent-ui:latest
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.8.0
     ports:
       - "8080:8080"
     environment:
@@ -107,6 +114,10 @@ volumes:
 
 :::danger
 Change the default `POSTGRES_PASSWORD` before deploying to production.
+:::
+
+:::warning[Before using PostgreSQL]
+The server image does not include a PostgreSQL driver: you need to add one (for example `psycopg`). The project's tests run on SQLite, and there are no migrations, so a schema change in a newer version does not update an existing database. See [Running in Production](/docs/configuration/production).
 :::
 
 ## Verify

@@ -1,0 +1,72 @@
+---
+sidebar_position: 2
+title: Runs, Metadata and Search
+description: "What a run is in TraceAgent, how to attach metadata, and how to find runs with the API filters and the UI search. Includes a way to group runs by session."
+image: img/social-card.jpg
+keywords: [run, runs, metadata, search, filter, sessions, group runs, GET /api/runs]
+---
+
+# Runs, Metadata and Search
+
+## What is a run?
+
+A **run** is one execution of an agent: everything it did between `start_run` and `finish` (or `fail`). It holds the events in order (model calls, tools, commands, file changes), the provider, the model, the token totals and the final output.
+
+A run is in one of three states: `running`, `completed` or `failed`.
+
+- With the SDK, the Pydantic AI capability and the LangChain callback, **you** create the run with `start_run` and close it.
+- With [OpenTelemetry ingestion](/docs/instrumentation/opentelemetry), the server creates **one run per trace**.
+
+## Metadata
+
+Pass a dictionary when you start a run to store extra information with it:
+
+```python
+run = client.start_run(
+    "support-agent",
+    "Refund request #4821",
+    metadata={"session_id": "s-77", "customer_tier": "gold"},
+)
+```
+
+The metadata is stored and returned as `metadata` in `GET /api/runs/{id}`. It is **not** searchable: you can't filter runs by a metadata key.
+
+## Finding runs
+
+`GET /api/runs` lists runs, newest first, and accepts these filters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `limit` | Number of runs to return, from 1 to 200 (default 50) |
+| `offset` | Runs to skip, for paging |
+| `agent_name` | Exact match on the agent name |
+| `status` | `running`, `completed` or `failed` |
+| `provider` | Provider of the run |
+| `model` | Model of the run |
+| `search` | Case-insensitive partial match on the goal or the id |
+| `started_after`, `started_before` | ISO date-time bounds |
+
+```bash
+curl "http://127.0.0.1:8000/api/runs?agent_name=support-agent&status=failed&limit=20"
+```
+
+In the UI, the search box looks at the goal and the id, and there is a status filter.
+
+## Grouping runs today
+
+There is no concept of a session, conversation or project. Until there is, the practical way to group runs is to put the identifier where the filters can see it:
+
+- In the **agent name** (`agent_name="support-agent"`), then filter with `agent_name=`.
+- At the **start of the goal** (`"[s-77] Refund request #4821"`), then find it with `search=s-77`.
+
+Keep the full details in `metadata` too, so they come back with each run.
+
+## Not available yet
+
+- Sessions, conversations and projects.
+- Filtering by `metadata`.
+
+## What's Next?
+
+- **[API Reference](/docs/reference/api)** — All endpoints
+- **[SDK Reference](/docs/instrumentation/sdk)** — Start, record and finish runs

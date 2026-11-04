@@ -1,0 +1,98 @@
+---
+sidebar_position: 6
+title: Privacidad y redacción
+description: "Qué guarda TraceAgent y cómo mantener los datos sensibles fuera de las trazas: redact_fields, truncado, captura de contenido completo y ajustes de contenido de OpenTelemetry."
+image: img/social-card.jpg
+keywords: [privacidad, redacción, redact_fields, datos sensibles, pii, secretos, captura de contenido completo, include_content]
+---
+
+# Privacidad y redacción
+
+TraceAgent registra lo que hace tu agente: prompts, argumentos de herramientas, resultados de herramientas y salidas. Esta página explica qué se guarda, qué se recorta automáticamente y los controles que tienes para mantener fuera los datos sensibles.
+
+:::warning[Por defecto no se redacta nada]
+No hay una lista integrada de claves sensibles (`password`, `token`, `api_key`...). TraceAgent solo redacta las claves que **tú** indiques. Si tus herramientas manejan secretos o datos personales, configura la redacción antes de enviar tráfico real.
+:::
+
+## Qué puedes controlar
+
+| Control | Dónde | Qué hace |
+|---------|-------|--------------|
+| `redact_fields` | Capacidad de Pydantic AI y `@run.tool` | Sustituye por `[redacted]` el valor de las claves indicadas en todo lo que guarda TraceAgent |
+| `capture_content=False` | Capacidad de Pydantic AI | No envía el contenido de las llamadas al modelo ni las salidas completas de las herramientas. Los argumentos de las herramientas (redactados y recortados) y los resúmenes se siguen enviando |
+| `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` | Servidor | No guarda ningún payload completo (contenido, argumentos, salida final ni comandos), llegue lo que llegue |
+| `include_content=False` | OpenTelemetry, en el agente | El contenido nunca sale del agente |
+
+## Siempre aplicado
+
+Estos límites se aplican sin configurar nada:
+
+- El texto de más de 160 caracteres dentro de los **argumentos** de herramientas se corta a 157 caracteres más `...`.
+- Los **resúmenes** de prompts y salidas se cortan a 220 caracteres.
+
+## Redactar campos
+
+`redact_fields` es una lista de **nombres de clave**. Una clave se detecta por su nombre exacto, a cualquier profundidad de diccionarios y listas, y su valor se sustituye por `[redacted]`. No busca patrones ni valores.
+
+```python
+capability = run.as_pydantic_ai_capability(
+    redact_fields=["api_key", "password", "authorization"],
+)
+```
+
+En la capacidad de Pydantic AI y en `@run.tool`, el valor de cada clave indicada se sustituye por `[redacted]` en todo lo que guarda TraceAgent: payloads de eventos, turnos, la conversación de las peticiones posteriores al modelo y los resúmenes. La herramienta y el modelo siguen recibiendo los valores reales. Solo se ocultan las claves indicadas, por nombre exacto y a cualquier profundidad. No se detecta nada más automáticamente.
+
+:::tip[Valores que no están bajo una clave con nombre]
+Si un dato sensible no está bajo una clave con un nombre fijo, no lo envíes como argumento de una herramienta: no hay detección de patrones.
+:::
+
+Los métodos manuales (`record_command`, el registro de archivos y parches, `commands.run`) **no** aceptan `redact_fields`: solo acortan los valores largos, y los resúmenes de stdout y stderr de los comandos nunca se redactan.
+
+## Mantén el contenido completo fuera del servidor
+
+Por defecto (`capture_content` en la capacidad y `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` en el servidor están activos), se guarda el contenido completo, no solo resúmenes: los prompts y las respuestas (con las instrucciones primero, como SYSTEM), las salidas de las herramientas y la salida final se conservan enteros.
+
+:::warning[El contenido completo puede contener datos sensibles]
+Los prompts, las respuestas y las salidas de herramientas se guardan tal cual, así que pueden contener datos personales o secretos. Redacta las claves que conozcas, o conserva solo resúmenes.
+:::
+
+Los dos ajustes no son equivalentes:
+
+- `TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false` (servidor): el servidor no guarda ningún payload completo (contenido, argumentos, salida final ni comandos), llegue lo que llegue.
+- `capture_content=False` (capacidad): el contenido de las llamadas al modelo (prompts y respuestas) y las salidas completas de las herramientas no se envían, pero los argumentos de las herramientas (redactados y recortados) y los resúmenes sí.
+
+Para no almacenar contenido completo basta el ajuste del servidor. `capture_content=False` además evita que ese contenido salga del proceso del agente. Lo más estricto es usar ambos. El ajuste del servidor:
+
+```bash
+TRACE_AGENT_CAPTURE_FULL_PAYLOADS=false
+```
+
+## OpenTelemetry
+
+Con la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry), los argumentos de herramientas pasan por el mismo acortado, pero **sin ninguna clave redactada**. Para asegurarte de que los prompts y las salidas nunca salen de tu agente, desactiva el contenido en origen:
+
+```python
+InstrumentationSettings(tracer_provider=provider, include_content=False)
+```
+
+## Recomendaciones
+
+- Redacta en origen: el dato más seguro es el que nunca se envía.
+- Añade a `redact_fields` toda clave con aspecto de secreto que usen tus herramientas, ya que los nombres deben coincidir exactamente.
+- Recuerda que el servidor aún no tiene autenticación ni forma de borrar trazas. Consulta [TraceAgent en producción](/es/docs/configuration/production).
+
+## Aún no disponible
+
+No hay una política de redacción para todo el servidor (por ejemplo, una lista global de claves sensibles). La redacción se configura por agente.
+
+:::info[Guardarraíles de auditoría]
+El servidor tiene guardarraíles opcionales que detectan datos personales e inyección de prompts (`TRACE_AGENT_AUDIT_ENABLE_GUARDRAILS`, desactivados por defecto). Solo actúan sobre el endpoint de modelos del servidor, no sobre la capacidad de Pydantic AI, OpenTelemetry ni otros eventos registrados, así que no sustituyen a la redacción.
+
+La pestaña Audit puntúa una ejecución desde 100 hacia abajo: cada petición bloqueada, inyección de prompts, secreto o dato personal detectado resta puntos. Esa puntuación de seguridad solo existe cuando los guardarraíles están activos. Con ellos apagados, la pestaña indica que no se comprobó nada.
+:::
+
+## ¿Y ahora qué?
+
+- **[Integración con Pydantic AI](/es/docs/instrumentation/pydantic-ai)**: todas las opciones de la capacidad
+- **[Variables de entorno](/es/docs/configuration/environment-variables)**: ajustes del servidor
+- **[TraceAgent en producción](/es/docs/configuration/production)**: seguridad y datos

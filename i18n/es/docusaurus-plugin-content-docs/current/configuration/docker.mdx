@@ -14,8 +14,15 @@ TraceAgent ofrece imágenes de Docker ya construidas para el servidor y la UI.
 
 | Componente | Imagen |
 |-----------|-------|
-| Servidor | `ghcr.io/lixussoftware/trace-agent-server:latest` |
-| UI | `ghcr.io/lixussoftware/trace-agent-ui:latest` |
+| Servidor | `ghcr.io/lixussoftware/trace-agent-server:0.8.0` |
+| UI | `ghcr.io/lixussoftware/trace-agent-ui:0.8.0` |
+
+| Puerto | Componente |
+|------|-----------|
+| `8000` | API del servidor (y receptor OpenTelemetry) |
+| `8080` | UI |
+
+Las imágenes se publican con los tags `0.8.0` (versión exacta), `0.8` (actualizaciones de parche) y `latest`. Usa la **misma versión** para el servidor y la UI, y fija `0.8.0` en producción. `latest` no se vuelve a descargar solo: `docker compose up` reutiliza tu copia local, así que ejecuta `docker compose pull` (o pon `pull_policy: always`) para actualizar. Consulta [TraceAgent en producción](/es/docs/configuration/production).
 
 ## Docker Compose
 
@@ -26,7 +33,7 @@ version: "3.8"
 
 services:
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:latest
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
     ports:
       - "8000:8000"
     environment:
@@ -36,7 +43,7 @@ services:
       - trace-data:/app/data
 
   ui:
-    image: ghcr.io/lixussoftware/trace-agent-ui:latest
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.8.0
     ports:
       - "8080:8080"
     environment:
@@ -84,7 +91,7 @@ services:
       - pg-data:/var/lib/postgresql/data
 
   server:
-    image: ghcr.io/lixussoftware/trace-agent-server:latest
+    image: ghcr.io/lixussoftware/trace-agent-server:0.8.0
     ports:
       - "8000:8000"
     environment:
@@ -93,7 +100,7 @@ services:
       - db
 
   ui:
-    image: ghcr.io/lixussoftware/trace-agent-ui:latest
+    image: ghcr.io/lixussoftware/trace-agent-ui:0.8.0
     ports:
       - "8080:8080"
     environment:
@@ -107,6 +114,10 @@ volumes:
 
 :::danger
 Cambia el `POSTGRES_PASSWORD` por defecto antes de desplegar en producción.
+:::
+
+:::warning[Antes de usar PostgreSQL]
+La imagen del servidor no incluye un controlador de PostgreSQL: tienes que añadir uno (por ejemplo `psycopg`). Las pruebas del proyecto se ejecutan sobre SQLite y no hay migraciones, así que un cambio de esquema en una versión nueva no actualiza una base de datos existente. Consulta [TraceAgent en producción](/es/docs/configuration/production).
 :::
 
 ## Verificar

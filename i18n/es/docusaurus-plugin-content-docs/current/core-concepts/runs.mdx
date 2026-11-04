@@ -1,0 +1,72 @@
+---
+sidebar_position: 2
+title: Ejecuciones, metadatos y búsqueda
+description: "Qué es una ejecución en TraceAgent, cómo adjuntar metadatos y cómo encontrar ejecuciones con los filtros de la API y la búsqueda de la UI. Incluye una forma de agrupar ejecuciones por sesión."
+image: img/social-card.jpg
+keywords: [ejecución, ejecuciones, metadatos, búsqueda, filtro, sesiones, agrupar ejecuciones, GET /api/runs]
+---
+
+# Ejecuciones, metadatos y búsqueda
+
+## ¿Qué es una ejecución?
+
+Una **ejecución** (*run*) es una ejecución de un agente: todo lo que hizo entre `start_run` y `finish` (o `fail`). Contiene los eventos en orden (llamadas al modelo, herramientas, comandos, cambios en archivos), el proveedor, el modelo, los totales de tokens y la salida final.
+
+Una ejecución está en uno de tres estados: `running`, `completed` o `failed`.
+
+- Con el SDK, la capacidad de Pydantic AI y el callback de LangChain, **tú** creas la ejecución con `start_run` y la cierras.
+- Con la [ingesta OpenTelemetry](/es/docs/instrumentation/opentelemetry), el servidor crea **una ejecución por traza**.
+
+## Metadatos
+
+Pasa un diccionario al iniciar una ejecución para guardar información adicional con ella:
+
+```python
+run = client.start_run(
+    "support-agent",
+    "Refund request #4821",
+    metadata={"session_id": "s-77", "customer_tier": "gold"},
+)
+```
+
+Los metadatos se guardan y se devuelven como `metadata` en `GET /api/runs/{id}`. **No** se pueden buscar: no puedes filtrar ejecuciones por una clave de los metadatos.
+
+## Encontrar ejecuciones
+
+`GET /api/runs` lista las ejecuciones, de más reciente a más antigua, y admite estos filtros:
+
+| Parámetro | Descripción |
+|-----------|-------------|
+| `limit` | Número de ejecuciones a devolver, de 1 a 200 (por defecto 50) |
+| `offset` | Ejecuciones que se saltan, para paginar |
+| `agent_name` | Coincidencia exacta con el nombre del agente |
+| `status` | `running`, `completed` o `failed` |
+| `provider` | Proveedor de la ejecución |
+| `model` | Modelo de la ejecución |
+| `search` | Coincidencia parcial, sin distinguir mayúsculas, con el objetivo o el id |
+| `started_after`, `started_before` | Límites de fecha y hora ISO |
+
+```bash
+curl "http://127.0.0.1:8000/api/runs?agent_name=support-agent&status=failed&limit=20"
+```
+
+En la UI, el cuadro de búsqueda mira el objetivo y el id, y hay un filtro de estado.
+
+## Agrupar ejecuciones hoy
+
+No existe el concepto de sesión, conversación ni proyecto. Mientras tanto, la forma práctica de agrupar ejecuciones es poner el identificador donde los filtros puedan verlo:
+
+- En el **nombre del agente** (`agent_name="support-agent"`), y luego filtrar con `agent_name=`.
+- Al **principio del objetivo** (`"[s-77] Refund request #4821"`), y luego encontrarlo con `search=s-77`.
+
+Guarda también todos los detalles en `metadata`, para que vuelvan con cada ejecución.
+
+## Aún no disponible
+
+- Sesiones, conversaciones y proyectos.
+- Filtrar por `metadata`.
+
+## ¿Y ahora qué?
+
+- **[Referencia de la API](/es/docs/reference/api)**: todos los endpoints
+- **[Referencia del SDK](/es/docs/instrumentation/sdk)**: iniciar, registrar y finalizar ejecuciones

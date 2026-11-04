@@ -16,7 +16,74 @@ For the most up-to-date release information, see the [GitHub Releases](https://g
 
 ---
 
-## Unreleased
+## v0.8.0 — 2026-10-29
+
+### Fixed
+- No false loop flags when the agent corrects itself: calls are compared by their arguments (`args_hash`)
+- A loop is flagged once, with its count: `X was called N times with the same arguments.`
+- The failed command flag reads `Command failed (exit code N): <first comment>`
+- Tracebacks are shown with real line breaks
+- Steps counts only top-level actions
+
+---
+
+## v0.7.0 — 2026-10-29
+
+### Changed
+- Model rows name the real model (`Model call · <model>`)
+- Object outputs are shown as JSON, and the order of results is kept
+
+---
+
+## v0.6.0 — 2026-10-29
+
+### Added
+- `current_step_id()` in `trace_agent_pydantic_ai`, to hang a command recorded with `run.record_command` from the tool that runs it
+- Content capture: prompts, responses, tool outputs and the final output are stored whole. Option `capture_content` on the Pydantic AI capability and setting `TRACE_AGENT_CAPTURE_FULL_PAYLOADS` on the server
+
+### Fixed
+- Events are numbered atomically: no more 500 error when `run.record_command` is called inside a tool
+- The execution graph has one node per step
+
+---
+
+## v0.5.0 — 2026-10-29
+
+### Added
+- Runs whose agent stopped without finishing are closed automatically as failed (error code `RunAbandoned`) after one hour without activity. Setting `TRACE_AGENT_RUN_INACTIVITY_TIMEOUT_SECONDS` (default 3600, `0` turns it off)
+- The audit report says whether guardrails are enabled (`guardrails_enabled`)
+- Timeline: the first level opens by itself, with Expand all and Collapse all; a tool call shows its arguments in its row; a command step is titled by the first comment of its script
+- Accessible names for the timeline, filters and search; text contrast of at least 4.5:1 in both themes
+
+### Fixed
+- `redact_fields` on `@run.tool` now keeps the masked keys out of everything that is stored (event payloads, turns and the conversation of later requests), not only out of the timeline summaries. The model and the tool still receive the real data
+- The Audit tab says guardrails are off instead of showing a meaningless score of 100
+- Decisions says they appear when the run finishes while it is running
+- The inspector no longer shows the previous run while the next one loads
+- Started events and "Run started" no longer show a status badge that contradicts the result
+
+---
+
+## v0.4.0 — 2026-10-26
+
+### Fixed
+- Accents and other non-ASCII text were shown escaped (for example `baj\u00f3` instead of `bajó`) in summaries of prompts, tool arguments and results and final outputs. The OpenTelemetry receiver also decodes results already escaped by another producer
+
+---
+
+## v0.3.0 — 2026-10-26
+
+### Added
+- `/health` endpoint in the UI server
+- The run list refreshes every 3 seconds, so a new run appears while it is still running (before: 30 seconds)
+- Tests for the UI package, run in CI
+
+### Fixed
+- The UI could not load runs: its server did not forward `/api` requests to the backend, so the run list was always empty (`trace-agent-ui` and its image up to 0.2.0). The proxy now also streams live events and answers `502` with a clear message when the server is unreachable
+
+---
+
+## v0.2.0 — 2026-10-26
 
 ### Added
 - Pydantic AI integration (`trace-agent-pydantic-ai`): a capability that records model calls and tools of Pydantic AI 2.x agents without blocking them, available as `run.as_pydantic_ai_capability()`
@@ -44,7 +111,7 @@ For the most up-to-date release information, see the [GitHub Releases](https://g
 
 ---
 
-## v0.1.0 — Initial Release
+## v0.0.x — Initial Releases
 
 ### Added
 - **TraceAgent SDK** — Python client for recording agent actions
