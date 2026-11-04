@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Instalación
-description: "Instala TraceAgent con pip, Docker o desde el código fuente: SDK, servidor, UI y las integraciones con LangChain y Pydantic AI. Python 3.11, 3.12 y 3.13."
+description: "Instala TraceAgent con pip, uv o Docker: SDK, servidor, UI y las integraciones con LangChain y Pydantic AI. Python 3.11, 3.12 y 3.13."
 image: img/social-card.jpg
 keywords: [instalar, pip install, docker, configuración, python, trace-agent-sdk, trace-agent-pydantic-ai]
 ---
@@ -12,7 +12,7 @@ import PackageInstall from '@site/src/components/PackageInstall';
 
 # Instalación
 
-TraceAgent requiere **Python 3.11+** (probado en 3.11, 3.12 y 3.13) y se puede instalar con pip o uv, con Docker o desde el código fuente.
+TraceAgent requiere **Python 3.11+** (probado en 3.11, 3.12 y 3.13) y se puede instalar con pip o uv, o con Docker.
 
 ## Instalar con pip o uv
 
@@ -67,30 +67,6 @@ docker pull ghcr.io/lixussoftware/trace-agent-ui:latest
 ```
 
 Para una configuración completa con Docker Compose, consulta la **[guía de despliegue con Docker](/es/docs/configuration/docker)**.
-
-## Desde el código fuente
-
-```bash
-git clone https://github.com/LixusSoftware/TraceAgent.git
-cd TraceAgent
-```
-
-<Tabs>
-  <TabItem value="uv" label="uv (recomendado)" default>
-
-```bash
-uv sync --extra dev --extra providers --extra langchain --extra pydantic-ai
-```
-
-  </TabItem>
-  <TabItem value="pip" label="pip">
-
-```bash
-pip install -e ".[dev,providers,langchain]"
-```
-
-  </TabItem>
-</Tabs>
 
 ## Verificar la instalación
 
